@@ -2,18 +2,105 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Akıllı Hareket Alarmı</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f7fafc; }
-        #container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
-        #video-container { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
-        #video, #canvas { width: 100%; border-radius: 8px; }
-        #canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
-        .controls { margin: 24px 0 12px 0; display: flex; gap: 12px; justify-content: center; }
-        .status { margin-top: 18px; font-weight: bold; text-align: center; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #f7fafc;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        #container {
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        h2 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+            color: #2b6cb0;
+        }
+        .controls {
+            margin: 12px 0 8px 0;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        select, button {
+            font-size: 1rem;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 4px;
+        }
+        button {
+            background: #4299e1;
+            color: #fff;
+            border: none;
+            font-weight: 600;
+        }
+        button:disabled {
+            background: #a0aec0;
+            color: #fff;
+        }
+        #video-container {
+            position: relative;
+            width: 96vw;
+            max-width: 420px;
+            aspect-ratio: 4/3;
+            margin: 0 auto 8px auto;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #video, #canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            display: block;
+        }
+        #canvas {
+            position: absolute;
+            left: 0; top: 0;
+            pointer-events: none;
+        }
+        .status {
+            margin-top: 12px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1rem;
+        }
         .alarm { color: #e53e3e; }
         .ok { color: #38a169; }
+        @media (max-width: 500px) {
+            #container {
+                padding: 0;
+            }
+            h2 {
+                font-size: 1.1rem;
+            }
+            select, button {
+                font-size: 0.95rem;
+                padding: 8px 10px;
+            }
+            #video-container {
+                max-width: 100vw;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
@@ -32,9 +119,9 @@
             <button id="startBtn">Kamerayı Aç & Alarmı Kur</button>
             <button id="stopBtn" disabled>Alarmı Durdur</button>
         </div>
-        <div id="video-container" style="height: 360px;">
-            <video id="video" width="480" height="360" autoplay muted playsinline style="background:#222"></video>
-            <canvas id="canvas" width="480" height="360"></canvas>
+        <div id="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="canvas"></canvas>
         </div>
         <div class="status" id="statusMsg">Alarm beklemede...</div>
     </div>
@@ -70,6 +157,11 @@
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                 video.srcObject = stream;
                 await video.play();
+                // Canvas boyutunu video ile eşleştir
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                };
             } catch (err) {
                 statusMsg.textContent = "Kamera açılamadı: " + err.message;
                 statusMsg.className = "status alarm";

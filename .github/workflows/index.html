@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Hareket Alarmı</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7fafc; }
+        #container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        #video-container { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
+        #video, #canvas { width: 100%; border-radius: 8px; }
+        #canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+        .controls { margin: 24px 0 12px 0; display: flex; gap: 12px; justify-content: center; }
+        .status { margin-top: 18px; font-weight: bold; text-align: center; }
+        .alarm { color: #e53e3e; }
+        .ok { color: #38a169; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <h2>Akıllı Hareket Alarmı</h2>
+        <div class="controls">
+            <select id="alarmType">
+                <option value="person">İnsana Duyarlı</option>
+                <option value="cat">Kediye Duyarlı</option>
+                <option value="dog">Köpeğe Duyarlı</option>
+                <option value="animal">Her Hayvana Duyarlı</option>
+                <option value="object">Her Objeye Duyarlı</option>
+            </select>
+            <button id="startBtn">Kamerayı Aç & Alarmı Kur</button>
+            <button id="stopBtn" disabled>Alarmı Durdur</button>
+        </div>
+        <div id="video-container" style="height: 360px;">
+            <video id="video" width="480" height="360" autoplay muted playsinline style="background:#222"></video>
+            <canvas id="canvas" width="480" height="360"></canvas>
+        </div>
+        <div class="status" id="statusMsg">Alarm beklemede...</div>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const alarmType = document.getElementById('alarmType');
+
+        let model, stream, alarmActive = false, detectLoop;
+
+        function getAlarmClasses() {
+            const type = alarmType.value;
+            if (type === "person") return ["person"];
+            if (type === "cat") return ["cat"];
+            if (type === "dog") return ["dog"];
+            if (type === "animal") return ["cat", "dog", "bird", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe"];
+            if (type === "object") return ["person", "cat", "dog", "bird", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "car", "bicycle", "motorcycle", "bus", "truck", "bottle", "cup", "chair", "sofa", "tv", "laptop", "cell phone"];
+            return [];
+        }
+
+        async function loadModel() {
+            statusMsg.textContent = "Model yükleniyor...";
+            model = await cocoSsd.load();
+            statusMsg.textContent = "Model yüklendi. Alarmı kurabilirsiniz.";
+        }
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+                await video.play();
+            } catch (err) {
+                statusMsg.textContent = "Kamera açılamadı: " + err.message;
+                statusMsg.className = "status alarm";
+            }
+        }
+
+        async function startAlarm() {
+            alarmActive = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            statusMsg.textContent = "Alarm devrede...";
+            if (!model) await loadModel();
+            detect();
+        }
+
+        function stopAlarm() {
+            alarmActive = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            statusMsg.textContent = "Alarm kapalı.";
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        async function detect() {
+            if (!alarmActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const predictions = await model.detect(video);
+            let alarmTriggered = false;
+            const alarmClasses = getAlarmClasses();
+
+            predictions.forEach(pred => {
+                if (pred.score > 0.6) {
+                    // Kutu çiz
+                    ctx.strokeStyle = "#4299e1";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(...pred.bbox);
+                    ctx.font = "16px Arial";
+                    ctx.fillStyle = "#222";
+                    ctx.fillRect(pred.bbox[0], pred.bbox[1] - 22, ctx.measureText(pred.class).width + 12, 22);
+                    ctx.fillStyle = "#fff";
+                    ctx.fillText(pred.class, pred.bbox[0] + 6, pred.bbox[1] - 6);
+
+                    // Alarm tetikleme
+                    if (alarmClasses.includes(pred.class)) {
+                        alarmTriggered = true;
+                    }
+                }
+            });
+
+            if (alarmTriggered) {
+                statusMsg.textContent = "ALARM! " + alarmType.options[alarmType.selectedIndex].text + " hareketi algılandı!";
+                statusMsg.className = "status alarm";
+            } else {
+                statusMsg.textContent = "Alarm devrede... Hareket bekleniyor.";
+                statusMsg.className = "status ok";
+            }
+
+            if (alarmActive) detectLoop = requestAnimationFrame(detect);
+        }
+
+        startBtn.onclick = async () => {
+            await startCamera();
+            await startAlarm();
+        };
+        stopBtn.onclick = () => {
+            stopAlarm();
+            if (detectLoop) cancelAnimationFrame(detectLoop);
+        };
+    </script>
+</body>
+</html>

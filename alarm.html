@@ -19,21 +19,23 @@
             padding: 20px;
         }
         h1 {
-            color: #1a237e;
-            margin-bottom: 20px;
+            /* Başlık kaldırıldığı için bu stil artık gereksiz, ancak güvenlik için tutulabilir veya tamamen silinebilir */
+            display: none;
         }
         .video-container {
             position: relative;
-            /* Kamera alanını daha büyük yap */
-            width: 95vw; /* Ekran genişliğinin %95'i */
-            max-width: 800px; /* Maksimum genişlik */
-            aspect-ratio: 16 / 9; /* En-boy oranını koru */
+            width: 95vw;
+            max-width: 800px;
+            /* Yüksekliği artırıldı */
+            height: 60vh; /* Viewport yüksekliğinin %60'ı */
+            min-height: 300px; /* Minimum yükseklik */
+            aspect-ratio: auto; /* Sabit en-boy oranını kaldırır */
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            margin-bottom: 20px; /* Kontrollerden biraz boşluk bırak */
-            display: flex; /* İçindeki video/iframe'i ortalamak için */
+            margin-bottom: 10px; /* Kontrollerden biraz boşluk bırak */
+            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -46,15 +48,23 @@
         #canvas {
             display: none; /* Canvas gizli kalacak */
         }
+        #countdown-display { /* Geri sayım stili */
+            /* Konumu videodan bağımsız yeni alana taşındı */
+            font-size: 40px; /* Video üstündekinden daha küçük */
+            font-weight: bold;
+            color: #1a237e; /* Geri sayım metni rengi */
+            text-shadow: none;
+            margin-bottom: 5px; /* Durum metni ile arasına boşluk */
+            display: none; /* Başlangıçta gizli */
+        }
         .controls {
             display: flex;
             gap: 15px;
             margin-bottom: 20px; /* Seçimlerden biraz boşluk bırak */
         }
         button {
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 15px 25px; /* Daha yüksek butonlar */
+            font-size: 18px; /* Daha büyük yazı */
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -66,6 +76,10 @@
         }
         button#stop-button {
             background-color: #f44336;
+            color: white;
+        }
+        button#open-camera-button { /* Yeni buton rengi */
+            background-color: #2196f3;
             color: white;
         }
         button:disabled {
@@ -84,6 +98,20 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             width: 90vw;
             max-width: 800px;
+        }
+        /* Yeni eklenen kamera ve alarm durumu alanı */
+        .camera-and-alarm-status-area {
+            display: flex;
+            flex-direction: column; /* Öğeleri dikeyde sırala */
+            align-items: center;
+            gap: 10px; /* Öğeler arasında boşluk */
+            margin-bottom: 20px; /* Ana kontrollerden önce boşluk */
+            width: 90vw;
+            max-width: 800px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
         .camera-source-selection label, .object-selection label, .sound-selection label, .sound-selection select,
         .reports-section label, .reports-section input[type="datetime-local"], .alarm-delay-selection label {
@@ -116,7 +144,7 @@
             margin-left: 10px;
             background-color: #2196f3;
         }
-        #external-camera-url-group, #device-camera-controls { /* Yeni eklenen kontrol grubu */
+        #external-camera-url-group, #device-camera-controls { /* Kontrol grupları */
             display: flex;
             flex-direction: column;
             width: 100%;
@@ -129,14 +157,17 @@
             border: 1px solid #ddd;
             border-radius: 8px;
         }
-        #test-external-camera-button, #switch-device-camera-button { /* Yeni buton id'si eklendi */
+        #test-external-camera-button, #switch-device-camera-button {
             padding: 8px 15px;
             font-size: 14px;
-            background-color: #009688; /* Teal rengi */
+            background-color: #009688;
             color: white;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
+        }
+        #switch-device-camera-button { /* Kamera değiştirme butonu için özel renk */
+            background-color: #3f51b5;
         }
         .camera-warning {
             font-size: 12px;
@@ -146,13 +177,15 @@
             text-align: left;
         }
         #alarm-status {
-            margin-top: 25px;
+            /* Konumu videodan bağımsız yeni alana taşındı */
+            margin-top: 0; 
             font-size: 20px;
             font-weight: bold;
-            padding: 15px 30px;
-            border-radius: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 10px 20px; 
+            border-radius: 8px;
+            background-color: #f0f2f5; 
+            color: #333; 
+            box-shadow: none; 
             transition: background-color 0.5s ease;
         }
         #alarm-status.active {
@@ -234,26 +267,43 @@
             border: 2px solid #ff4081;
             box-shadow: 0 0 10px #ff4081;
         }
+        .bounding-box-label { /* Algılama kutusu etiketi */
+            position: absolute;
+            top: -20px; /* Kutunun biraz üstüne */
+            left: 0;
+            background-color: #ff4081;
+            color: white;
+            padding: 2px 5px;
+            font-size: 12px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
 
         /* Mobil cihazlar için responsive ayarlar */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
-            h1 {
-                font-size: 24px;
-            }
             .video-container {
                 width: 98vw;
+                height: 50vh; /* Mobil cihazlarda da biraz daha uzun */
+            }
+            #countdown-display {
+                font-size: 30px; /* Mobil cihazda daha küçük sayaç */
             }
             .controls {
                 flex-direction: column;
-                width: 80%;
+                width: 90%;
             }
-            .camera-source-selection, .object-selection, .sound-selection, .reports-section, .alarm-delay-selection {
+            button {
+                width: 100%;
+                margin-bottom: 10px; /* Butonlar arasına boşluk */
+            }
+            .camera-source-selection, .object-selection, .sound-selection, .reports-section, .alarm-delay-selection, .camera-and-alarm-status-area {
                 flex-direction: column;
                 width: 90vw;
                 max-width: none;
+                gap: 8px; /* Öğeler arasında boşluk */
             }
             .sound-selection select, .sound-selection button,
             .reports-filter input, .reports-filter button,
@@ -261,11 +311,8 @@
                 width: 100%;
                 margin-left: 0;
             }
-            #external-camera-url-group, #device-camera-controls { /* Responsive için eklendi */
+            #external-camera-url-group, #device-camera-controls {
                  width: 100%;
-            }
-            button {
-                width: 100%;
             }
             .reports-filter {
                 flex-direction: column;
@@ -274,14 +321,25 @@
     </style>
 </head>
 <body>
-    <h1>Akıllı Hareket Alarmı</h1>
+    <!-- <h1>Akıllı Hareket Alarmı</h1> başlığı kaldırıldı -->
     <div class="video-container">
         <video id="webcam" autoplay playsinline muted></video>
         <canvas id="canvas"></canvas>
         <div class="detection-overlay" id="detection-overlay"></div>
     </div>
+
+    <!-- Kamera kontrolleri ve alarm durumu için yeni alan -->
+    <div class="camera-and-alarm-status-area">
+        <div id="countdown-display" style="display:none;"></div> <!-- Sayaç buraya taşındı -->
+        <div id="alarm-status">Alarm Durumu: Başlatılmaya hazır</div> <!-- Alarm durumu buraya taşındı -->
+        <div id="device-camera-controls" style="display: flex; justify-content: center; width: 100%;">
+            <button id="switch-device-camera-button" style="display:none;">Cihaz Kamerasını Değiştir</button>
+        </div>
+    </div>
+
     <div class="controls">
-        <button id="start-button">Alarmı Kur</button>
+        <button id="open-camera-button">Kamerayı Aç</button> <!-- Yeni "Kamerayı Aç" butonu -->
+        <button id="start-button" disabled>Alarmı Kur</button>
         <button id="stop-button" disabled>Alarmı Durdur</button>
     </div>
 
@@ -293,9 +351,6 @@
         <label>
             <input type="radio" name="camera-source" value="external"> Harici URL
         </label>
-        <div id="device-camera-controls" style="display: flex;"> <!-- Cihaz kamerası kontrolleri için grup -->
-            <button id="switch-device-camera-button" style="display:none;">Cihaz Kamerasını Değiştir</button>
-        </div>
         <div id="external-camera-url-group" style="display:none;">
             <input type="url" id="external-camera-url" placeholder="Harici kamera URL'si (örn: http://kameraip/video.mjpeg)">
             <button id="test-external-camera-button">Yayını Test Et</button>
@@ -316,7 +371,7 @@
     </div>
 
     <div class="object-selection">
-        <label><input type="checkbox" value="person"> İnsan</label>
+        <label><input type="checkbox" value="person" checked> İnsan</label> <!-- Varsayılan olarak seçili -->
         <label><input type="checkbox" value="cat"> Kedi</label>
         <label><input type="checkbox" value="dog"> Köpek</label>
         <label><input type="checkbox" value="bird"> Kuş</label>
@@ -350,7 +405,8 @@
         </div>
     </div>
 
-    <div id="alarm-status">Alarm Durumu: Başlatılmaya hazır</div>
+    <!-- Alarm durumu artık camera-and-alarm-status-area içinde -->
+    <!-- <div id="alarm-status">Alarm Durumu: Başlatılmaya hazır</div> -->
 
     <!-- TensorFlow.js ve COCO-SSD modellerini yükle -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
@@ -367,7 +423,7 @@
         const detectionOverlay = document.getElementById('detection-overlay');
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
-        const alarmStatus = document.getElementById('alarm-status');
+        const alarmStatus = document.getElementById('alarm-status'); // Yeni konumu
         const alarmSoundSelect = document.getElementById('alarm-sound-select');
         const previewSoundButton = document.getElementById('preview-sound-button');
         const reportsList = document.getElementById('reports-list');
@@ -379,22 +435,25 @@
         const externalCameraUrlInput = document.getElementById('external-camera-url');
         const testExternalCameraButton = document.getElementById('test-external-camera-button');
         const alarmDelayRadios = document.querySelectorAll('input[name="alarm-delay"]');
-        const switchDeviceCameraButton = document.getElementById('switch-device-camera-button'); // Yeni buton referansı
-        const deviceCameraControls = document.getElementById('device-camera-controls'); // Cihaz kamera kontrolleri grubu
+        const switchDeviceCameraButton = document.getElementById('switch-device-camera-button');
+        const deviceCameraControls = document.getElementById('device-camera-controls'); // Yeni konumu
+        const countdownDisplay = document.getElementById('countdown-display'); // Yeni konumu
+        const openCameraButton = document.getElementById('open-camera-button'); // Yeni buton referansı
+        const personCheckbox = document.querySelector('input[value="person"]'); // İnsan checkbox referansı
         
         let model = null;
         let isRunning = false;
         let selectedObjects = new Set();
-        let cameraSource = 'device'; // 'device' (cihaz kamerası) veya 'external' (harici URL)
-        let hlsInstance = null; // hls.js örneğini tutmak için
+        let cameraSource = 'device';
+        let hlsInstance = null;
 
-        let availableVideoDevices = []; // Mevcut video cihazlarını tutacak
-        let currentDeviceIndex = 0; // Şu anki cihaz kamerası indeksi
+        let availableVideoDevices = [];
+        let currentDeviceIndex = 0;
 
         let alarmSound = new Audio(alarmSoundSelect.value); 
         alarmSound.loop = true;
 
-        let alarmLogs = []; // Alarm geçmişini tutacak dizi
+        let alarmLogs = [];
 
         // COCO-SSD modelini yükle
         async function loadModel() {
@@ -405,11 +464,13 @@
                     model = await cocoSsd.load();
                     console.log('Model yüklendi!');
                     alarmStatus.textContent = 'Alarm Durumu: Başlatılmaya hazır';
-                    startButton.disabled = false; // Model yüklendiğinde başlat düğmesini etkinleştir
+                    // Model yüklendiğinde startButton'ı etkinleştirme, bu artık openCameraButton'ın işi.
+                    // startButton.disabled = false;
                 } catch (error) {
                     console.error("Model yüklenirken hata oluştu:", error);
                     alarmStatus.textContent = 'Hata: Model yüklenemedi!';
                     startButton.disabled = true;
+                    openCameraButton.disabled = true; // Model yoksa kamera da açılmasın
                 }
             }
         }
@@ -426,25 +487,23 @@
         function saveLog(message) {
             const now = new Date();
             const logEntry = {
-                timestamp: now.toISOString(), // ISO formatında kaydet
+                timestamp: now.toISOString(),
                 displayTime: now.toLocaleString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                 message: message
             };
             alarmLogs.push(logEntry);
             localStorage.setItem('alarmReports', JSON.stringify(alarmLogs));
-            displayReports(); // Rapor listesini güncelle
+            displayReports();
         }
 
         // Raporları ekranda göster
         function displayReports(logsToDisplay = null) {
-            reportsList.innerHTML = ''; // Listeyi temizle
+            reportsList.innerHTML = '';
             
-            let logs = logsToDisplay || alarmLogs; // Filtrelenmiş loglar varsa onları kullan
+            let logs = logsToDisplay || alarmLogs;
             
-            // Tarihe göre tersine sırala (en yeni en üstte)
             logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            // Sadece son 5 işlemi göster (filtreleme yoksa)
             const displayLimit = logsToDisplay ? logs.length : 5; 
             
             if (logs.length === 0) {
@@ -485,17 +544,13 @@
         // Başlangıç ve bitiş tarih/saat inputlarına varsayılan değerleri ayarla
         function setDateTimeDefaults() {
             const now = new Date();
-            // Varsayılan olarak bugünün başından itibaren
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-            // Varsayılan olarak anlık tarih ve saat
             const endNow = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
 
-            // toISOString() UTC zamanı döndürür, datetime-local için yerel zaman dilimine uygun hale getirmeliyiz.
-            // Bu basit bir yaklaşımdır, karmaşık zaman dilimi senaryoları için daha sağlam kütüphaneler gerekebilir.
             const toLocalISOString = (date) => {
-                const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+                const offset = date.getTimezoneOffset() * 60000;
                 const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, -1);
-                return localISOTime.substring(0, 16); //YYYY-MM-DDTHH:MM formatı
+                return localISOTime.substring(0, 16);
             };
 
             startDatetimeInput.value = toLocalISOString(startOfDay);
@@ -540,9 +595,12 @@
             video.load();
 
             video.style.display = 'block'; 
-            detectionOverlay.innerHTML = ''; // Önceki kutuları temizle
+            detectionOverlay.innerHTML = '';
+            countdownDisplay.style.display = 'none'; // Geri sayımı gizle
 
             alarmStatus.textContent = 'Video akışı başlatılıyor...';
+            startButton.disabled = true; // Akış başlatılırken alarm kurma devre dışı kalsın
+            stopButton.disabled = true; // Akış başlatılırken durdurma devre dışı kalsın
 
             try {
                 if (source === 'device') {
@@ -551,7 +609,11 @@
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     video.srcObject = stream;
                     await video.play();
-                    isRunning = true; // Algılamayı etkinleştir
+                    // isRunning burada TRUE yapılmıyor, sadece akış başlatılıyor.
+                    // Alarmı Kur butonu isRunning'i TRUE yapacak.
+                    // startButton.disabled = false; // Akış başarılıysa alarm kurma butonu aktif olur
+                    // stopButton.disabled = false; // Akış başarılıysa durdur butonu aktif olur
+                    
                     // Kamera değiştiğinde mevcut index'i güncelle
                     if (deviceId) {
                         const newIndex = availableVideoDevices.findIndex(d => d.deviceId === deviceId);
@@ -559,9 +621,14 @@
                             currentDeviceIndex = newIndex;
                         }
                     }
+                    if (availableVideoDevices.length > 1) {
+                        switchDeviceCameraButton.style.display = 'inline-block';
+                    } else {
+                        switchDeviceCameraButton.style.display = 'none';
+                    }
+                    deviceCameraControls.style.display = 'flex'; // Ensure its container is visible
                 } else if (source === 'external') {
-                    video.style.transform = 'none'; // Harici kamera için ayna efekti olmasın
-                    // CORS hatasını çözmek için crossOrigin niteliğini ekledim
+                    video.style.transform = 'none';
                     video.crossOrigin = 'anonymous'; 
 
                     if (!url) {
@@ -622,18 +689,44 @@
                             });
                         });
                     }
-                    isRunning = true; // Algılamayı etkinleştir
+                    // isRunning burada TRUE yapılmıyor, sadece akış başlatılıyor.
+                    switchDeviceCameraButton.style.display = 'none'; // Harici için gizle
+                    deviceCameraControls.style.display = 'none'; // Kontrol grubu da gizlensin
                 }
                 alarmStatus.textContent = 'Video akışı hazır.';
+                startButton.disabled = false; // Akış başarılıysa alarm kurma butonu aktif olur
+                stopButton.disabled = false; // Akış başarılıysa durdur butonu aktif olur
                 return true;
             } catch (err) {
                 console.error("Video akışı başlatılamadı:", err);
                 const errorMessage = err.message.includes('Kamera erişimi') ? 'Kamera erişimi için izin vermeniz gerekiyor.' : err.message;
                 alert(errorMessage);
                 alarmStatus.textContent = 'Video akışı başlatılamadı.';
+                startButton.disabled = true;
+                stopButton.disabled = true;
                 return false;
             }
         }
+
+        // Kamerayı Aç butonu
+        openCameraButton.addEventListener('click', async () => {
+            // Mevcut akışı ve alarmı durdur (temiz bir başlangıç için)
+            stopButton.click(); 
+            
+            const currentSource = document.querySelector('input[name="camera-source"]:checked').value;
+            const streamStarted = await startVideoStream(currentSource, externalCameraUrlInput.value);
+            
+            if (streamStarted) {
+                alarmStatus.textContent = 'Kamera akışı açık. Alarmı kurabilirsiniz.';
+                startButton.disabled = false; // Kamerayı açtıktan sonra alarm kur butonu aktif olsun
+                // stopButton zaten startVideoStream içinde aktif ediliyor
+                isRunning = false; // Sadece akış açık, henüz algılama başlamadı
+            } else {
+                alarmStatus.textContent = 'Kamera akışı başlatılamadı.';
+                startButton.disabled = true; // Akış başarısızsa alarm kurma butonu devre dışı kalsın
+                // stopButton zaten startVideoStream içinde devre dışı ediliyor
+            }
+        });
 
 
         // Kamera akışını başlat ve alarmı kur
@@ -643,41 +736,47 @@
                 return;
             }
             
-            // Önce video akışını başlat
-            const streamStarted = await startVideoStream(cameraSource, externalCameraUrlInput.value);
-            if (!streamStarted) {
-                startButton.disabled = false;
-                stopButton.disabled = true;
-                return; // Akış başlamazsa alarmı kurma
+            // Eğer henüz bir video akışı aktif değilse, önce akışı başlat
+            if (!video.srcObject && !video.src) {
+                const streamStarted = await startVideoStream(cameraSource, externalCameraUrlInput.value);
+                if (!streamStarted) {
+                    return; // Akış başlatılamazsa devam etme
+                }
             }
 
-            saveLog('Alarm kurulumu başlatıldı.'); // Log kaydı
-            // Başlat düğmesini devre dışı bırak ve geri sayımı başlat
+            saveLog('Alarm kurulumu başlatıldı.');
             startButton.disabled = true;
-            stopButton.disabled = true; // Geri sayım sırasında durdurma da devre dışı kalsın
+            stopButton.disabled = true;
+            openCameraButton.disabled = true; // Alarm kurulurken kamerayı aç butonu devre dışı
             
-            let countdown = parseInt(document.querySelector('input[name="alarm-delay"]:checked').value); // Seçili gecikme süresini al
+            let countdown = parseInt(document.querySelector('input[name="alarm-delay"]:checked').value);
 
             if (countdown > 0) {
+                countdownDisplay.style.display = 'block'; // Geri sayımı göster
+                countdownDisplay.textContent = countdown; // İlk değeri ayarla
+
                 alarmStatus.textContent = `Alarm kuruluyor: ${countdown} saniye...`;
                 alarmStatus.classList.remove('active');
 
                 const countdownInterval = setInterval(() => {
                     countdown--;
+                    countdownDisplay.textContent = countdown; // Geri sayım değerini güncelle
                     if (countdown > 0) {
                         alarmStatus.textContent = `Alarm kuruluyor: ${countdown} saniye...`;
                     } else {
                         clearInterval(countdownInterval);
+                        countdownDisplay.style.display = 'none'; // Geri sayımı gizle
                         alarmStatus.textContent = 'Alarm Durumu: Aktif';
-                        saveLog('Alarm aktif edildi.'); // Log kaydı
+                        saveLog('Alarm aktif edildi.');
                         isRunning = true; // Algılama başlatılıyor
                         stopButton.disabled = false; // Algılama başladıktan sonra durdurma etkinleşsin
                         detectFrame(); // Algılama döngüsünü başlat
                     }
                 }, 1000);
             } else { // Hemen Kur seçeneği
+                countdownDisplay.style.display = 'none'; // 0 gecikme ise gizle
                 alarmStatus.textContent = 'Alarm Durumu: Aktif';
-                saveLog('Alarm aktif edildi.'); // Log kaydı
+                saveLog('Alarm aktif edildi.');
                 isRunning = true; // Algılama başlatılıyor
                 stopButton.disabled = false; // Algılama başladıktan sonra durdurma etkinleşsin
                 detectFrame(); // Algılama döngüsünü başlat
@@ -703,7 +802,7 @@
             
             // Eğer model yüklüyse tahmin yap
             if (model) {
-                try { // Güvenlik hatası için try-catch bloğu eklendi
+                try {
                     const predictions = await model.detect(canvas);
 
                     let alarmTriggered = false;
@@ -737,15 +836,21 @@
                         alarmSound.pause();
                         alarmSound.currentTime = 0;
                         alarmStatus.classList.remove('active');
-                        alarmStatus.textContent = 'Alarm Durumu: Aktif';
+                        // Alarm aktif değilse, durum metni tekrar "Aktif" olarak dönsün
+                        if (alarmStatus.textContent !== 'Alarm Durumu: Güvenlik hatası (Algılama devre dışı)') {
+                            alarmStatus.textContent = 'Alarm Durumu: Aktif';
+                        }
                     }
                 } catch (e) {
                     if (e.name === 'SecurityError') {
                         console.error("Güvenlik hatası: Canvas'tan piksel okunamıyor (CORS kısıtlaması olabilir). Algılama durduruldu.", e);
                         alert("Güvenlik Hatası: Harici video akışı nedeniyle hareket algılama yapılamıyor. Bu genellikle CORS kısıtlamalarından kaynaklanır. Video oynatılmaya devam edecek ancak alarm devre dışı kalacaktır.");
-                        stopButton.click(); // Algılamayı durdur
+                        isRunning = false;
                         alarmStatus.textContent = 'Alarm Durumu: Güvenlik hatası (Algılama devre dışı)';
-                        return; // Algılama döngüsünü durdur
+                        startButton.disabled = false;
+                        stopButton.disabled = true;
+                        openCameraButton.disabled = false; // Tekrar kamerayı açmaya izin ver
+                        return;
                     } else {
                         console.error("Algılama sırasında beklenmedik hata:", e);
                         alert("Algılama sırasında bir hata oluştu: " + e.message);
@@ -797,20 +902,23 @@
                 externalCameraUrlInputGroup.style.display = 'none';
                 deviceCameraControls.style.display = 'none'; // Cihaz kamera kontrollerini gizle
                 switchDeviceCameraButton.style.display = 'none'; // Butonu gizle
-                video.style.display = 'block'; // Video elementini varsayılan olarak göster
-                startButton.disabled = false; // Her modda başlama yeteneğini geri ver
+                video.style.display = 'block';
+                
+                // Kaynak değiştiğinde tüm butonları başlangıç durumuna getir
+                startButton.disabled = true; // Alarm kurma devre dışı
+                stopButton.disabled = true; // Durdurma devre dışı
+                openCameraButton.disabled = false; // Kamerayı aç aktif
+
+                // Stop any active stream when source changes for a clean state
+                stopButton.click(); // Bu aynı zamanda isRunning'i false yapar, countdown'ı gizler vb.
 
                 if (cameraSource === 'external') {
                     externalCameraUrlInputGroup.style.display = 'flex';
                 } else if (cameraSource === 'device') {
-                    deviceCameraControls.style.display = 'flex'; // Cihaz kamera kontrollerini göster
+                    deviceCameraControls.style.display = 'flex';
                     enumerateCameras(); // Cihazları listele ve butonu duruma göre göster
                 }
-
-                // Kamera kaynağı değiştiğinde eğer aktifse durdur
-                if (video.src || video.srcObject) { // Akış aktifse durdur
-                    stopButton.click();
-                }
+                alarmStatus.textContent = 'Alarm Durumu: Başlatılmaya hazır'; // Durumu sıfırla
             });
         });
 
@@ -824,7 +932,7 @@
             currentDeviceIndex = (currentDeviceIndex + 1) % availableVideoDevices.length;
             const nextDeviceId = availableVideoDevices[currentDeviceIndex].deviceId;
             
-            // Mevcut akışı durdur
+            // Mevcut akışı ve alarmı durdur
             stopButton.click(); 
 
             alarmStatus.textContent = 'Cihaz kamerası değiştiriliyor...';
@@ -835,12 +943,14 @@
                 alarmStatus.textContent = `Kamera değiştirildi: ${availableVideoDevices[currentDeviceIndex].label || `Kamera ${currentDeviceIndex + 1}`}`;
                 startButton.disabled = false; 
                 stopButton.disabled = false; 
-                isRunning = true; // Kamera değiştikten sonra algılamayı hemen başlat
-                detectFrame();
+                openCameraButton.disabled = false; // Kamera değiştirildikten sonra aktif kalmalı
+                // isRunning is set in startVideoStream, but here we explicitly keep it false until alarm is armed
+                isRunning = false; 
             } else {
                 alarmStatus.textContent = 'Kamera değiştirilemedi.';
-                startButton.disabled = false;
+                startButton.disabled = true;
                 stopButton.disabled = true;
+                openCameraButton.disabled = false;
             }
         });
 
@@ -851,23 +961,23 @@
                 alert('Lütfen harici kamera URL\'sini girin.');
                 return;
             }
-            // Mevcut alarmı veya akışı durdur
-            if (isRunning || video.src || video.srcObject) {
-                stopButton.click();
-            }
+            // Mevcut akışı ve alarmı durdur
+            stopButton.click();
+
+            alarmStatus.textContent = 'Yayını test ediliyor...';
             // Sadece video akışını başlat (algılama yapmadan)
             const streamStarted = await startVideoStream('external', externalCameraUrlInput.value);
             if (streamStarted) {
-                alarmStatus.textContent = 'Yayını test ediliyor...';
-                // Test akışı olduğu için algılama döngüsünü başlatma
-                isRunning = false; // isRunning false olarak kalacak
-                stopButton.disabled = false; // Test akışını durdurabilir
-                startButton.disabled = false; // Test sonrası alarmı kurabilir
+                alarmStatus.textContent = 'Yayın testi başarılı. Alarmı kurabilirsiniz.';
+                startButton.disabled = false;
+                stopButton.disabled = false;
+                isRunning = false; // Test akışı, algılama yok
             } else {
                 alarmStatus.textContent = 'Yayın testi başarısız.';
-                startButton.disabled = false;
+                startButton.disabled = true;
                 stopButton.disabled = true;
             }
+            openCameraButton.disabled = false; // Test sonrası kamera açma butonu aktif kalmalı
         });
 
         // Alarm sesi seçimini dinle
@@ -891,9 +1001,11 @@
 
         // Alarmı durdur
         stopButton.addEventListener('click', () => {
-            isRunning = false; // Algılama döngüsünü durdur
-            startButton.disabled = false;
+            isRunning = false;
+            startButton.disabled = true; // Durdurulduktan sonra alarm kurmak için tekrar "Kamerayı Aç" basılmalı
             stopButton.disabled = true;
+            openCameraButton.disabled = false; // Kamerayı aç butonu tekrar aktif olsun
+
             alarmStatus.textContent = 'Alarm Durumu: Durduruldu';
             alarmStatus.classList.remove('active');
             alarmSound.pause();
@@ -903,7 +1015,7 @@
                 video.srcObject.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
             }
-            if (hlsInstance) { // HLS.js örneğini yok et
+            if (hlsInstance) {
                 hlsInstance.destroy();
                 hlsInstance = null;
             }
@@ -911,7 +1023,16 @@
             video.load(); // Videoyu yeniden yükle (boş kaynakla)
             video.style.display = 'block'; // Video elementini tekrar görünür yap (varsayılan)
             detectionOverlay.innerHTML = ''; // Çizili kutuları temizle
-            saveLog('Alarm durduruldu.'); // Log kaydı
+            countdownDisplay.style.display = 'none'; // Geri sayımı gizle
+            saveLog('Alarm durduruldu.');
+            
+            // Kamera kaynağı device ise, değiştirme butonunun görünürlüğünü güncelle
+            if (cameraSource === 'device') {
+                enumerateCameras(); // Yeniden say ve butonu göster/gizle
+            } else {
+                deviceCameraControls.style.display = 'none';
+                switchDeviceCameraButton.style.display = 'none';
+            }
         });
 
         // Alarmı tetikle
@@ -920,33 +1041,29 @@
             alarmStatus.classList.add('active');
             if (alarmSound.paused) {
                 alarmSound.play().catch(e => console.error("Alarm sesi çalınamadı:", e));
-                saveLog('Hareket algılandı!'); // Log kaydı
+                saveLog('Hareket algılandı!');
             }
         }
 
         // Algılanan nesnenin etrafına kutu çiz
         function drawBoundingBox(bbox, label) {
             const [x, y, width, height] = bbox;
-            const videoIntrinsicWidth = video.videoWidth;   // Videonun kendi genişliği
-            const videoIntrinsicHeight = video.videoHeight; // Videonun kendi yüksekliği
-            const containerWidth = detectionOverlay.clientWidth; // Kutu çizim alanının genişliği (video konteyneri)
-            const containerHeight = detectionOverlay.clientHeight; // Kutu çizim alanının yüksekliği
+            const videoIntrinsicWidth = video.videoWidth;
+            const videoIntrinsicHeight = video.videoHeight;
+            const containerWidth = detectionOverlay.clientWidth;
+            const containerHeight = detectionOverlay.clientHeight;
 
-            // Video ve konteyner en-boy oranlarını hesapla
             const videoAspectRatio = videoIntrinsicWidth / videoIntrinsicHeight;
             const containerAspectRatio = containerWidth / containerHeight;
 
-            let actualScale; // Gerçek ölçeklendirme faktörü
-            let offsetX = 0; // Yatay ofset (kırpma/boşluk nedeniyle)
-            let offsetY = 0; // Dikey ofset (kırpma/boşluk nedeniyle)
+            let actualScale;
+            let offsetX = 0;
+            let offsetY = 0;
 
-            // object-fit: cover nasıl davrandığını hesapla
             if (videoAspectRatio > containerAspectRatio) {
-                // Video daha genişse, yüksekliğe göre ölçeklenir ve yatayda kırpılır
                 actualScale = containerHeight / videoIntrinsicHeight;
                 offsetX = (containerWidth - (videoIntrinsicWidth * actualScale)) / 2;
             } else {
-                // Video daha dikeyse, genişliğe göre ölçeklenir ve dikeyde kırpılır
                 actualScale = containerWidth / videoIntrinsicWidth;
                 offsetY = (containerHeight - (videoIntrinsicHeight * actualScale)) / 2;
             }
@@ -955,19 +1072,13 @@
             box.className = 'bounding-box';
             
             let boxLeft;
-            // Orijinal Y koordinatına ölçeklendirme ve dikey ofset uygula
             let boxTop = (y * actualScale) + offsetY; 
-            // Genişlik ve yüksekliğe gerçek ölçeği uygula
             let boxWidth = width * actualScale;
             let boxHeight = height * actualScale;
 
-            // Kamera ayna efekti (transform: scaleX(-1)) varsa, yatay konumu ayarla
             if (video.style.transform === 'scaleX(-1)') {
-                // Orijinal x koordinatına göre görüntünün sağ kenarına olan uzaklığı hesapla,
-                // sonra ölçekle ve yatay ofseti ekle.
                 boxLeft = ((videoIntrinsicWidth - (x + width)) * actualScale) + offsetX;
             } else {
-                // Ayna efekti yoksa, direkt x koordinatını ölçekle ve yatay ofseti ekle
                 boxLeft = (x * actualScale) + offsetX;
             }
 
@@ -976,17 +1087,40 @@
             box.style.width = `${boxWidth}px`;
             box.style.height = `${boxHeight}px`;
 
+            const labelElement = document.createElement('span');
+            labelElement.className = 'bounding-box-label';
+            labelElement.textContent = label;
+            box.appendChild(labelElement);
+
             detectionOverlay.appendChild(box);
         }
 
         // Sayfa yüklendiğinde modeli hazırla ve logları yükle/göster
         window.addEventListener('load', () => {
             loadModel();
-            startButton.disabled = true;
-            setDateTimeDefaults(); // Tarih/saat girişlerini ayarla
-            loadLogs(); // Logları yükle
-            displayReports(); // Raporları göster
-            enumerateCameras(); // Cihazları listeleyi başlat
+            startButton.disabled = true; // Başlangıçta alarm kur devre dışı
+            stopButton.disabled = true; // Başlangıçta durdur devre dışı
+            openCameraButton.disabled = false; // Kamerayı aç aktif
+
+            setDateTimeDefaults();
+            loadLogs();
+            displayReports();
+            
+            // "İnsan" checkbox'ını varsayılan olarak seçili yap ve selectedObjects'e ekle
+            if (personCheckbox && !personCheckbox.checked) {
+                personCheckbox.checked = true;
+                selectedObjects.add(personCheckbox.value);
+            }
+
+            // Başlangıçta cihaz kamerası seçili olduğu için kontrolleri göster
+            if (document.querySelector('input[name="camera-source"]:checked').value === 'device') {
+                deviceCameraControls.style.display = 'flex';
+                enumerateCameras(); // Cihaz kameralarını listele
+            } else if (document.querySelector('input[name="camera-source"]:checked').value === 'external') {
+                externalCameraUrlInputGroup.style.display = 'flex';
+                deviceCameraControls.style.display = 'none'; // Cihaz kamera kontrolleri gizli
+                switchDeviceCameraButton.style.display = 'none'; // Değiştir butonu gizli
+            }
         });
     </script>
 </body>

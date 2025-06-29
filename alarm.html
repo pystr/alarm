@@ -609,10 +609,6 @@
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     video.srcObject = stream;
                     await video.play();
-                    // isRunning burada TRUE yapılmıyor, sadece akış başlatılıyor.
-                    // Alarmı Kur butonu isRunning'i TRUE yapacak.
-                    // startButton.disabled = false; // Akış başarılıysa alarm kurma butonu aktif olur
-                    // stopButton.disabled = false; // Akış başarılıysa durdur butonu aktif olur
                     
                     // Kamera değiştiğinde mevcut index'i güncelle
                     if (deviceId) {
@@ -689,7 +685,6 @@
                             });
                         });
                     }
-                    // isRunning burada TRUE yapılmıyor, sadece akış başlatılıyor.
                     switchDeviceCameraButton.style.display = 'none'; // Harici için gizle
                     deviceCameraControls.style.display = 'none'; // Kontrol grubu da gizlensin
                 }
@@ -1106,11 +1101,11 @@
             loadLogs();
             displayReports();
             
-            // "İnsan" checkbox'ını varsayılan olarak seçili yap ve selectedObjects'e ekle
-            if (personCheckbox && !personCheckbox.checked) {
-                personCheckbox.checked = true;
-                selectedObjects.add(personCheckbox.value);
-            }
+            // selectedObjects setini başlangıçta seçili tüm onay kutularına göre doldur
+            document.querySelectorAll('.object-selection input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedObjects.add(checkbox.value);
+            });
+            console.log('Başlangıçta seçili nesneler:', Array.from(selectedObjects)); 
 
             // Başlangıçta cihaz kamerası seçili olduğu için kontrolleri göster
             if (document.querySelector('input[name="camera-source"]:checked').value === 'device') {

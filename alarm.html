@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Hareket Alarmı</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #1a237e;
+            margin-bottom: 20px;
+        }
+        .video-container {
+            position: relative;
+            /* Kamera alanını daha büyük yap */
+            width: 95vw; /* Ekran genişliğinin %95'i */
+            max-width: 800px; /* Maksimum genişlik */
+            aspect-ratio: 16 / 9; /* En-boy oranını koru */
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px; /* Kontrollerden biraz boşluk bırak */
+            display: flex; /* İçindeki video/iframe'i ortalamak için */
+            justify-content: center;
+            align-items: center;
+        }
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* transform: scaleX(-1); Bu artık JS ile dinamik yönetilecek */
+        }
+        #canvas {
+            display: none; /* Canvas gizli kalacak */
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px; /* Seçimlerden biraz boşluk bırak */
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button#start-button {
+            background-color: #4caf50;
+            color: white;
+        }
+        button#stop-button {
+            background-color: #f44336;
+            color: white;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .camera-source-selection, .object-selection, .sound-selection, .reports-section, .alarm-delay-selection {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            width: 90vw;
+            max-width: 800px;
+        }
+        .camera-source-selection label, .object-selection label, .sound-selection label, .sound-selection select,
+        .reports-section label, .reports-section input[type="datetime-local"], .alarm-delay-selection label {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .camera-source-selection input[type="radio"],
+        .object-selection input[type="checkbox"],
+        .alarm-delay-selection input[type="radio"] {
+            transform: scale(1.2);
+            accent-color: #1a237e;
+        }
+        .sound-selection {
+            display: flex;
+            align-items: center;
+        }
+        .sound-selection select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .sound-selection button {
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-left: 10px;
+            background-color: #2196f3;
+        }
+        #external-camera-url-group, #device-camera-controls { /* Yeni eklenen kontrol grubu */
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+            align-items: center;
+        }
+        #external-camera-url {
+            width: calc(100% - 20px); /* Padding'i hesaba kat */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        #test-external-camera-button, #switch-device-camera-button { /* Yeni buton id'si eklendi */
+            padding: 8px 15px;
+            font-size: 14px;
+            background-color: #009688; /* Teal rengi */
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .camera-warning {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+            width: 100%;
+            text-align: left;
+        }
+        #alarm-status {
+            margin-top: 25px;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: background-color 0.5s ease;
+        }
+        #alarm-status.active {
+            background-color: #ffcdd2;
+            color: #d32f2f;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .reports-section {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 30px;
+            padding: 20px;
+        }
+        .reports-section h2 {
+            color: #1a237e;
+            margin-top: 0;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .reports-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+        .reports-filter input[type="datetime-local"] {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .reports-filter button {
+            background-color: #00796b;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        #reports-list {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+            padding: 10px;
+            text-align: left;
+        }
+        .report-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            color: #555;
+        }
+        .report-item:last-child {
+            border-bottom: none;
+        }
+        .report-item strong {
+            color: #1a237e;
+        }
+
+        .detection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .bounding-box {
+            position: absolute;
+            border: 2px solid #ff4081;
+            box-shadow: 0 0 10px #ff4081;
+        }
+
+        /* Mobil cihazlar için responsive ayarlar */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .video-container {
+                width: 98vw;
+            }
+            .controls {
+                flex-direction: column;
+                width: 80%;
+            }
+            .camera-source-selection, .object-selection, .sound-selection, .reports-section, .alarm-delay-selection {
+                flex-direction: column;
+                width: 90vw;
+                max-width: none;
+            }
+            .sound-selection select, .sound-selection button,
+            .reports-filter input, .reports-filter button,
+            #external-camera-url {
+                width: 100%;
+                margin-left: 0;
+            }
+            #external-camera-url-group, #device-camera-controls { /* Responsive için eklendi */
+                 width: 100%;
+            }
+            button {
+                width: 100%;
+            }
+            .reports-filter {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Akıllı Hareket Alarmı</h1>
+    <div class="video-container">
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="canvas"></canvas>
+        <div class="detection-overlay" id="detection-overlay"></div>
+    </div>
+    <div class="controls">
+        <button id="start-button">Alarmı Kur</button>
+        <button id="stop-button" disabled>Alarmı Durdur</button>
+    </div>
+
+    <div class="camera-source-selection">
+        <label>Kamera Kaynağı:</label>
+        <label>
+            <input type="radio" name="camera-source" value="device" checked> Cihaz Kamerası
+        </label>
+        <label>
+            <input type="radio" name="camera-source" value="external"> Harici URL
+        </label>
+        <div id="device-camera-controls" style="display: flex;"> <!-- Cihaz kamerası kontrolleri için grup -->
+            <button id="switch-device-camera-button" style="display:none;">Cihaz Kamerasını Değiştir</button>
+        </div>
+        <div id="external-camera-url-group" style="display:none;">
+            <input type="url" id="external-camera-url" placeholder="Harici kamera URL'si (örn: http://kameraip/video.mjpeg)">
+            <button id="test-external-camera-button">Yayını Test Et</button>
+            <p class="camera-warning">
+                Not: Harici URL için sadece HTTP/HTTPS tabanlı, tarayıcı tarafından desteklenen video formatları (örn: MJPEG, MP4, **HLS (.m3u8)**) çalışır. **CORS (Cross-Origin Resource Sharing) kısıtlamaları nedeniyle bazı harici kaynaklar üzerinde algılama yapılamaz.** RTSP/ONVIF gibi protokoller doğrudan desteklenmez.
+            </p>
+        </div>
+    </div>
+
+    <div class="alarm-delay-selection">
+        <label>Alarm Gecikmesi:</label>
+        <label>
+            <input type="radio" name="alarm-delay" value="0" checked> Hemen Kur
+        </label>
+        <label>
+            <input type="radio" name="alarm-delay" value="5"> 5 Saniye Gecikmeli Kur
+        </label>
+    </div>
+
+    <div class="object-selection">
+        <label><input type="checkbox" value="person"> İnsan</label>
+        <label><input type="checkbox" value="cat"> Kedi</label>
+        <label><input type="checkbox" value="dog"> Köpek</label>
+        <label><input type="checkbox" value="bird"> Kuş</label>
+        <label><input type="checkbox" value="car"> Araba</label>
+        <label><input type="checkbox" value="animal_generic"> Diğer Hayvan (generic)</label>
+        <label><input type="checkbox" value="all"> Her Şey</label>
+    </div>
+    <div class="sound-selection">
+        <label for="alarm-sound-select">Alarm Sesi Seç:</label>
+        <select id="alarm-sound-select">
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Ses 1 (Melodik)</option>
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Ses 2 (Daha Yoğun)</option>
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">Ses 3 (Hızlı)</option>
+            <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3">Siren Sesi</option>
+        </select>
+        <button id="preview-sound-button">Ön İzle</button>
+    </div>
+
+    <div class="reports-section">
+        <h2>Alarm Raporları</h2>
+        <div class="reports-filter">
+            <label for="start-datetime">Başlangıç:</label>
+            <input type="datetime-local" id="start-datetime">
+            <label for="end-datetime">Bitiş:</label>
+            <input type="datetime-local" id="end-datetime">
+            <button id="filter-reports-button">Filtrele</button>
+        </div>
+        <div id="reports-list">
+            <!-- Raporlar buraya dinamik olarak eklenecek -->
+            <div class="report-item">Raporlar yükleniyor...</div>
+        </div>
+    </div>
+
+    <div id="alarm-status">Alarm Durumu: Başlatılmaya hazır</div>
+
+    <!-- TensorFlow.js ve COCO-SSD modellerini yükle -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
+    <!-- HLS.js kütüphanesini yükle (m3u8 desteği için) -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+
+
+    <script>
+        // Uygulama Mantığı
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        const detectionOverlay = document.getElementById('detection-overlay');
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        const alarmStatus = document.getElementById('alarm-status');
+        const alarmSoundSelect = document.getElementById('alarm-sound-select');
+        const previewSoundButton = document.getElementById('preview-sound-button');
+        const reportsList = document.getElementById('reports-list');
+        const startDatetimeInput = document.getElementById('start-datetime');
+        const endDatetimeInput = document.getElementById('end-datetime');
+        const filterReportsButton = document.getElementById('filter-reports-button');
+        const cameraSourceRadios = document.querySelectorAll('input[name="camera-source"]');
+        const externalCameraUrlInputGroup = document.getElementById('external-camera-url-group');
+        const externalCameraUrlInput = document.getElementById('external-camera-url');
+        const testExternalCameraButton = document.getElementById('test-external-camera-button');
+        const alarmDelayRadios = document.querySelectorAll('input[name="alarm-delay"]');
+        const switchDeviceCameraButton = document.getElementById('switch-device-camera-button'); // Yeni buton referansı
+        const deviceCameraControls = document.getElementById('device-camera-controls'); // Cihaz kamera kontrolleri grubu
+        
+        let model = null;
+        let isRunning = false;
+        let selectedObjects = new Set();
+        let cameraSource = 'device'; // 'device' (cihaz kamerası) veya 'external' (harici URL)
+        let hlsInstance = null; // hls.js örneğini tutmak için
+
+        let availableVideoDevices = []; // Mevcut video cihazlarını tutacak
+        let currentDeviceIndex = 0; // Şu anki cihaz kamerası indeksi
+
+        let alarmSound = new Audio(alarmSoundSelect.value); 
+        alarmSound.loop = true;
+
+        let alarmLogs = []; // Alarm geçmişini tutacak dizi
+
+        // COCO-SSD modelini yükle
+        async function loadModel() {
+            if (!model) {
+                console.log('Model yükleniyor...');
+                alarmStatus.textContent = 'Alarm Durumu: Model yükleniyor...';
+                try {
+                    model = await cocoSsd.load();
+                    console.log('Model yüklendi!');
+                    alarmStatus.textContent = 'Alarm Durumu: Başlatılmaya hazır';
+                    startButton.disabled = false; // Model yüklendiğinde başlat düğmesini etkinleştir
+                } catch (error) {
+                    console.error("Model yüklenirken hata oluştu:", error);
+                    alarmStatus.textContent = 'Hata: Model yüklenemedi!';
+                    startButton.disabled = true;
+                }
+            }
+        }
+
+        // Raporları localStorage'dan yükle
+        function loadLogs() {
+            const storedLogs = localStorage.getItem('alarmReports');
+            if (storedLogs) {
+                alarmLogs = JSON.parse(storedLogs);
+            }
+        }
+
+        // Yeni bir log kaydet
+        function saveLog(message) {
+            const now = new Date();
+            const logEntry = {
+                timestamp: now.toISOString(), // ISO formatında kaydet
+                displayTime: now.toLocaleString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                message: message
+            };
+            alarmLogs.push(logEntry);
+            localStorage.setItem('alarmReports', JSON.stringify(alarmLogs));
+            displayReports(); // Rapor listesini güncelle
+        }
+
+        // Raporları ekranda göster
+        function displayReports(logsToDisplay = null) {
+            reportsList.innerHTML = ''; // Listeyi temizle
+            
+            let logs = logsToDisplay || alarmLogs; // Filtrelenmiş loglar varsa onları kullan
+            
+            // Tarihe göre tersine sırala (en yeni en üstte)
+            logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Sadece son 5 işlemi göster (filtreleme yoksa)
+            const displayLimit = logsToDisplay ? logs.length : 5; 
+            
+            if (logs.length === 0) {
+                reportsList.innerHTML = '<div class="report-item">Henüz bir rapor yok.</div>';
+                return;
+            }
+
+            for (let i = 0; i < Math.min(logs.length, displayLimit); i++) {
+                const log = logs[i];
+                const item = document.createElement('div');
+                item.className = 'report-item';
+                item.innerHTML = `<strong>${log.displayTime}</strong>: ${log.message}`;
+                reportsList.appendChild(item);
+            }
+        }
+
+        // Tarih ve saat filtreleme
+        filterReportsButton.addEventListener('click', filterReports);
+
+        function filterReports() {
+            const startDateTime = startDatetimeInput.value ? new Date(startDatetimeInput.value) : null;
+            const endDateTime = endDatetimeInput.value ? new Date(endDatetimeInput.value) : null;
+
+            const filtered = alarmLogs.filter(log => {
+                const logTime = new Date(log.timestamp);
+                let pass = true;
+                if (startDateTime && logTime < startDateTime) {
+                    pass = false;
+                }
+                if (endDateTime && logTime > endDateTime) {
+                    pass = false;
+                }
+                return pass;
+            });
+            displayReports(filtered);
+        }
+
+        // Başlangıç ve bitiş tarih/saat inputlarına varsayılan değerleri ayarla
+        function setDateTimeDefaults() {
+            const now = new Date();
+            // Varsayılan olarak bugünün başından itibaren
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            // Varsayılan olarak anlık tarih ve saat
+            const endNow = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+
+            // toISOString() UTC zamanı döndürür, datetime-local için yerel zaman dilimine uygun hale getirmeliyiz.
+            // Bu basit bir yaklaşımdır, karmaşık zaman dilimi senaryoları için daha sağlam kütüphaneler gerekebilir.
+            const toLocalISOString = (date) => {
+                const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+                const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, -1);
+                return localISOTime.substring(0, 16); //YYYY-MM-DDTHH:MM formatı
+            };
+
+            startDatetimeInput.value = toLocalISOString(startOfDay);
+            endDatetimeInput.value = toLocalISOString(endNow);
+        }
+
+        // Cihazdaki mevcut video giriş cihazlarını listele
+        async function enumerateCameras() {
+            try {
+                // Kamera izinlerini kontrol et ve iste
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop()); // Akışı hemen durdur
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                availableVideoDevices = devices.filter(device => device.kind === 'videoinput');
+                console.log('Available video devices:', availableVideoDevices);
+
+                // Eğer cihaz kamerası seçiliyse ve birden fazla cihaz kamerası varsa butonu göster
+                if (cameraSource === 'device' && availableVideoDevices.length > 1) {
+                    switchDeviceCameraButton.style.display = 'inline-block'; 
+                } else {
+                    switchDeviceCameraButton.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Kamera cihazları listelenirken hata oluştu veya kamera erişimi reddedildi:", err);
+                switchDeviceCameraButton.style.display = 'none';
+            }
+        }
+
+        // Video akışını başlatma (cihaz veya harici URL)
+        async function startVideoStream(source, url = null, deviceId = null) {
+            // Önceki akışı durdur ve temizle
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            video.src = '';
+            video.load();
+
+            video.style.display = 'block'; 
+            detectionOverlay.innerHTML = ''; // Önceki kutuları temizle
+
+            alarmStatus.textContent = 'Video akışı başlatılıyor...';
+
+            try {
+                if (source === 'device') {
+                    video.style.transform = 'scaleX(-1)'; // Cihaz kamerası için ayna efekti
+                    const constraints = { video: { deviceId: deviceId ? { exact: deviceId } : undefined } };
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    await video.play();
+                    isRunning = true; // Algılamayı etkinleştir
+                    // Kamera değiştiğinde mevcut index'i güncelle
+                    if (deviceId) {
+                        const newIndex = availableVideoDevices.findIndex(d => d.deviceId === deviceId);
+                        if (newIndex !== -1) {
+                            currentDeviceIndex = newIndex;
+                        }
+                    }
+                } else if (source === 'external') {
+                    video.style.transform = 'none'; // Harici kamera için ayna efekti olmasın
+                    // CORS hatasını çözmek için crossOrigin niteliğini ekledim
+                    video.crossOrigin = 'anonymous'; 
+
+                    if (!url) {
+                        throw new Error('Harici kamera URL\'si boş olamaz.');
+                    }
+                    if (!url.startsWith('http')) {
+                        throw new Error('Lütfen geçerli bir HTTP/HTTPS kamera URL\'si girin (örn: http://kameraip/video.mjpeg). RTSP veya özel protokoller doğrudan desteklenmez.');
+                    }
+
+                    if (url.endsWith('.m3u8') && Hls.isSupported()) {
+                        hlsInstance = new Hls();
+                        hlsInstance.loadSource(url);
+                        hlsInstance.attachMedia(video);
+                        await new Promise((resolve, reject) => {
+                            video.oncanplay = () => resolve();
+                            hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                                if (data.fatal) {
+                                    console.error('HLS fatal hata:', data);
+                                    reject(new Error(`HLS akışı başlatılamadı: ${data.details}. URL'yi, CORS'u ve akışın geçerliliğini kontrol edin.`));
+                                }
+                            });
+                            video.onerror = (e) => {
+                                console.error("Video yüklenirken hata oluştu:", e);
+                                reject(new Error(`Harici kamera akışı yüklenemedi. Olası nedenler: 
+                                1. URL doğru değil veya kamera kapalı.
+                                2. Sunucu CORS (Cross-Origin Resource Sharing) politikalarına izin vermiyor.
+                                3. Video formatı tarayıcı tarafından desteklenmiyor (örn: RTSP/ONVIF doğrudan çalışmaz).
+                                Lütfen URL'yi ve kamera ayarlarınızı kontrol edin.`));
+                            };
+                            video.play().catch(e => {
+                                console.warn("Video autoplay hatası, kullanıcı etkileşimi gerekebilir:", e);
+                                resolve();
+                            });
+                        });
+                    } else if (url.endsWith('.m3u8') && !Hls.isSupported()) {
+                        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                            video.src = url;
+                            await video.play();
+                        } else {
+                            throw new Error('Tarayıcınız HLS akışlarını desteklemiyor ve hls.js yüklenemedi.');
+                        }
+                    } else {
+                        video.src = url;
+                        await new Promise((resolve, reject) => {
+                            video.oncanplay = () => resolve();
+                            video.onerror = (e) => {
+                                console.error("Video yüklenirken hata oluştu:", e);
+                                reject(new Error(`Harici kamera akışı yüklenemedi. Olası nedenler: 
+                                1. URL doğru değil veya kamera kapalı.
+                                2. Sunucu CORS (Cross-Origin Resource Sharing) politikalarına izin vermiyor.
+                                3. Video formatı tarayıcı tarafından desteklenmiyor (örn: RTSP/ONVIF doğrudan çalışmaz).
+                                Lütfen URL'yi ve kamera ayarlarınızı kontrol edin.`));
+                            };
+                            video.load();
+                            video.play().catch(e => {
+                                console.warn("Video autoplay hatası, kullanıcı etkileşimi gerekebilir:", e);
+                                resolve(); 
+                            });
+                        });
+                    }
+                    isRunning = true; // Algılamayı etkinleştir
+                }
+                alarmStatus.textContent = 'Video akışı hazır.';
+                return true;
+            } catch (err) {
+                console.error("Video akışı başlatılamadı:", err);
+                const errorMessage = err.message.includes('Kamera erişimi') ? 'Kamera erişimi için izin vermeniz gerekiyor.' : err.message;
+                alert(errorMessage);
+                alarmStatus.textContent = 'Video akışı başlatılamadı.';
+                return false;
+            }
+        }
+
+
+        // Kamera akışını başlat ve alarmı kur
+        startButton.addEventListener('click', async () => {
+            if (selectedObjects.size === 0) { 
+                alert('Lütfen algılamak istediğiniz en az bir nesne seçin!');
+                return;
+            }
+            
+            // Önce video akışını başlat
+            const streamStarted = await startVideoStream(cameraSource, externalCameraUrlInput.value);
+            if (!streamStarted) {
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                return; // Akış başlamazsa alarmı kurma
+            }
+
+            saveLog('Alarm kurulumu başlatıldı.'); // Log kaydı
+            // Başlat düğmesini devre dışı bırak ve geri sayımı başlat
+            startButton.disabled = true;
+            stopButton.disabled = true; // Geri sayım sırasında durdurma da devre dışı kalsın
+            
+            let countdown = parseInt(document.querySelector('input[name="alarm-delay"]:checked').value); // Seçili gecikme süresini al
+
+            if (countdown > 0) {
+                alarmStatus.textContent = `Alarm kuruluyor: ${countdown} saniye...`;
+                alarmStatus.classList.remove('active');
+
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        alarmStatus.textContent = `Alarm kuruluyor: ${countdown} saniye...`;
+                    } else {
+                        clearInterval(countdownInterval);
+                        alarmStatus.textContent = 'Alarm Durumu: Aktif';
+                        saveLog('Alarm aktif edildi.'); // Log kaydı
+                        isRunning = true; // Algılama başlatılıyor
+                        stopButton.disabled = false; // Algılama başladıktan sonra durdurma etkinleşsin
+                        detectFrame(); // Algılama döngüsünü başlat
+                    }
+                }, 1000);
+            } else { // Hemen Kur seçeneği
+                alarmStatus.textContent = 'Alarm Durumu: Aktif';
+                saveLog('Alarm aktif edildi.'); // Log kaydı
+                isRunning = true; // Algılama başlatılıyor
+                stopButton.disabled = false; // Algılama başladıktan sonra durdurma etkinleşsin
+                detectFrame(); // Algılama döngüsünü başlat
+            }
+        });
+
+        // Kameradan gelen her kareyi işle
+        async function detectFrame() {
+            if (!isRunning) {
+                return;
+            }
+            
+            // Video'nun hazır olduğundan emin ol (intrinsic boyutları olsun)
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                 requestAnimationFrame(detectFrame); // Tekrar dene
+                 return;
+            }
+
+            // Canvas boyutunu videonun mevcut boyutlarına göre ayarla
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Eğer model yüklüyse tahmin yap
+            if (model) {
+                try { // Güvenlik hatası için try-catch bloğu eklendi
+                    const predictions = await model.detect(canvas);
+
+                    let alarmTriggered = false;
+                    detectionOverlay.innerHTML = ''; // Önceki kutuları temizle
+
+                    predictions.forEach(prediction => {
+                        const isGenericAnimal = selectedObjects.has('animal_generic') && 
+                                                (prediction.class === 'cat' || 
+                                                 prediction.class === 'dog' || 
+                                                 prediction.class === 'bird' ||
+                                                 prediction.class === 'horse' ||
+                                                 prediction.class === 'sheep' ||
+                                                 prediction.class === 'cow' ||
+                                                 prediction.class === 'elephant' ||
+                                                 prediction.class === 'bear' ||
+                                                 prediction.class === 'zebra' ||
+                                                 prediction.class === 'giraffe');
+                        
+                        if (selectedObjects.has('all') || selectedObjects.has(prediction.class) || isGenericAnimal) {
+                            if (prediction.score > 0.5) { // Güven skoru %50'nin üzerindeyse algıla
+                                console.log(`Algılandı: ${prediction.class} (${(prediction.score * 100).toFixed(2)}%)`);
+                                alarmTriggered = true;
+                                drawBoundingBox(prediction.bbox, prediction.class);
+                            }
+                        }
+                    });
+
+                    if (alarmTriggered) {
+                        triggerAlarm();
+                    } else {
+                        alarmSound.pause();
+                        alarmSound.currentTime = 0;
+                        alarmStatus.classList.remove('active');
+                        alarmStatus.textContent = 'Alarm Durumu: Aktif';
+                    }
+                } catch (e) {
+                    if (e.name === 'SecurityError') {
+                        console.error("Güvenlik hatası: Canvas'tan piksel okunamıyor (CORS kısıtlaması olabilir). Algılama durduruldu.", e);
+                        alert("Güvenlik Hatası: Harici video akışı nedeniyle hareket algılama yapılamıyor. Bu genellikle CORS kısıtlamalarından kaynaklanır. Video oynatılmaya devam edecek ancak alarm devre dışı kalacaktır.");
+                        stopButton.click(); // Algılamayı durdur
+                        alarmStatus.textContent = 'Alarm Durumu: Güvenlik hatası (Algılama devre dışı)';
+                        return; // Algılama döngüsünü durdur
+                    } else {
+                        console.error("Algılama sırasında beklenmedik hata:", e);
+                        alert("Algılama sırasında bir hata oluştu: " + e.message);
+                        stopButton.click();
+                        return;
+                    }
+                }
+            } else {
+                console.warn("Model henüz yüklenmedi, algılama yapılamıyor.");
+                alarmStatus.textContent = 'Alarm Durumu: Model bekleniyor...';
+            }
+
+            requestAnimationFrame(detectFrame);
+        }
+
+        // Seçim kutularını dinle
+        document.querySelectorAll('.object-selection input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                const object = event.target.value;
+                if (event.target.checked) {
+                    selectedObjects.add(object);
+                    if (object === 'all') {
+                        document.querySelectorAll('.object-selection input[type="checkbox"]').forEach(cb => {
+                            if (cb !== event.target && cb.value !== 'all') {
+                                cb.checked = true;
+                                selectedObjects.add(cb.value);
+                            }
+                        });
+                    }
+                } else {
+                    selectedObjects.delete(object);
+                    if (object === 'all') {
+                        document.querySelectorAll('.object-selection input[type="checkbox"]').forEach(cb => {
+                            if (cb !== event.target) {
+                                cb.checked = false;
+                                selectedObjects.delete(cb.value);
+                            }
+                        });
+                    }
+                }
+                console.log('Seçili Nesneler:', Array.from(selectedObjects));
+            });
+        });
+
+        // Kamera kaynağı seçimini dinle
+        cameraSourceRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                cameraSource = event.target.value;
+                externalCameraUrlInputGroup.style.display = 'none';
+                deviceCameraControls.style.display = 'none'; // Cihaz kamera kontrollerini gizle
+                switchDeviceCameraButton.style.display = 'none'; // Butonu gizle
+                video.style.display = 'block'; // Video elementini varsayılan olarak göster
+                startButton.disabled = false; // Her modda başlama yeteneğini geri ver
+
+                if (cameraSource === 'external') {
+                    externalCameraUrlInputGroup.style.display = 'flex';
+                } else if (cameraSource === 'device') {
+                    deviceCameraControls.style.display = 'flex'; // Cihaz kamera kontrollerini göster
+                    enumerateCameras(); // Cihazları listele ve butonu duruma göre göster
+                }
+
+                // Kamera kaynağı değiştiğinde eğer aktifse durdur
+                if (video.src || video.srcObject) { // Akış aktifse durdur
+                    stopButton.click();
+                }
+            });
+        });
+
+        // Cihaz kamerasını değiştir butonu
+        switchDeviceCameraButton.addEventListener('click', async () => {
+            if (availableVideoDevices.length < 2) {
+                alert('Cihazınızda değiştirilebilecek birden fazla kamera bulunmuyor.');
+                return;
+            }
+
+            currentDeviceIndex = (currentDeviceIndex + 1) % availableVideoDevices.length;
+            const nextDeviceId = availableVideoDevices[currentDeviceIndex].deviceId;
+            
+            // Mevcut akışı durdur
+            stopButton.click(); 
+
+            alarmStatus.textContent = 'Cihaz kamerası değiştiriliyor...';
+            // Yeni kamera ile akışı başlat
+            const streamStarted = await startVideoStream('device', null, nextDeviceId);
+            
+            if (streamStarted) {
+                alarmStatus.textContent = `Kamera değiştirildi: ${availableVideoDevices[currentDeviceIndex].label || `Kamera ${currentDeviceIndex + 1}`}`;
+                startButton.disabled = false; 
+                stopButton.disabled = false; 
+                isRunning = true; // Kamera değiştikten sonra algılamayı hemen başlat
+                detectFrame();
+            } else {
+                alarmStatus.textContent = 'Kamera değiştirilemedi.';
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        });
+
+
+        // Harici kamera yayını test et butonu
+        testExternalCameraButton.addEventListener('click', async () => {
+            if (!externalCameraUrlInput.value) {
+                alert('Lütfen harici kamera URL\'sini girin.');
+                return;
+            }
+            // Mevcut alarmı veya akışı durdur
+            if (isRunning || video.src || video.srcObject) {
+                stopButton.click();
+            }
+            // Sadece video akışını başlat (algılama yapmadan)
+            const streamStarted = await startVideoStream('external', externalCameraUrlInput.value);
+            if (streamStarted) {
+                alarmStatus.textContent = 'Yayını test ediliyor...';
+                // Test akışı olduğu için algılama döngüsünü başlatma
+                isRunning = false; // isRunning false olarak kalacak
+                stopButton.disabled = false; // Test akışını durdurabilir
+                startButton.disabled = false; // Test sonrası alarmı kurabilir
+            } else {
+                alarmStatus.textContent = 'Yayın testi başarısız.';
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        });
+
+        // Alarm sesi seçimini dinle
+        alarmSoundSelect.addEventListener('change', (event) => {
+            alarmSound.src = event.target.value;
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+            console.log('Alarm sesi değiştirildi:', alarmSound.src);
+        });
+
+        // Ön İzle butonunu dinle
+        previewSoundButton.addEventListener('click', () => {
+            const selectedSoundUrl = alarmSoundSelect.value;
+            const previewAudio = new Audio(selectedSoundUrl);
+            previewAudio.play().catch(e => console.error("Ses ön izlemesi çalınamadı:", e));
+            setTimeout(() => {
+                previewAudio.pause();
+                previewAudio.currentTime = 0;
+            }, 3000); 
+        });
+
+        // Alarmı durdur
+        stopButton.addEventListener('click', () => {
+            isRunning = false; // Algılama döngüsünü durdur
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            alarmStatus.textContent = 'Alarm Durumu: Durduruldu';
+            alarmStatus.classList.remove('active');
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+            // Video akışını durdur
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            if (hlsInstance) { // HLS.js örneğini yok et
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            video.src = ''; // Harici URL'yi de temizle
+            video.load(); // Videoyu yeniden yükle (boş kaynakla)
+            video.style.display = 'block'; // Video elementini tekrar görünür yap (varsayılan)
+            detectionOverlay.innerHTML = ''; // Çizili kutuları temizle
+            saveLog('Alarm durduruldu.'); // Log kaydı
+        });
+
+        // Alarmı tetikle
+        function triggerAlarm() {
+            alarmStatus.textContent = 'Alarm Durumu: HAREKET ALGILANDI!';
+            alarmStatus.classList.add('active');
+            if (alarmSound.paused) {
+                alarmSound.play().catch(e => console.error("Alarm sesi çalınamadı:", e));
+                saveLog('Hareket algılandı!'); // Log kaydı
+            }
+        }
+
+        // Algılanan nesnenin etrafına kutu çiz
+        function drawBoundingBox(bbox, label) {
+            const [x, y, width, height] = bbox;
+            const videoIntrinsicWidth = video.videoWidth;   // Videonun kendi genişliği
+            const videoIntrinsicHeight = video.videoHeight; // Videonun kendi yüksekliği
+            const containerWidth = detectionOverlay.clientWidth; // Kutu çizim alanının genişliği (video konteyneri)
+            const containerHeight = detectionOverlay.clientHeight; // Kutu çizim alanının yüksekliği
+
+            // Video ve konteyner en-boy oranlarını hesapla
+            const videoAspectRatio = videoIntrinsicWidth / videoIntrinsicHeight;
+            const containerAspectRatio = containerWidth / containerHeight;
+
+            let actualScale; // Gerçek ölçeklendirme faktörü
+            let offsetX = 0; // Yatay ofset (kırpma/boşluk nedeniyle)
+            let offsetY = 0; // Dikey ofset (kırpma/boşluk nedeniyle)
+
+            // object-fit: cover nasıl davrandığını hesapla
+            if (videoAspectRatio > containerAspectRatio) {
+                // Video daha genişse, yüksekliğe göre ölçeklenir ve yatayda kırpılır
+                actualScale = containerHeight / videoIntrinsicHeight;
+                offsetX = (containerWidth - (videoIntrinsicWidth * actualScale)) / 2;
+            } else {
+                // Video daha dikeyse, genişliğe göre ölçeklenir ve dikeyde kırpılır
+                actualScale = containerWidth / videoIntrinsicWidth;
+                offsetY = (containerHeight - (videoIntrinsicHeight * actualScale)) / 2;
+            }
+
+            const box = document.createElement('div');
+            box.className = 'bounding-box';
+            
+            let boxLeft;
+            // Orijinal Y koordinatına ölçeklendirme ve dikey ofset uygula
+            let boxTop = (y * actualScale) + offsetY; 
+            // Genişlik ve yüksekliğe gerçek ölçeği uygula
+            let boxWidth = width * actualScale;
+            let boxHeight = height * actualScale;
+
+            // Kamera ayna efekti (transform: scaleX(-1)) varsa, yatay konumu ayarla
+            if (video.style.transform === 'scaleX(-1)') {
+                // Orijinal x koordinatına göre görüntünün sağ kenarına olan uzaklığı hesapla,
+                // sonra ölçekle ve yatay ofseti ekle.
+                boxLeft = ((videoIntrinsicWidth - (x + width)) * actualScale) + offsetX;
+            } else {
+                // Ayna efekti yoksa, direkt x koordinatını ölçekle ve yatay ofseti ekle
+                boxLeft = (x * actualScale) + offsetX;
+            }
+
+            box.style.left = `${boxLeft}px`;
+            box.style.top = `${boxTop}px`;
+            box.style.width = `${boxWidth}px`;
+            box.style.height = `${boxHeight}px`;
+
+            detectionOverlay.appendChild(box);
+        }
+
+        // Sayfa yüklendiğinde modeli hazırla ve logları yükle/göster
+        window.addEventListener('load', () => {
+            loadModel();
+            startButton.disabled = true;
+            setDateTimeDefaults(); // Tarih/saat girişlerini ayarla
+            loadLogs(); // Logları yükle
+            displayReports(); // Raporları göster
+            enumerateCameras(); // Cihazları listeleyi başlat
+        });
+    </script>
+</body>
+</html>

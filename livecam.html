@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canlı Kamera Yayını</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font for a clean look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        /* Styling for the video element */
+        video {
+            width: 100%;
+            max-width: 640px; /* Max width for the video */
+            height: auto;
+            background-color: #000;
+            border-radius: 12px; /* Rounded corners for the video */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            display: block;
+            margin-bottom: 20px;
+        }
+        /* Container for controls */
+        .controls {
+            display: flex;
+            gap: 15px; /* Space between buttons */
+            justify-content: center;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        /* Button styling */
+        button {
+            padding: 12px 25px;
+            border-radius: 9999px; /* Pill-shaped buttons */
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        button:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        /* Specific button colors */
+        .start-button {
+            background-color: #22c55e; /* Green for start */
+            color: white;
+        }
+        .start-button:hover {
+            background-color: #16a34a;
+        }
+        .stop-button {
+            background-color: #ef4444; /* Red for stop */
+            color: white;
+        }
+        .stop-button:hover {
+            background-color: #dc2626;
+        }
+        .message-box {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            max-width: 400px;
+            width: 100%;
+            display: none; /* Hidden by default */
+        }
+        .message-box.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex flex-col items-center p-6 bg-white rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Canlı Kamera Yayını</h1>
+
+        <!-- Video element to display the camera stream -->
+        <video id="videoElement" autoplay playsinline></video>
+
+        <!-- Controls for starting and stopping the stream -->
+        <div class="controls">
+            <button id="startButton" class="start-button">Yayını Başlat</button>
+            <button id="stopButton" class="stop-button" disabled>Yayını Durdur</button>
+        </div>
+
+        <!-- Message box for user feedback -->
+        <div id="messageBox" class="message-box"></div>
+    </div>
+
+    <script>
+        // Get references to the video element and buttons
+        const videoElement = document.getElementById('videoElement');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const messageBox = document.getElementById('messageBox');
+
+        let stream = null; // Variable to hold the camera stream
+
+        // Function to display messages to the user
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show'; // Show the message box
+            if (type === 'error') {
+                messageBox.style.borderColor = '#ef4444';
+                messageBox.style.color = '#ef4444';
+            } else {
+                messageBox.style.borderColor = '#ccc';
+                messageBox.style.color = '#333';
+            }
+        }
+
+        // Function to hide the message box
+        function hideMessage() {
+            messageBox.className = 'message-box'; // Hide the message box
+            messageBox.textContent = '';
+        }
+
+        // Event listener for the "Start Stream" button
+        startButton.addEventListener('click', async () => {
+            hideMessage(); // Clear any previous messages
+            try {
+                // Request access to the user's camera
+                // 'video: true' requests video, 'audio: false' means no audio
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                videoElement.srcObject = stream; // Set the video element's source to the camera stream
+                startButton.disabled = true; // Disable start button
+                stopButton.disabled = false; // Enable stop button
+                showMessage('Kamera yayını başlatıldı.');
+            } catch (err) {
+                // Handle errors if camera access is denied or not available
+                console.error('Kamera erişim hatası:', err);
+                if (err.name === 'NotAllowedError') {
+                    showMessage('Kamera erişimi reddedildi. Lütfen tarayıcı ayarlarınızdan izin verin.', 'error');
+                } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                    showMessage('Kamera bulunamadı. Lütfen bir kamera bağlı olduğundan emin olun.', 'error');
+                } else {
+                    showMessage('Kamera yayını başlatılırken bir hata oluştu: ' + err.message, 'error');
+                }
+            }
+        });
+
+        // Event listener for the "Stop Stream" button
+        stopButton.addEventListener('click', () => {
+            hideMessage(); // Clear any previous messages
+            if (stream) {
+                // Stop all tracks (video, audio) in the stream
+                stream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null; // Clear the video element's source
+                startButton.disabled = false; // Enable start button
+                stopButton.disabled = true; // Disable stop button
+                showMessage('Kamera yayını durduruldu.');
+            }
+        });
+
+        // Ensure buttons are in correct state on page load
+        window.onload = () => {
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        };
+    </script>
+</body>
+</html>

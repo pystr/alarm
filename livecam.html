@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canlı Kamera Yayını</title>
+    <title>Kamera Testi (HTTP)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Inter font for a clean look */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light gray background */
+            background-color: #e0f2f7; /* Soft light blue background */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,83 +19,167 @@
             padding: 20px;
             box-sizing: border-box;
         }
-        /* Styling for the video element */
+        /* Main container styling */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            background-color: #ffffff; /* Clean white background */
+            border-radius: 20px; /* More rounded corners */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Deeper shadow for pop */
+            max-width: 700px;
+            width: 100%;
+            gap: 20px;
+            border: 1px solid #cce7ee; /* Subtle border */
+        }
+        /* Header styling */
+        .app-header {
+            color: #2c3e50; /* Darker text for contrast */
+            text-align: center;
+            width: 100%;
+        }
+        /* Video element styling */
         video {
             width: 100%;
             max-width: 640px; /* Max width for the video */
             height: auto;
-            background-color: #000;
+            background-color: #1a2a3a; /* Darker background for video */
             border-radius: 12px; /* Rounded corners for the video */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
             display: block;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #5d9cec; /* Blue border for video */
         }
-        /* Container for controls */
+        /* Controls styling */
         .controls {
             display: flex;
-            gap: 15px; /* Space between buttons */
+            gap: 15px;
             justify-content: center;
-            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            flex-wrap: wrap;
+            margin-top: 15px;
         }
-        /* Button styling */
         button {
             padding: 12px 25px;
-            border-radius: 9999px; /* Pill-shaped buttons */
+            border-radius: 30px; /* More pill-shaped */
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         button:hover {
-            transform: translateY(-2px); /* Slight lift on hover */
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.15);
         }
-        /* Specific button colors */
         .start-button {
-            background-color: #22c55e; /* Green for start */
+            background-image: linear-gradient(to right, #4CAF50, #8BC34A); /* Green gradient */
             color: white;
         }
         .start-button:hover {
-            background-color: #16a34a;
+            background-image: linear-gradient(to right, #388E3C, #689F38);
         }
         .stop-button {
-            background-color: #ef4444; /* Red for stop */
+            background-image: linear-gradient(to right, #F44336, #FF5722); /* Red gradient */
             color: white;
         }
         .stop-button:hover {
-            background-color: #dc2626;
+            background-image: linear-gradient(to right, #D32F2F, #E64A19);
         }
+        .change-button {
+            background-image: linear-gradient(to right, #2196F3, #03A9F4); /* Blue gradient */
+            color: white;
+        }
+        .change-button:hover {
+            background-image: linear-gradient(to right, #1976D2, #0288D1);
+        }
+
+        /* Select dropdown styling */
+        select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cce7ee;
+            background-color: #f0f8ff;
+            font-size: 1rem;
+            color: #2c3e50;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        select:focus {
+            border-color: #5d9cec;
+            box-shadow: 0 0 0 3px rgba(93, 156, 236, 0.3);
+        }
+
+        /* Message Box */
         .message-box {
             background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            border: 1px solid #b3e5fc; /* Light blue border */
+            border-radius: 10px;
             padding: 15px;
-            margin-top: 20px;
+            margin-top: 25px;
             text-align: center;
             font-size: 1rem;
             color: #333;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
             width: 100%;
-            display: none; /* Hidden by default */
+            display: none;
+            font-weight: 500;
         }
         .message-box.show {
             display: block;
         }
+        .message-box.error {
+            border-color: #ef9a9a;
+            color: #d32f2f;
+            background-color: #ffebee;
+        }
+
+        /* Icons (using inline SVG for simplicity) */
+        .icon-play { fill: currentColor; }
+        .icon-stop { fill: currentColor; }
+        .icon-camera { fill: currentColor; }
     </style>
 </head>
 <body>
-    <div class="flex flex-col items-center p-6 bg-white rounded-xl shadow-lg">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Canlı Kamera Yayını</h1>
+    <div class="main-container">
+        <h1 class="text-4xl font-extrabold app-header">
+            <span class="text-blue-600">Kamera</span> Testi
+        </h1>
+        <p class="text-lg text-gray-600 mb-4 text-center">
+            Cihazınızdaki kameraları test edin ve aralarında geçiş yapın.
+        </p>
 
         <!-- Video element to display the camera stream -->
         <video id="videoElement" autoplay playsinline></video>
 
-        <!-- Controls for starting and stopping the stream -->
+        <!-- Camera selection dropdown -->
+        <div class="flex flex-col items-center gap-4 w-full">
+            <label for="cameraSelect" class="text-lg font-semibold text-gray-700">Kamera Seç:</label>
+            <select id="cameraSelect" class="w-full max-w-xs" disabled>
+                <option value="">Kamera Yükleniyor...</option>
+            </select>
+        </div>
+
+        <!-- Controls for starting, stopping and changing the stream -->
         <div class="controls">
-            <button id="startButton" class="start-button">Yayını Başlat</button>
-            <button id="stopButton" class="stop-button" disabled>Yayını Durdur</button>
+            <button id="startButton" class="start-button">
+                <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                Yayını Başlat
+            </button>
+            <button id="stopButton" class="stop-button" disabled>
+                <svg class="icon-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                Yayını Durdur
+            </button>
+            <button id="changeCameraButton" class="change-button" disabled>
+                <svg class="icon-camera" viewBox="0 0 24 24"><path d="M12 12c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm0 3c-2.48 0-4.5 2.02-4.5 4.5v.5h9v-.5c0-2.48-2.02-4.5-4.5-4.5zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 13c-2.76 0-5 2.24-5 5v1h10v-1c0-2.76-2.24-5-5-5z"/></svg>
+                Kamerayı Değiştir
+            </button>
         </div>
 
         <!-- Message box for user feedback -->
@@ -103,24 +187,25 @@
     </div>
 
     <script>
-        // Get references to the video element and buttons
+        // Get references to the video element, buttons, and select dropdown
         const videoElement = document.getElementById('videoElement');
         const startButton = document.getElementById('startButton');
         const stopButton = document.getElementById('stopButton');
+        const changeCameraButton = document.getElementById('changeCameraButton');
+        const cameraSelect = document.getElementById('cameraSelect');
         const messageBox = document.getElementById('messageBox');
 
-        let stream = null; // Variable to hold the camera stream
+        let currentStream = null; // Variable to hold the current camera stream
+        let availableCameras = []; // Array to store detected video input devices
 
         // Function to display messages to the user
         function showMessage(message, type = 'info') {
             messageBox.textContent = message;
             messageBox.className = 'message-box show'; // Show the message box
             if (type === 'error') {
-                messageBox.style.borderColor = '#ef4444';
-                messageBox.style.color = '#ef4444';
+                messageBox.classList.add('error');
             } else {
-                messageBox.style.borderColor = '#ccc';
-                messageBox.style.color = '#333';
+                messageBox.classList.remove('error');
             }
         }
 
@@ -130,19 +215,58 @@
             messageBox.textContent = '';
         }
 
-        // Event listener for the "Start Stream" button
-        startButton.addEventListener('click', async () => {
-            hideMessage(); // Clear any previous messages
+        // Function to populate the camera selection dropdown
+        async function populateCameraList() {
             try {
-                // Request access to the user's camera
-                // 'video: true' requests video, 'audio: false' means no audio
-                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                videoElement.srcObject = stream; // Set the video element's source to the camera stream
+                // Get all media devices
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                // Filter for video input devices
+                availableCameras = devices.filter(device => device.kind === 'videoinput');
+
+                cameraSelect.innerHTML = ''; // Clear existing options
+
+                if (availableCameras.length === 0) {
+                    cameraSelect.innerHTML = '<option value="">Kamera Bulunamadı</option>';
+                    cameraSelect.disabled = true;
+                    showMessage('Cihazınızda video girişi bulunamadı.', 'error');
+                } else {
+                    availableCameras.forEach((device, index) => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        // Use device.label if available, otherwise a generic name
+                        option.textContent = device.label || `Kamera ${index + 1}`;
+                        cameraSelect.appendChild(option);
+                    });
+                    cameraSelect.disabled = false;
+                    changeCameraButton.disabled = false; // Enable change button if cameras are found
+                }
+            } catch (err) {
+                console.error('Kamera listesi alınırken hata:', err);
+                showMessage('Kamera listesi yüklenirken bir hata oluştu: ' + err.message, 'error');
+                cameraSelect.innerHTML = '<option value="">Hata Yüklendi</option>';
+                cameraSelect.disabled = true;
+            }
+        }
+
+        // Function to start the camera stream with a specific deviceId
+        async function startStream(deviceId) {
+            hideMessage(); // Clear any previous messages
+            if (currentStream) {
+                stopStream(); // Stop existing stream if any
+            }
+
+            try {
+                // Request access to the user's camera with the selected deviceId
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: deviceId ? { exact: deviceId } : undefined },
+                    audio: false // Only video for this test
+                });
+                videoElement.srcObject = currentStream; // Set the video element's source
                 startButton.disabled = true; // Disable start button
                 stopButton.disabled = false; // Enable stop button
+                changeCameraButton.disabled = false; // Ensure change button is enabled
                 showMessage('Kamera yayını başlatıldı.');
             } catch (err) {
-                // Handle errors if camera access is denied or not available
                 console.error('Kamera erişim hatası:', err);
                 if (err.name === 'NotAllowedError') {
                     showMessage('Kamera erişimi reddedildi. Lütfen tarayıcı ayarlarınızdan izin verin.', 'error');
@@ -151,26 +275,55 @@
                 } else {
                     showMessage('Kamera yayını başlatılırken bir hata oluştu: ' + err.message, 'error');
                 }
+                startButton.disabled = false; // Re-enable start button on error
+                stopButton.disabled = true; // Disable stop button
+                changeCameraButton.disabled = false; // Keep change button enabled if cameras are listed
             }
-        });
+        }
 
-        // Event listener for the "Stop Stream" button
-        stopButton.addEventListener('click', () => {
+        // Function to stop the current camera stream
+        function stopStream() {
             hideMessage(); // Clear any previous messages
-            if (stream) {
-                // Stop all tracks (video, audio) in the stream
-                stream.getTracks().forEach(track => track.stop());
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // Stop all tracks
                 videoElement.srcObject = null; // Clear the video element's source
                 startButton.disabled = false; // Enable start button
                 stopButton.disabled = true; // Disable stop button
                 showMessage('Kamera yayını durduruldu.');
             }
+        }
+
+        // --- Event Listeners ---
+
+        // Event listener for the "Start Stream" button
+        startButton.addEventListener('click', () => {
+            const selectedDeviceId = cameraSelect.value;
+            if (selectedDeviceId) {
+                startStream(selectedDeviceId);
+            } else {
+                showMessage('Lütfen bir kamera seçin veya kamera bulunamadı.', 'error');
+            }
         });
 
-        // Ensure buttons are in correct state on page load
-        window.onload = () => {
-            startButton.disabled = false;
-            stopButton.disabled = true;
+        // Event listener for the "Stop Stream" button
+        stopButton.addEventListener('click', stopStream);
+
+        // Event listener for the "Change Camera" button
+        changeCameraButton.addEventListener('click', () => {
+            const selectedDeviceId = cameraSelect.value;
+            if (selectedDeviceId) {
+                startStream(selectedDeviceId);
+            } else {
+                showMessage('Lütfen önce bir kamera seçin.', 'error');
+            }
+        });
+
+        // Initial setup on page load
+        window.onload = async () => {
+            await populateCameraList(); // Populate camera list first
+            startButton.disabled = false; // Enable start button initially
+            stopButton.disabled = true; // Disable stop button initially
+            // Change camera button enabled/disabled based on populateCameraList result
         };
     </script>
 </body>

@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web AR Görsel Gösterici</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
+    <title>AR Görsel Gösterici</title>
     <style>
         * {
             margin: 0;
@@ -15,36 +13,122 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: white;
             overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        #videoContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
             background: #000;
         }
 
-        .ar-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
         }
 
-        .controls-panel {
+        .ar-object {
+            position: absolute;
+            transform-style: preserve-3d;
+            pointer-events: none;
+        }
+
+        .cube {
+            width: 100px;
+            height: 100px;
+            transform-style: preserve-3d;
+            animation: rotateCube 10s infinite linear;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(102, 126, 234, 0.8);
+            border: 2px solid #fff;
+            opacity: 0.9;
+        }
+
+        .cube-face.front { transform: rotateY(0deg) translateZ(50px); }
+        .cube-face.back { transform: rotateY(180deg) translateZ(50px); }
+        .cube-face.right { transform: rotateY(90deg) translateZ(50px); }
+        .cube-face.left { transform: rotateY(-90deg) translateZ(50px); }
+        .cube-face.top { transform: rotateX(90deg) translateZ(50px); }
+        .cube-face.bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        @keyframes rotateCube {
+            0% { transform: rotateX(0) rotateY(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        .sphere {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, #f093fb, #f5576c);
+            border-radius: 50%;
+            animation: bounce 2s infinite ease-in-out;
+            box-shadow: 0 0 30px rgba(240, 147, 251, 0.5);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .pyramid {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 100px solid rgba(79, 172, 254, 0.8);
+            animation: spin 5s infinite linear;
+        }
+
+        @keyframes spin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .ring {
+            width: 100px;
+            height: 100px;
+            border: 20px solid rgba(250, 112, 154, 0.8);
+            border-radius: 50%;
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+
+        .controls {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1000;
+            display: flex;
+            gap: 15px;
             background: rgba(0, 0, 0, 0.8);
             padding: 20px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
-            display: flex;
-            gap: 15px;
+            z-index: 1000;
             flex-wrap: wrap;
             justify-content: center;
             max-width: 90%;
         }
 
-        .ar-btn {
-            padding: 15px 20px;
-            border: 2px solid;
+        .btn {
+            padding: 15px 25px;
+            border: none;
             border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
@@ -52,373 +136,321 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
+            gap: 10px;
             color: white;
-            min-width: 120px;
+            min-width: 140px;
             justify-content: center;
         }
 
-        .ar-btn:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.2);
+        .btn-camera {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .btn-cube { border-color: #667eea; }
-        .btn-sphere { border-color: #f093fb; }
-        .btn-pyramid { border-color: #4facfe; }
-        .btn-ring { border-color: #fa709a; }
-        .btn-clear { border-color: #30cfd0; }
+        .btn-cube {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
 
-        .info-overlay {
+        .btn-sphere {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-pyramid {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .btn-ring {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info {
             position: fixed;
             top: 20px;
             left: 20px;
-            right: 20px;
             background: rgba(0, 0, 0, 0.8);
-            color: white;
             padding: 20px;
             border-radius: 15px;
-            z-index: 1000;
             backdrop-filter: blur(10px);
+            max-width: 300px;
+            z-index: 1000;
         }
 
-        .info-overlay h2 {
+        .info h2 {
             margin-bottom: 10px;
             font-size: 1.3rem;
         }
 
-        .info-overlay p {
+        .info p {
             font-size: 0.9rem;
             opacity: 0.9;
             line-height: 1.5;
         }
 
-        .camera-error {
-            position: fixed;
+        .camera-placeholder {
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(220, 53, 69, 0.95);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
             text-align: center;
-            z-index: 2000;
-            max-width: 400px;
+            z-index: 100;
         }
 
-        .camera-error h3 {
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-
-        .camera-error button {
-            margin-top: 20px;
-            padding: 12px 25px;
-            background: white;
-            color: #dc3545;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .camera-error button:hover {
-            transform: scale(1.05);
-        }
-
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            z-index: 3000;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .camera-placeholder svg {
+            width: 100px;
+            height: 100px;
             margin-bottom: 20px;
+            opacity: 0.5;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .object-counter {
+        .status {
             position: fixed;
             top: 20px;
             right: 20px;
             background: rgba(0, 0, 0, 0.8);
-            color: white;
             padding: 15px 20px;
             border-radius: 10px;
-            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .object-counter {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
             z-index: 1000;
         }
 
         @media (max-width: 768px) {
-            .controls-panel {
+            .controls {
                 bottom: 10px;
                 padding: 15px;
                 gap: 10px;
             }
-            
-            .ar-btn {
-                padding: 12px 15px;
+
+            .btn {
+                padding: 12px 20px;
                 font-size: 0.9rem;
-                min-width: 100px;
+                min-width: 120px;
             }
-            
-            .info-overlay {
+
+            .info {
                 top: 10px;
                 left: 10px;
                 right: 10px;
-                padding: 15px;
+                max-width: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-spinner"></div>
-        <p>AR Sistemi Yükleniyor...</p>
+    <div id="videoContainer">
+        <video id="video" autoplay playsinline></video>
+        <div class="camera-placeholder" id="placeholder">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+            </svg>
+            <p>Kamerayı başlatmak için butona tıklayın</p>
+        </div>
     </div>
 
-    <div class="ar-container">
-        <div class="info-overlay">
-            <h2>🎮 AR Deneyimi</h2>
-            <p>Butonlara tıklayarak 3D objeleri kameranızda görünür hale getirin! Objeler 10 saniye sonra otomatik kaybolacak.</p>
-        </div>
+    <div class="info">
+        <h2>🎮 AR Deneyimi</h2>
+        <p>1. Önce kamerayı başlatın<br>
+        2. Butonlara tıklayarak 3D objeleri oluşturun<br>
+        3. Objeler 10 saniye sonra kaybolacak</p>
+    </div>
 
-        <div class="object-counter" id="objectCounter">
-            Objeler: 0
-        </div>
+    <div class="status" id="status">
+        Kamera: Kapalı
+    </div>
 
-        <div class="controls-panel">
-            <button class="ar-btn btn-cube" onclick="spawnObject('cube')">
-                <span>📦</span> Küp
-            </button>
-            <button class="ar-btn btn-sphere" onclick="spawnObject('sphere')">
-                <span>🌍</span> Küre
-            </button>
-            <button class="ar-btn btn-pyramid" onclick="spawnObject('pyramid')">
-                <span>🔺</span> Piramit
-            </button>
-            <button class="ar-btn btn-ring" onclick="spawnObject('ring')">
-                <span>⭕</span> Halka
-            </button>
-            <button class="ar-btn btn-clear" onclick="clearAllObjects()">
-                <span>🗑️</span> Temizle
-            </button>
-        </div>
+    <div class="object-counter" id="counter">
+        Objeler: 0
+    </div>
 
-        <a-scene 
-            embedded
-            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-            vr-mode-ui="enabled: false"
-            renderer="logarithmicDepthBuffer: true;"
-            loading-screen="dotsColor: #667eea; backgroundColor: #000">
-            
-            <a-entity camera></a-entity>
-            
-            <a-entity id="objectsContainer"></a-entity>
-        </a-scene>
+    <div class="controls">
+        <button class="btn btn-camera" id="cameraBtn" onclick="toggleCamera()">
+            <span>📷</span> Kamerayı Aç
+        </button>
+        <button class="btn btn-cube" onclick="spawnObject('cube')" disabled>
+            <span>📦</span> Küp
+        </button>
+        <button class="btn btn-sphere" onclick="spawnObject('sphere')" disabled>
+            <span>🌍</span> Küre
+        </button>
+        <button class="btn btn-pyramid" onclick="spawnObject('pyramid')" disabled>
+            <span>🔺</span> Piramit
+        </button>
+        <button class="btn btn-ring" onclick="spawnObject('ring')" disabled>
+            <span>⭕</span> Halka
+        </button>
+        <button class="btn btn-clear" onclick="clearAllObjects()">
+            <span>🗑️</span> Temizle
+        </button>
     </div>
 
     <script>
+        let stream = null;
+        let cameraActive = false;
         let objectCount = 0;
         let activeObjects = 0;
-        let scene = null;
-        let cameraInitialized = false;
 
-        // Sayfa yüklendiğinde
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                initializeAR();
-            }, 2000);
-        });
+        const video = document.getElementById('video');
+        const videoContainer = document.getElementById('videoContainer');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const placeholder = document.getElementById('placeholder');
+        const status = document.getElementById('status');
+        const counter = document.getElementById('counter');
 
-        function initializeAR() {
-            // A-Frame sahnesini al
-            scene = document.querySelector('a-scene');
-            
-            // Sahne yüklendiğinde
-            scene.addEventListener('loaded', () => {
-                document.getElementById('loadingScreen').style.display = 'none';
-                checkCameraAccess();
-            });
-
-            // Kamera başlatma hatası
-            scene.addEventListener('camera-error', () => {
-                showCameraError();
-            });
-
-            // AR.js hata yönetimi
-            window.addEventListener('arjs-video-loaded', () => {
-                cameraInitialized = true;
-                console.log('Kamera başarıyla yüklendi');
-            });
-
-            window.addEventListener('arjs-error', (error) => {
-                console.error('AR.js Hatası:', error);
-                showCameraError();
-            });
-        }
-
-        function checkCameraAccess() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showCameraError('Tarayıcınız kamera desteği sunmuyor!');
-                return;
+        async function toggleCamera() {
+            if (!cameraActive) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    });
+                    
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    cameraActive = true;
+                    
+                    cameraBtn.innerHTML = '<span>📷</span> Kamerayı Kapat';
+                    status.textContent = 'Kamera: Açık';
+                    
+                    // Butonları aktif et
+                    document.querySelectorAll('.btn-cube, .btn-sphere, .btn-pyramid, .btn-ring').forEach(btn => {
+                        btn.disabled = false;
+                    });
+                    
+                } catch (err) {
+                    console.error('Kamera hatası:', err);
+                    alert('Kamera başlatılamadı: ' + err.message);
+                }
+            } else {
+                stopCamera();
             }
-
-            // Kamera iznini kontrol et
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(() => {
-                    console.log('Kamera erişimi başarılı');
-                })
-                .catch((error) => {
-                    console.error('Kamera erişim hatası:', error);
-                    showCameraError('Kamera erişimi reddedildi. Lütfen tarayıcı ayarlarından kamera izni verin.');
-                });
         }
 
-        function showCameraError(message = 'Kamera başlatılamadı. Lütfen tarayıcınızın kamera izinlerini kontrol edin.') {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'camera-error';
-            errorDiv.innerHTML = `
-                <h3>⚠️ Kamera Hatası</h3>
-                <p>${message}</p>
-                <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
-                    Not: Bu uygulama HTTPS bağlantısı gerektirir. 
-                    Localhost üzerinde çalışıyorsanız normalde çalışmalıdır.
-                </p>
-                <button onclick="location.reload()">Tekrar Dene</button>
-            `;
-            document.body.appendChild(errorDiv);
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            video.style.display = 'none';
+            placeholder.style.display = 'block';
+            cameraActive = false;
+            
+            cameraBtn.innerHTML = '<span>📷</span> Kamerayı Aç';
+            status.textContent = 'Kamera: Kapalı';
+            
+            // Butonları devre dışı bırak
+            document.querySelectorAll('.btn-cube, .btn-sphere, .btn-pyramid, .btn-ring').forEach(btn => {
+                btn.disabled = true;
+            });
         }
 
         function spawnObject(type) {
-            if (!cameraInitialized) {
-                alert('Lütfen kameranın yüklenmesini bekleyin!');
+            if (!cameraActive) {
+                alert('Önce kamerayı açın!');
                 return;
             }
 
-            const container = document.getElementById('objectsContainer');
-            const objectId = `object-${objectCount++}`;
+            const object = document.createElement('div');
+            object.className = `ar-object ${type}`;
+            object.id = `object-${objectCount++}`;
             
-            // Rastgele renk ve pozisyon
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6ab04c', '#c7ecee'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            // Rastgele pozisyon
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            object.style.left = x + 'px';
+            object.style.top = y + 'px';
             
-            const posX = (Math.random() - 0.5) * 3;
-            const posY = Math.random() * 1.5 + 0.5;
-            const posZ = -2 - Math.random() * 1;
-            
-            let objectElement = null;
-            
-            switch(type) {
-                case 'cube':
-                    objectElement = document.createElement('a-box');
-                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
-                    objectElement.setAttribute('scale', '0.4 0.4 0.4');
-                    objectElement.setAttribute('color', randomColor);
-                    objectElement.setAttribute('animation', 'property: rotation; to: 360 360 360; loop: true; dur: 8000');
-                    break;
-                    
-                case 'sphere':
-                    objectElement = document.createElement('a-sphere');
-                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
-                    objectElement.setAttribute('radius', '0.3');
-                    objectElement.setAttribute('color', randomColor);
-                    objectElement.setAttribute('animation', 'property: position; to: ${posX} ${posY + 0.5} ${posZ}; dir: alternate; loop: true; dur: 1500');
-                    break;
-                    
-                case 'pyramid':
-                    objectElement = document.createElement('a-cone');
-                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
-                    objectElement.setAttribute('radius-bottom', '0.3');
-                    objectElement.setAttribute('radius-top', '0');
-                    objectElement.setAttribute('height', '0.6');
-                    objectElement.setAttribute('color', randomColor);
-                    objectElement.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000');
-                    break;
-                    
-                case 'ring':
-                    objectElement = document.createElement('a-torus');
-                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
-                    objectElement.setAttribute('radius', '0.3');
-                    objectElement.setAttribute('radius-tubular', '0.08');
-                    objectElement.setAttribute('color', randomColor);
-                    objectElement.setAttribute('animation', 'property: rotation; to: 360 0 360; loop: true; dur: 6000');
-                    break;
+            // Objeye özel yapı
+            if (type === 'cube') {
+                object.innerHTML = `
+                    <div class="cube-face front"></div>
+                    <div class="cube-face back"></div>
+                    <div class="cube-face right"></div>
+                    <div class="cube-face left"></div>
+                    <div class="cube-face top"></div>
+                    <div class="cube-face bottom"></div>
+                `;
             }
             
-            if (objectElement) {
-                objectElement.setAttribute('id', objectId);
-                
-                // Görünme animasyonu
-                objectElement.setAttribute('animation__appear', 'property: scale; from: 0 0 0; to: 1 1 1; dur: 500; easing: easeOutElastic');
-                
-                container.appendChild(objectElement);
-                activeObjects++;
-                updateObjectCounter();
-                
-                // 10 saniye sonra kaldır
-                setTimeout(() => {
-                    removeObject(objectId);
-                }, 10000);
-            }
+            videoContainer.appendChild(object);
+            activeObjects++;
+            updateCounter();
+            
+            // 10 saniye sonra kaldır
+            setTimeout(() => {
+                removeObject(object.id);
+            }, 10000);
         }
 
         function removeObject(objectId) {
             const obj = document.getElementById(objectId);
             if (obj) {
-                obj.setAttribute('animation__disappear', 'property: scale; to: 0 0 0; dur: 300; easing: easeInQuad');
+                obj.style.transition = 'all 0.5s ease';
+                obj.style.opacity = '0';
+                obj.style.transform = 'scale(0)';
+                
                 setTimeout(() => {
                     obj.remove();
                     activeObjects--;
-                    updateObjectCounter();
-                }, 300);
+                    updateCounter();
+                }, 500);
             }
         }
 
         function clearAllObjects() {
-            const container = document.getElementById('objectsContainer');
-            const objects = container.querySelectorAll('[id^="object-"]');
-            
+            const objects = document.querySelectorAll('.ar-object');
             objects.forEach(obj => {
-                obj.setAttribute('animation__disappear', 'property: scale; to: 0 0 0; dur: 200; easing: easeInQuad');
+                obj.style.transition = 'all 0.3s ease';
+                obj.style.opacity = '0';
+                obj.style.transform = 'scale(0)';
+                
                 setTimeout(() => {
                     obj.remove();
-                }, 200);
+                }, 300);
             });
             
             setTimeout(() => {
                 activeObjects = 0;
-                updateObjectCounter();
+                updateCounter();
             }, 300);
         }
 
-        function updateObjectCounter() {
-            document.getElementById('objectCounter').textContent = `Objeler: ${activeObjects}`;
+        function updateCounter() {
+            counter.textContent = `Objeler: ${activeObjects}`;
         }
 
         // Klavye kontrolleri
         document.addEventListener('keydown', (e) => {
+            if (!cameraActive) return;
+            
             switch(e.key) {
                 case '1':
                     spawnObject('cube');
@@ -439,14 +471,10 @@
             }
         });
 
-        // Dokunmatik cihazlar için titreşim
-        if ('vibrate' in navigator) {
-            document.querySelectorAll('.ar-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    navigator.vibrate(30);
-                });
-            });
-        }
+        // Sayfa kapatıldığında kamerayı durdur
+        window.addEventListener('beforeunload', () => {
+            stopCamera();
+        });
     </script>
 </body>
 </html>

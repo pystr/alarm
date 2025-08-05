@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web AR Görsel Gösterici</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/supermedium/superframe@master/components/environment/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
     <style>
         * {
             margin: 0;
@@ -19,24 +19,32 @@
             background: #000;
         }
 
-        .ar-controls {
+        .ar-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .controls-panel {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            display: flex;
-            gap: 15px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(0, 0, 0, 0.8);
             padding: 20px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90%;
         }
 
         .ar-btn {
-            padding: 15px 25px;
-            border: none;
+            padding: 15px 20px;
+            border: 2px solid;
             border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
@@ -44,357 +52,369 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ar-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .ar-btn:active::before {
-            width: 300px;
-            height: 300px;
+            min-width: 120px;
+            justify-content: center;
         }
 
         .ar-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .btn-cube {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+        .btn-cube { border-color: #667eea; }
+        .btn-sphere { border-color: #f093fb; }
+        .btn-pyramid { border-color: #4facfe; }
+        .btn-ring { border-color: #fa709a; }
+        .btn-clear { border-color: #30cfd0; }
 
-        .btn-sphere {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .btn-pyramid {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .btn-ring {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .btn-clear {
-            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-        }
-
-        .info-panel {
+        .info-overlay {
             position: fixed;
-            top: 30px;
-            left: 30px;
-            background: rgba(255, 255, 255, 0.95);
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
             z-index: 1000;
-            max-width: 300px;
+            backdrop-filter: blur(10px);
         }
 
-        .info-panel h2 {
-            color: #333;
+        .info-overlay h2 {
             margin-bottom: 10px;
             font-size: 1.3rem;
         }
 
-        .info-panel p {
-            color: #666;
+        .info-overlay p {
             font-size: 0.9rem;
+            opacity: 0.9;
             line-height: 1.5;
         }
 
-        .camera-permission {
+        .camera-error {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 40px;
+            background: rgba(220, 53, 69, 0.95);
+            color: white;
+            padding: 30px;
             border-radius: 20px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             z-index: 2000;
-            display: none;
+            max-width: 400px;
         }
 
-        .camera-permission h3 {
-            color: #333;
-            margin-bottom: 20px;
+        .camera-error h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
         }
 
-        .camera-permission button {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .camera-error button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: white;
+            color: #dc3545;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .camera-permission button:hover {
+        .camera-error button:hover {
             transform: scale(1.05);
         }
 
-        .loading {
+        .loading-screen {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: white;
-            font-size: 1.2rem;
-            z-index: 1500;
+            z-index: 3000;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .object-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            z-index: 1000;
         }
 
         @media (max-width: 768px) {
-            .ar-controls {
-                bottom: 20px;
+            .controls-panel {
+                bottom: 10px;
                 padding: 15px;
-                flex-wrap: wrap;
-                width: 90%;
+                gap: 10px;
             }
-
+            
             .ar-btn {
-                padding: 12px 20px;
+                padding: 12px 15px;
                 font-size: 0.9rem;
+                min-width: 100px;
             }
-
-            .info-panel {
-                top: 20px;
-                left: 20px;
-                right: 20px;
-                max-width: none;
+            
+            .info-overlay {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="loading" id="loading">Yükleniyor...</div>
-    
-    <div class="camera-permission" id="cameraPermission">
-        <h3>📷 Kamera İzni Gerekli</h3>
-        <p>AR deneyimi için kamera erişimine ihtiyacımız var.</p>
-        <button onclick="requestCameraAccess()">Kamerayı Aç</button>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <p>AR Sistemi Yükleniyor...</p>
     </div>
 
-    <div class="info-panel">
-        <h2>🎮 AR Denetim Paneli</h2>
-        <p>Aşağıdaki butonlara basarak farklı 3D objeleri kameranızın önünde oluşturun!</p>
-    </div>
+    <div class="ar-container">
+        <div class="info-overlay">
+            <h2>🎮 AR Deneyimi</h2>
+            <p>Butonlara tıklayarak 3D objeleri kameranızda görünür hale getirin! Objeler 10 saniye sonra otomatik kaybolacak.</p>
+        </div>
 
-    <div class="ar-controls">
-        <button class="ar-btn btn-cube" onclick="spawnObject('cube')">
-            <span>📦</span> Küp
-        </button>
-        <button class="ar-btn btn-sphere" onclick="spawnObject('sphere')">
-            <span>🌍</span> Küre
-        </button>
-        <button class="ar-btn btn-pyramid" onclick="spawnObject('pyramid')">
-            <span>🔺</span> Piramit
-        </button>
-        <button class="ar-btn btn-ring" onclick="spawnObject('ring')">
-            <span>⭕</span> Halka
-        </button>
-        <button class="ar-btn btn-clear" onclick="clearAllObjects()">
-            <span>🗑️</span> Temizle
-        </button>
-    </div>
+        <div class="object-counter" id="objectCounter">
+            Objeler: 0
+        </div>
 
-    <a-scene 
-        embedded 
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-        vr-mode-ui="enabled: false"
-        renderer="logarithmicDepthBuffer: true;">
-        
-        <a-entity camera></a-entity>
-        
-        <a-entity id="objects-container"></a-entity>
-    </a-scene>
+        <div class="controls-panel">
+            <button class="ar-btn btn-cube" onclick="spawnObject('cube')">
+                <span>📦</span> Küp
+            </button>
+            <button class="ar-btn btn-sphere" onclick="spawnObject('sphere')">
+                <span>🌍</span> Küre
+            </button>
+            <button class="ar-btn btn-pyramid" onclick="spawnObject('pyramid')">
+                <span>🔺</span> Piramit
+            </button>
+            <button class="ar-btn btn-ring" onclick="spawnObject('ring')">
+                <span>⭕</span> Halka
+            </button>
+            <button class="ar-btn btn-clear" onclick="clearAllObjects()">
+                <span>🗑️</span> Temizle
+            </button>
+        </div>
+
+        <a-scene 
+            embedded
+            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+            vr-mode-ui="enabled: false"
+            renderer="logarithmicDepthBuffer: true;"
+            loading-screen="dotsColor: #667eea; backgroundColor: #000">
+            
+            <a-entity camera></a-entity>
+            
+            <a-entity id="objectsContainer"></a-entity>
+        </a-scene>
+    </div>
 
     <script>
         let objectCount = 0;
-        let cameraAccessGranted = false;
+        let activeObjects = 0;
+        let scene = null;
+        let cameraInitialized = false;
 
         // Sayfa yüklendiğinde
         window.addEventListener('load', () => {
             setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                checkCameraSupport();
-            }, 1000);
+                initializeAR();
+            }, 2000);
         });
 
-        function checkCameraSupport() {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                document.getElementById('cameraPermission').style.display = 'block';
-            } else {
-                alert('Tarayıcınız kamera desteği sunmuyor!');
-            }
-        }
-
-        function requestCameraAccess() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(() => {
-                    cameraAccessGranted = true;
-                    document.getElementById('cameraPermission').style.display = 'none';
-                    initializeAR();
-                })
-                .catch(err => {
-                    console.error('Kamera erişimi reddedildi:', err);
-                    alert('Kamera erişimi reddedildi. Lütfen tarayıcı ayarlarınızı kontrol edin.');
-                });
-        }
-
         function initializeAR() {
-            // AR.js otomatik olarak başlayacak
-            console.log('AR initialized');
+            // A-Frame sahnesini al
+            scene = document.querySelector('a-scene');
+            
+            // Sahne yüklendiğinde
+            scene.addEventListener('loaded', () => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                checkCameraAccess();
+            });
+
+            // Kamera başlatma hatası
+            scene.addEventListener('camera-error', () => {
+                showCameraError();
+            });
+
+            // AR.js hata yönetimi
+            window.addEventListener('arjs-video-loaded', () => {
+                cameraInitialized = true;
+                console.log('Kamera başarıyla yüklendi');
+            });
+
+            window.addEventListener('arjs-error', (error) => {
+                console.error('AR.js Hatası:', error);
+                showCameraError();
+            });
         }
 
-        function spawnObject(type) {
-            if (!cameraAccessGranted) {
-                alert('Önce kamera izni vermeniz gerekiyor!');
+        function checkCameraAccess() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showCameraError('Tarayıcınız kamera desteği sunmuyor!');
                 return;
             }
 
-            const container = document.getElementById('objects-container');
+            // Kamera iznini kontrol et
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(() => {
+                    console.log('Kamera erişimi başarılı');
+                })
+                .catch((error) => {
+                    console.error('Kamera erişim hatası:', error);
+                    showCameraError('Kamera erişimi reddedildi. Lütfen tarayıcı ayarlarından kamera izni verin.');
+                });
+        }
+
+        function showCameraError(message = 'Kamera başlatılamadı. Lütfen tarayıcınızın kamera izinlerini kontrol edin.') {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'camera-error';
+            errorDiv.innerHTML = `
+                <h3>⚠️ Kamera Hatası</h3>
+                <p>${message}</p>
+                <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
+                    Not: Bu uygulama HTTPS bağlantısı gerektirir. 
+                    Localhost üzerinde çalışıyorsanız normalde çalışmalıdır.
+                </p>
+                <button onclick="location.reload()">Tekrar Dene</button>
+            `;
+            document.body.appendChild(errorDiv);
+        }
+
+        function spawnObject(type) {
+            if (!cameraInitialized) {
+                alert('Lütfen kameranın yüklenmesini bekleyin!');
+                return;
+            }
+
+            const container = document.getElementById('objectsContainer');
             const objectId = `object-${objectCount++}`;
             
-            // Rastgele renk oluştur
+            // Rastgele renk ve pozisyon
             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6ab04c', '#c7ecee'];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             
-            // Rastgele pozisyon
-            const posX = (Math.random() - 0.5) * 4;
-            const posY = Math.random() * 2 + 0.5;
-            const posZ = -3 - Math.random() * 2;
+            const posX = (Math.random() - 0.5) * 3;
+            const posY = Math.random() * 1.5 + 0.5;
+            const posZ = -2 - Math.random() * 1;
             
-            let objectHTML = '';
+            let objectElement = null;
             
             switch(type) {
                 case 'cube':
-                    objectHTML = `
-                        <a-box 
-                            id="${objectId}"
-                            position="${posX} ${posY} ${posZ}"
-                            rotation="0 0 0"
-                            scale="0.5 0.5 0.5"
-                            color="${randomColor}"
-                            animation="property: rotation; to: 360 360 360; loop: true; dur: 10000"
-                            shadow>
-                            <a-animation 
-                                attribute="scale" 
-                                from="0 0 0" 
-                                to="0.5 0.5 0.5" 
-                                dur="1000"
-                                easing="easeOutElastic">
-                            </a-animation>
-                        </a-box>
-                    `;
+                    objectElement = document.createElement('a-box');
+                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
+                    objectElement.setAttribute('scale', '0.4 0.4 0.4');
+                    objectElement.setAttribute('color', randomColor);
+                    objectElement.setAttribute('animation', 'property: rotation; to: 360 360 360; loop: true; dur: 8000');
                     break;
                     
                 case 'sphere':
-                    objectHTML = `
-                        <a-sphere 
-                            id="${objectId}"
-                            position="${posX} ${posY} ${posZ}"
-                            radius="0.5"
-                            color="${randomColor}"
-                            animation="property: position; to: ${posX} ${posY + 1} ${posZ}; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"
-                            shadow>
-                            <a-animation 
-                                attribute="scale" 
-                                from="0 0 0" 
-                                to="1 1 1" 
-                                dur="1000"
-                                easing="easeOutBounce">
-                            </a-animation>
-                        </a-sphere>
-                    `;
+                    objectElement = document.createElement('a-sphere');
+                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
+                    objectElement.setAttribute('radius', '0.3');
+                    objectElement.setAttribute('color', randomColor);
+                    objectElement.setAttribute('animation', 'property: position; to: ${posX} ${posY + 0.5} ${posZ}; dir: alternate; loop: true; dur: 1500');
                     break;
                     
                 case 'pyramid':
-                    objectHTML = `
-                        <a-cone 
-                            id="${objectId}"
-                            position="${posX} ${posY} ${posZ}"
-                            radius-bottom="0.5"
-                            radius-top="0"
-                            height="1"
-                            color="${randomColor}"
-                            animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"
-                            shadow>
-                            <a-animation 
-                                attribute="scale" 
-                                from="0 0 0" 
-                                to="1 1 1" 
-                                dur="1000"
-                                easing="easeOutBack">
-                            </a-animation>
-                        </a-cone>
-                    `;
+                    objectElement = document.createElement('a-cone');
+                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
+                    objectElement.setAttribute('radius-bottom', '0.3');
+                    objectElement.setAttribute('radius-top', '0');
+                    objectElement.setAttribute('height', '0.6');
+                    objectElement.setAttribute('color', randomColor);
+                    objectElement.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000');
                     break;
                     
                 case 'ring':
-                    objectHTML = `
-                        <a-torus 
-                            id="${objectId}"
-                            position="${posX} ${posY} ${posZ}"
-                            radius="0.5"
-                            radius-tubular="0.1"
-                            color="${randomColor}"
-                            animation="property: rotation; to: 360 0 360; loop: true; dur: 8000"
-                            shadow>
-                            <a-animation 
-                                attribute="scale" 
-                                from="0 0 0" 
-                                to="1 1 1" 
-                                dur="1000"
-                                easing="easeOutElastic">
-                            </a-animation>
-                        </a-torus>
-                    `;
+                    objectElement = document.createElement('a-torus');
+                    objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
+                    objectElement.setAttribute('radius', '0.3');
+                    objectElement.setAttribute('radius-tubular', '0.08');
+                    objectElement.setAttribute('color', randomColor);
+                    objectElement.setAttribute('animation', 'property: rotation; to: 360 0 360; loop: true; dur: 6000');
                     break;
             }
             
-            container.innerHTML += objectHTML;
-            
-            // 10 saniye sonra objeyi kaldır
-            setTimeout(() => {
-                const obj = document.getElementById(objectId);
-                if (obj) {
-                    obj.setAttribute('animation', 'property: scale; to: 0 0 0; dur: 500; easing: easeInQuad');
-                    setTimeout(() => {
-                        obj.remove();
-                    }, 500);
-                }
-            }, 10000);
+            if (objectElement) {
+                objectElement.setAttribute('id', objectId);
+                
+                // Görünme animasyonu
+                objectElement.setAttribute('animation__appear', 'property: scale; from: 0 0 0; to: 1 1 1; dur: 500; easing: easeOutElastic');
+                
+                container.appendChild(objectElement);
+                activeObjects++;
+                updateObjectCounter();
+                
+                // 10 saniye sonra kaldır
+                setTimeout(() => {
+                    removeObject(objectId);
+                }, 10000);
+            }
+        }
+
+        function removeObject(objectId) {
+            const obj = document.getElementById(objectId);
+            if (obj) {
+                obj.setAttribute('animation__disappear', 'property: scale; to: 0 0 0; dur: 300; easing: easeInQuad');
+                setTimeout(() => {
+                    obj.remove();
+                    activeObjects--;
+                    updateObjectCounter();
+                }, 300);
+            }
         }
 
         function clearAllObjects() {
-            const container = document.getElementById('objects-container');
+            const container = document.getElementById('objectsContainer');
             const objects = container.querySelectorAll('[id^="object-"]');
             
             objects.forEach(obj => {
-                obj.setAttribute('animation', 'property: scale; to: 0 0 0; dur: 300; easing: easeInQuad');
+                obj.setAttribute('animation__disappear', 'property: scale; to: 0 0 0; dur: 200; easing: easeInQuad');
                 setTimeout(() => {
                     obj.remove();
-                }, 300);
+                }, 200);
             });
+            
+            setTimeout(() => {
+                activeObjects = 0;
+                updateObjectCounter();
+            }, 300);
+        }
+
+        function updateObjectCounter() {
+            document.getElementById('objectCounter').textContent = `Objeler: ${activeObjects}`;
         }
 
         // Klavye kontrolleri
@@ -419,11 +439,11 @@
             }
         });
 
-        // Dokunmatik cihazlar için titreşim desteği
+        // Dokunmatik cihazlar için titreşim
         if ('vibrate' in navigator) {
             document.querySelectorAll('.ar-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    navigator.vibrate(50);
+                    navigator.vibrate(30);
                 });
             });
         }

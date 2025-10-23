@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dokunmatik WebAR - 3D Obje Yerleştirme</title>
+    <title>Direkt Kameralı WebAR</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
@@ -15,83 +15,56 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000;
             color: white;
             min-height: 100vh;
             overflow: hidden;
         }
         
-        .container {
-            position: relative;
-            z-index: 10;
-            padding: 20px;
-            text-align: center;
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
         }
         
-        header {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 20px;
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #4CC9F0;
         }
         
-        .instructions {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px auto;
-            max-width: 500px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .object-selector {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .obj-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .subtitle {
             font-size: 1rem;
-            backdrop-filter: blur(10px);
-        }
-        
-        .obj-btn:hover, .obj-btn.active {
-            background: #4CC9F0;
-            border-color: #4CC9F0;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 201, 240, 0.4);
+            opacity: 0.9;
         }
         
         .controls {
-            position: fixed;
+            position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 100;
             display: flex;
-            gap: 15px;
-            background: rgba(0, 0, 0, 0.7);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.8);
             padding: 15px;
             border-radius: 25px;
             backdrop-filter: blur(10px);
+            pointer-events: auto;
         }
         
         .control-btn {
@@ -101,8 +74,9 @@
             padding: 12px 20px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
+            pointer-events: auto;
         }
         
         .control-btn:hover {
@@ -118,15 +92,59 @@
             background: #d41c6f;
         }
         
+        .object-selector {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+        
+        .obj-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            pointer-events: auto;
+        }
+        
+        .obj-btn:hover, .obj-btn.active {
+            background: #4CC9F0;
+            border-color: #4CC9F0;
+            transform: translateY(-2px);
+        }
+        
         .status {
-            position: fixed;
+            position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             padding: 10px 15px;
             border-radius: 10px;
-            font-size: 0.9rem;
-            z-index: 100;
+            font-size: 0.8rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .touch-indicator {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(76, 201, 240, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+            animation: pulse 0.5s ease-out;
+            transform: translate(-50%, -50%);
         }
         
         .loading {
@@ -135,12 +153,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
         }
         
         .hidden {
@@ -156,75 +175,34 @@
             z-index: 1;
         }
         
-        .touch-indicator {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, rgba(76, 201, 240, 0.8) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 50;
-            animation: pulse 0.5s ease-out;
-            transform: translate(-50%, -50%);
-        }
-        
-        .start-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .start-btn {
-            background: #4CC9F0;
-            border: none;
-            color: white;
-            padding: 20px 40px;
-            border-radius: 30px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            margin-top: 30px;
-            transition: all 0.3s ease;
-        }
-        
-        .start-btn:hover {
-            background: #3aa8c9;
-            transform: scale(1.1);
-        }
-        
         @keyframes pulse {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
+        
+        .obj-count {
+            position: absolute;
+            top: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body>
-    <div class="start-screen" id="startScreen">
-        <h1>👆 Dokunmatik WebAR</h1>
-        <p style="font-size: 1.2rem; margin: 20px 0;">Ekrana dokunduğunuz yere 3D objeler yerleştirin!</p>
-        <p style="margin-bottom: 30px;">Kamera erişimine izin vermeniz gerekecek</p>
-        <button class="start-btn" id="startBtn">🎮 DENEYİMİ BAŞLAT</button>
+    <div class="loading" id="loading">
+        <div>📷 Kamera başlatılıyor...</div>
+        <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">Lütfen kamera erişimine izin verin</div>
     </div>
 
-    <div class="container hidden" id="mainContainer">
-        <header>
-            <h1>👆 Dokunmatik WebAR</h1>
-            <p class="subtitle">Ekrana dokunduğunuz yere 3D objeler yerleştirin!</p>
-        </header>
-        
-        <div class="instructions">
-            <h3>🎯 Nasıl Kullanılır?</h3>
-            <p>1. Aşağıdan bir obje seçin</p>
-            <p>2. Ekrana dokunduğunuz yere obje eklenecek!</p>
+    <div class="ui-overlay">
+        <div class="header">
+            <h1>👆 Direkt Kameralı WebAR</h1>
+            <div class="subtitle">Ekrana dokunduğunuz yere 3D objeler yerleşir!</div>
         </div>
         
         <div class="object-selector">
@@ -234,15 +212,15 @@
             <button class="obj-btn" data-object="cone">🎯 Koni</button>
             <button class="obj-btn" data-object="torus">🍩 Simit</button>
         </div>
-    </div>
+        
+        <div class="obj-count" id="objCount">0 obje</div>
+        
+        <div class="status" id="status">🟢 Kamera Aktif - Ekrana Dokunun!</div>
 
-    <div class="status hidden" id="status">
-        🟢 Kamera Aktif - Ekrana Dokunun!
-    </div>
-
-    <div class="controls hidden" id="controls">
-        <button class="control-btn" id="clearAll">🗑️ Tümünü Temizle</button>
-        <button class="control-btn delete" id="deleteLast">↩️ Son Objeyi Sil</button>
+        <div class="controls">
+            <button class="control-btn" id="clearAll">🗑️ Temizle</button>
+            <button class="control-btn delete" id="deleteLast">↩️ Geri Al</button>
+        </div>
     </div>
 
     <!-- AR Sahnesi -->
@@ -252,9 +230,7 @@
         embedded 
         arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
         renderer="logarithmicDepthBuffer: true;"
-        class="hidden"
     >
-        <!-- Kamera -->
         <a-entity camera></a-entity>
     </a-scene>
 
@@ -265,19 +241,17 @@
         let isCameraActive = false;
 
         // Elementleri seç
-        const startScreen = document.getElementById('startScreen');
-        const mainContainer = document.getElementById('mainContainer');
+        const loadingElement = document.getElementById('loading');
         const arScene = document.getElementById('arScene');
-        const startBtn = document.getElementById('startBtn');
         const clearAllBtn = document.getElementById('clearAll');
         const deleteLastBtn = document.getElementById('deleteLast');
         const statusElement = document.getElementById('status');
-        const controlsElement = document.getElementById('controls');
+        const objCountElement = document.getElementById('objCount');
         const objectButtons = document.querySelectorAll('.obj-btn');
 
-        // Başlat butonu
-        startBtn.addEventListener('click', function() {
-            startARExperience();
+        // Sayfa yüklendiğinde otomatik başlat
+        window.addEventListener('load', function() {
+            startCamera();
         });
 
         // Obje seçim butonları
@@ -286,6 +260,7 @@
                 objectButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 selectedObject = this.getAttribute('data-object');
+                showTouchIndicator(50, 50);
             });
         });
 
@@ -314,8 +289,8 @@
 
         // Mobil dokunma desteği
         arScene.addEventListener('touchstart', function(event) {
-            event.preventDefault();
             if (!isCameraActive) return;
+            event.preventDefault();
             
             const touch = event.touches[0];
             const touchX = touch.clientX;
@@ -325,21 +300,15 @@
             showTouchIndicator(touchX, touchY);
         });
 
-        function startARExperience() {
-            startScreen.classList.add('hidden');
-            mainContainer.classList.remove('hidden');
-            statusElement.classList.remove('hidden');
-            controlsElement.classList.remove('hidden');
+        function startCamera() {
+            console.log('🚀 Kamera başlatılıyor...');
             
-            // AR sahnesini göster
-            arScene.classList.remove('hidden');
-            isCameraActive = true;
-            
-            console.log('🚀 WebAR deneyimi başlatıldı!');
-            
-            // Kamera hazır olduğunda
+            // 2 saniye sonra loading ekranını kaldır
             setTimeout(() => {
-                statusElement.textContent = `🟢 Kamera Aktif - Ekrana Dokunun! (0 obje)`;
+                loadingElement.classList.add('hidden');
+                isCameraActive = true;
+                statusElement.textContent = '🟢 Kamera Aktif - Ekrana Dokunun!';
+                console.log('✅ Kamera başarıyla başlatıldı!');
             }, 2000);
         }
 
@@ -347,16 +316,17 @@
             if (!isCameraActive) return;
             
             // Ekran koordinatlarını 3D koordinatlara çevir
-            const x = (screenX / window.innerWidth) * 2 - 1;
-            const y = -(screenY / window.innerHeight) * 2 + 1;
+            const normalizedX = (screenX / window.innerWidth) * 2 - 1;
+            const normalizedY = -(screenY / window.innerHeight) * 2 + 1;
             
-            const objectId = 'object-' + objectCount++;
+            // Kameranın önüne objeyi yerleştir
+            const distance = -3; // Kameradan uzaklık
+            const x = normalizedX * 2;
+            const y = normalizedY * 2;
+            const z = distance;
+            
+            const objectId = 'object-' + Date.now() + '-' + Math.random();
             let objectElement;
-            
-            // Rastgele pozisyon için küçük ofset
-            const posX = (Math.random() - 0.5) * 2;
-            const posY = (Math.random() - 0.5) * 2 + 1;
-            const posZ = (Math.random() - 0.5) * 2 - 3;
             
             // Seçilen objeye göre element oluştur
             switch(selectedObject) {
@@ -399,11 +369,11 @@
             
             // Obje özellikleri
             objectElement.setAttribute('id', objectId);
-            objectElement.setAttribute('position', `${posX} ${posY} ${posZ}`);
+            objectElement.setAttribute('position', `${x} ${y} ${z}`);
             objectElement.setAttribute('animation', `property: rotation; to: 360 360 360; loop: true; dur: ${4000 + Math.random() * 4000}`);
-            objectElement.setAttribute('animation__2', `property: position; to: ${posX} ${posY + 0.5} ${posZ}; dir: alternate; loop: true; dur: ${3000 + Math.random() * 3000}`);
+            objectElement.setAttribute('animation__2', `property: position; to: ${x} ${y + 0.3} ${z}; dir: alternate; loop: true; dur: ${2000 + Math.random() * 2000}`);
             objectElement.setAttribute('class', 'ar-object');
-            objectElement.setAttribute('shadow', 'receive: true; cast: true');
+            objectElement.setAttribute('shadow', 'cast: true');
             
             // AR sahnesine ekle
             arScene.appendChild(objectElement);
@@ -434,7 +404,6 @@
                     obj.parentNode.removeChild(obj);
                 }
             });
-            objectCount = 0;
             updateObjectCount();
         }
 
@@ -444,7 +413,6 @@
                 const lastObject = objects[objects.length - 1];
                 if (lastObject.parentNode) {
                     lastObject.parentNode.removeChild(lastObject);
-                    objectCount = Math.max(0, objectCount - 1);
                     updateObjectCount();
                 }
             }
@@ -452,17 +420,28 @@
 
         function updateObjectCount() {
             const objects = document.querySelectorAll('.ar-object');
-            statusElement.textContent = `🟢 Kamera Aktif - ${objects.length} obje - Ekrana Dokunun!`;
+            objCountElement.textContent = `${objects.length} obje`;
         }
 
         function getRandomColor() {
-            const colors = ['#4CC9F0', '#F72585', '#7209B7', '#3A0CA3', '#4361EE', '#FF9E00', '#FF5400', '#00FF88', '#FFDD00'];
+            const colors = [
+                '#4CC9F0', '#F72585', '#7209B7', '#3A0CA3', 
+                '#4361EE', '#FF9E00', '#FF5400', '#00FF88', 
+                '#FFDD00', '#FF006E', '#00F5FF', '#9B5DE5'
+            ];
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
+        // Hata yönetimi
+        window.addEventListener('error', function(e) {
+            console.error('Hata:', e.error);
+            statusElement.textContent = '🔴 Hata oluştu - Sayfayı yenileyin';
+            loadingElement.classList.add('hidden');
+        });
+
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('👆 Dokunmatik WebAR hazır! "DENEYİMİ BAŞLAT" butonuna tıklayın.');
+            console.log('✅ Direkt Kameralı WebAR hazır!');
         });
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video AR - Hiro Marker</title>
+    <title>Dikey Video AR - Şeffaf</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
@@ -109,17 +109,30 @@
         .hidden {
             display: none;
         }
+
+        /* Şeffaf video için özel stiller */
+        .transparent-video {
+            mix-blend-mode: screen;
+            opacity: 0.9;
+        }
+
+        .video-frame {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="loading" id="loading">
         <div style="font-size: 1.2rem; margin-bottom: 10px;">📷 AR Yükleniyor...</div>
-        <div style="font-size: 0.9rem;">Lütfen bekleyin</div>
+        <div style="font-size: 0.9rem;">Dikey video hazırlanıyor</div>
     </div>
 
     <div class="ui-container">
         <div class="header">
-            <h1>🎬 Video AR Deneyimi</h1>
+            <h1>📱 Dikey Video AR</h1>
             <div>Marker'ı kameraya gösterin</div>
         </div>
         
@@ -128,10 +141,11 @@
         <div class="controls">
             <button class="control-btn" onclick="changeVideoSize()">📏 Boyut</button>
             <button class="control-btn" onclick="toggleVideo()">⏸️ Duraklat</button>
+            <button class="control-btn" onclick="changeTransparency()">🌫️ Şeffaflık</button>
         </div>
 
         <div class="video-info">
-            Hiro marker'ını kameraya gösterin ve videoyu izleyin
+            📱 Dikey video • 🎬 Şeffaf arka plan • ✨ Gerçek zamanlı
         </div>
     </div>
 
@@ -139,58 +153,105 @@
         embedded 
         arjs="sourceType: webcam; debugUIEnabled: false;"
         vr-mode-ui="enabled: false"
-        renderer="logarithmicDepthBuffer: true;"
+        renderer="alpha: true; colorManagement: true;"
     >
-        <!-- Basit video asset -->
+        <!-- Video asset - Dikey video için -->
         <a-assets>
             <video 
-                id="video1" 
+                id="verticalVideo" 
                 autoplay 
                 loop 
                 crossorigin="anonymous"
                 webkit-playsinline
                 playsinline
+                preload="auto"
             >
-                <source src="videom.mp4" type="video/mp4">
+                <!-- Dikey video örneği -->
+                <source src="https://assets.codepen.io/3364143/20230515_01.mp4" type="video/mp4">
             </video>
         </a-assets>
 
         <!-- Marker -->
         <a-marker preset="hiro" id="marker">
-            <!-- Video entity -->
-            <a-video
-                id="arVideo"
-                src="#video1"
-                width="1.6"
-                height="0.9"
-                position="0 0.5 0"
-                rotation="0 0 0"
-                visible="false"
-            ></a-video>
+            <!-- Dikey video konteyneri -->
+            <a-entity id="videoContainer" position="0 0.8 0">
+                <!-- Şeffaf arka plan çerçevesi -->
+                <a-plane
+                    class="video-frame"
+                    id="videoBackground"
+                    width="1.2"
+                    height="2.0"
+                    position="0 0 -0.01"
+                    color="rgba(255,255,255,0.1)"
+                    transparent="true"
+                    opacity="0.3"
+                    shader="flat"
+                ></a-plane>
+
+                <!-- Dikey video (9:16 oran) -->
+                <a-video
+                    id="arVideo"
+                    src="#verticalVideo"
+                    width="1.0"    /* Daha dar */
+                    height="1.78"  /* Daha uzun - 9:16 oranı */
+                    position="0 0 0"
+                    rotation="0 0 0"
+                    transparent="true"
+                    opacity="0.85"
+                    visible="false"
+                    class="transparent-video"
+                ></a-video>
+
+                <!-- Parlaklık efekti -->
+                <a-light
+                    type="point"
+                    position="0 0 1"
+                    color="#FFFFFF"
+                    intensity="0.3"
+                    visible="false"
+                    id="videoLight"
+                ></a-light>
+            </a-entity>
         </a-marker>
 
+        <!-- Kamera -->
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
         // Değişkenler
         let currentSize = 1;
+        let currentTransparency = 0.85;
         let isVideoPlaying = false;
         let videoElement = null;
         let arVideo = null;
+        let videoBackground = null;
+        let videoLight = null;
+
+        // Boyut seçenekleri (dikey için optimize)
+        const sizePresets = [
+            { width: 0.8, height: 1.42, label: 'Küçük' },    // 9:16 oran
+            { width: 1.0, height: 1.78, label: 'Normal' },   // 9:16 oran
+            { width: 1.2, height: 2.13, label: 'Büyük' }     // 9:16 oran
+        ];
+
+        // Şeffaflık seçenekleri
+        const transparencyPresets = [0.7, 0.85, 0.95];
 
         // Sayfa yüklendiğinde
         window.addEventListener('load', function() {
             // Elementleri seç
-            videoElement = document.getElementById('video1');
+            videoElement = document.getElementById('verticalVideo');
             arVideo = document.getElementById('arVideo');
+            videoBackground = document.getElementById('videoBackground');
+            videoLight = document.getElementById('videoLight');
             const marker = document.getElementById('marker');
             const loading = document.getElementById('loading');
             const status = document.getElementById('status');
 
             // Video olaylarını dinle
             videoElement.addEventListener('loadeddata', function() {
-                console.log('Video yüklendi');
+                console.log('Dikey video yüklendi');
                 videoElement.volume = 0; // Sessiz
             });
 
@@ -201,12 +262,14 @@
 
             // Marker olayları
             marker.addEventListener('markerFound', function() {
-                console.log('Marker bulundu');
-                status.textContent = '🟢 Video Oynuyor';
+                console.log('Marker bulundu - Dikey video aktif');
+                status.textContent = '🟢 Dikey Video Aktif';
                 status.style.background = 'rgba(34, 197, 94, 0.8)';
                 
                 // Videoyu göster ve oynat
                 arVideo.setAttribute('visible', 'true');
+                videoLight.setAttribute('visible', 'true');
+                
                 videoElement.play().catch(e => {
                     console.log('Oynatma hatası:', e);
                 });
@@ -220,6 +283,7 @@
                 
                 // Videoyu gizle ve duraklat
                 arVideo.setAttribute('visible', 'false');
+                videoLight.setAttribute('visible', 'false');
                 videoElement.pause();
                 isVideoPlaying = false;
             });
@@ -227,21 +291,25 @@
             // Loading ekranını kaldır
             setTimeout(function() {
                 loading.classList.add('hidden');
+                // Videonun şeffaflığını ayarla
+                updateTransparency();
             }, 3000);
         });
 
         // Boyut değiştirme fonksiyonu
         function changeVideoSize() {
-            const sizes = [0.8, 1, 1.3];
-            const sizeLabels = ['Küçük', 'Normal', 'Büyük'];
+            currentSize = (currentSize + 1) % sizePresets.length;
+            const newSize = sizePresets[currentSize];
             
-            currentSize = (currentSize + 1) % sizes.length;
-            const newSize = sizes[currentSize];
+            // Video boyutunu güncelle
+            arVideo.setAttribute('width', newSize.width);
+            arVideo.setAttribute('height', newSize.height);
             
-            arVideo.setAttribute('width', 1.6 * newSize);
-            arVideo.setAttribute('height', 0.9 * newSize);
+            // Arka plan boyutunu güncelle (videodan biraz büyük)
+            videoBackground.setAttribute('width', newSize.width + 0.2);
+            videoBackground.setAttribute('height', newSize.height + 0.2);
             
-            console.log('Video boyutu:', sizeLabels[currentSize]);
+            console.log('Video boyutu:', newSize.label);
         }
 
         // Video duraklatma/oynatma
@@ -249,18 +317,51 @@
             if (isVideoPlaying) {
                 videoElement.pause();
                 document.querySelector('.control-btn:nth-child(2)').textContent = '▶️ Oynat';
+                videoLight.setAttribute('intensity', '0.1');
                 isVideoPlaying = false;
             } else {
                 videoElement.play();
                 document.querySelector('.control-btn:nth-child(2)').textContent = '⏸️ Duraklat';
+                videoLight.setAttribute('intensity', '0.3');
                 isVideoPlaying = true;
             }
+        }
+
+        // Şeffaflık değiştirme
+        function changeTransparency() {
+            currentTransparency = (currentTransparency + 1) % transparencyPresets.length;
+            const newTransparency = transparencyPresets[currentTransparency];
+            
+            updateTransparency(newTransparency);
+            
+            const labels = ['Düşük', 'Orta', 'Yüksek'];
+            console.log('Şeffaflık:', labels[currentTransparency]);
+        }
+
+        // Şeffaflığı güncelle
+        function updateTransparency(value = currentTransparency) {
+            arVideo.setAttribute('opacity', value);
+            
+            // Arka plan şeffaflığını da ayarla
+            const bgOpacity = value * 0.4; // Daha düşük şeffaflık
+            videoBackground.setAttribute('opacity', bgOpacity);
+            
+            // Işık şiddetini ayarla
+            videoLight.setAttribute('intensity', value * 0.4);
         }
 
         // Hata yönetimi
         window.addEventListener('error', function(e) {
             console.error('Global hata:', e.error);
             document.getElementById('status').textContent = '❌ Hata oluştu';
+        });
+
+        // Sayfa kapatılırken videoyu temizle
+        window.addEventListener('beforeunload', function() {
+            if (videoElement) {
+                videoElement.pause();
+                videoElement.src = '';
+            }
         });
     </script>
 </body>

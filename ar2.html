@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Kod ile WebAR</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .ui-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+        }
+        
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #4CC9F0;
+        }
+        
+        .status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 15px;
+            pointer-events: auto;
+        }
+        
+        .control-btn {
+            background: #4CC9F0;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        
+        .qr-info {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 300px;
+            font-size: 0.8rem;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        #qrCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            opacity: 0;
+        }
+
+        .qr-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px solid #4CC9F0;
+            border-radius: 15px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .qr-overlay::before {
+            content: 'QR KODU BURAYA GETİRİN';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #4CC9F0;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div style="font-size: 1.2rem; margin-bottom: 10px;">📷 QR AR Yükleniyor...</div>
+        <div style="font-size: 0.9rem;">QR kod okutma hazırlanıyor</div>
+    </div>
+
+    <div class="ui-container">
+        <div class="header">
+            <h1>📱 QR Kod ile AR Deneyimi</h1>
+            <div>QR kodu kameraya okutun</div>
+        </div>
+        
+        <div class="status" id="status">🔴 QR Kod Bekleniyor</div>
+
+        <div class="controls">
+            <button class="control-btn" onclick="changeObject()">🔄 Obje Değiştir</button>
+            <button class="control-btn" onclick="toggleVisibility()">👁️ Görünürlük</button>
+        </div>
+
+        <div class="qr-info">
+            📱 QR kodu kameraya okutun • 🎬 3D obje belirecek
+        </div>
+    </div>
+
+    <!-- QR kod tespiti için canvas -->
+    <canvas id="qrCanvas"></canvas>
+    <div class="qr-overlay"></div>
+
+    <!-- A-Frame Sahnesi -->
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        renderer="alpha: true;"
+    >
+        <a-assets>
+            <!-- Basit 3D objeler için asset'ler -->
+        </a-assets>
+
+        <!-- QR kod ile tetiklenen 3D objeler -->
+        <a-entity id="arObjects" visible="false">
+            <!-- Küp -->
+            <a-box 
+                id="cubeObject"
+                position="0 0.5 0"
+                width="0.5"
+                height="0.5"
+                depth="0.5"
+                color="#4CC9F0"
+                animation="property: rotation; to: 360 360 360; loop: true; dur: 8000;"
+                visible="true"
+            ></a-box>
+
+            <!-- Küre -->
+            <a-sphere 
+                id="sphereObject"
+                position="0 0.5 0"
+                radius="0.3"
+                color="#F72585"
+                animation="property: rotation; to: 360 0 0; loop: true; dur: 5000;"
+                visible="false"
+            ></a-sphere>
+
+            <!-- Silindir -->
+            <a-cylinder 
+                id="cylinderObject"
+                position="0 0.5 0"
+                radius="0.2"
+                height="0.6"
+                color="#7209B7"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 6000;"
+                visible="false"
+            ></a-cylinder>
+        </a-entity>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        // Değişkenler
+        let currentObject = 'cube';
+        let isQRDetected = false;
+        let videoStream = null;
+        let canvasContext = null;
+        let animationFrame = null;
+
+        // QR kod değerleri ve karşılık gelen işlemler
+        const qrActions = {
+            'AR_CUBE': 'cube',
+            'AR_SPHERE': 'sphere', 
+            'AR_CYLINDER': 'cylinder',
+            'HELLO_AR': 'cube',
+            'TEST_123': 'sphere'
+        };
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', function() {
+            initializeQRScanner();
+        });
+
+        // QR Scanner başlatma
+        function initializeQRScanner() {
+            const video = document.querySelector('a-scene').components['arjs']._arSource.domElement;
+            const canvas = document.getElementById('qrCanvas');
+            canvasContext = canvas.getContext('2d');
+            
+            // Canvas boyutlarını ayarla
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // QR tarama döngüsü
+            function scanQR() {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    // Video'dan canvas'a çiz
+                    canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    // Görüntüyü al ve QR tara
+                    const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code) {
+                        // QR kodu bulundu
+                        handleQRDetected(code.data);
+                    } else {
+                        // QR kodu bulunamadı
+                        if (isQRDetected) {
+                            handleQRLost();
+                        }
+                    }
+                }
+                
+                animationFrame = requestAnimationFrame(scanQR);
+            }
+
+            // Video hazır olduğunda taramayı başlat
+            video.addEventListener('loadeddata', function() {
+                setTimeout(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                    scanQR();
+                }, 2000);
+            });
+        }
+
+        // QR kodu bulunduğunda
+        function handleQRDetected(qrData) {
+            if (!isQRDetected) {
+                isQRDetected = true;
+                document.getElementById('status').textContent = '🟢 QR Kod Okundu!';
+                document.getElementById('status').style.background = 'rgba(34, 197, 94, 0.8)';
+                
+                // AR objelerini göster
+                document.getElementById('arObjects').setAttribute('visible', 'true');
+                
+                // QR data'ya göre obje seç
+                const objectType = qrActions[qrData] || 'cube';
+                changeObjectTo(objectType);
+                
+                console.log('QR Kod Okundu:', qrData, '->', objectType);
+            }
+        }
+
+        // QR kodu kaybolduğunda
+        function handleQRLost() {
+            isQRDetected = false;
+            document.getElementById('status').textContent = '🔴 QR Kod Bekleniyor';
+            document.getElementById('status').style.background = 'rgba(0, 0, 0, 0.8)';
+            
+            // AR objelerini gizle (isteğe bağlı)
+            // document.getElementById('arObjects').setAttribute('visible', 'false');
+        }
+
+        // Obje değiştirme
+        function changeObject() {
+            const objects = ['cube', 'sphere', 'cylinder'];
+            const currentIndex = objects.indexOf(currentObject);
+            const nextIndex = (currentIndex + 1) % objects.length;
+            currentObject = objects[nextIndex];
+            
+            changeObjectTo(currentObject);
+        }
+
+        // Belirli bir objeye geçiş
+        function changeObjectTo(objectType) {
+            currentObject = objectType;
+            
+            // Tüm objeleri gizle
+            document.getElementById('cubeObject').setAttribute('visible', 'false');
+            document.getElementById('sphereObject').setAttribute('visible', 'false');
+            document.getElementById('cylinderObject').setAttribute('visible', 'false');
+            
+            // Seçilen objeyi göster
+            document.getElementById(objectType + 'Object').setAttribute('visible', 'true');
+            
+            console.log('Obje değiştirildi:', objectType);
+        }
+
+        // Görünürlük değiştirme
+        function toggleVisibility() {
+            const arObjects = document.getElementById('arObjects');
+            const isVisible = arObjects.getAttribute('visible');
+            arObjects.setAttribute('visible', !isVisible);
+            
+            document.querySelector('.control-btn:nth-child(2)').textContent = 
+                isVisible ? '👁️ Göster' : '👁️ Gizle';
+        }
+
+        // Test QR kodları oluşturmak için (konsoldan kullanabilirsiniz)
+        window.testQR = function(qrText) {
+            handleQRDetected(qrText);
+        };
+
+        // Sayfa kapatılırken temizlik
+        window.addEventListener('beforeunload', function() {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Hata yönetimi
+        window.addEventListener('error', function(e) {
+            console.error('Hata:', e.error);
+            document.getElementById('status').textContent = '❌ Hata oluştu';
+        });
+    </script>
+</body>
+</html>

@@ -1,448 +1,56 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Direkt Kameralı WebAR</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000;
-            color: white;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-        
-        .ui-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        .header {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            backdrop-filter: blur(10px);
-        }
-        
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            color: #4CC9F0;
-        }
-        
-        .subtitle {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-        
-        .controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-        
-        .control-btn {
-            background: #4CC9F0;
-            border: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            pointer-events: auto;
-        }
-        
-        .control-btn:hover {
-            background: #3aa8c9;
-            transform: scale(1.05);
-        }
-        
-        .control-btn.delete {
-            background: #F72585;
-        }
-        
-        .control-btn.delete:hover {
-            background: #d41c6f;
-        }
-        
-        .object-selector {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-        
-        .obj-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            pointer-events: auto;
-        }
-        
-        .obj-btn:hover, .obj-btn.active {
-            background: #4CC9F0;
-            border-color: #4CC9F0;
-            transform: translateY(-2px);
-        }
-        
-        .status {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            backdrop-filter: blur(10px);
-        }
-        
-        .touch-indicator {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, rgba(76, 201, 240, 0.8) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 50;
-            animation: pulse 0.5s ease-out;
-            transform: translate(-50%, -50%);
-        }
-        
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-size: 1.2rem;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        #arScene {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
-        }
-        
-        .obj-count {
-            position: absolute;
-            top: 180px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 8px 15px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            backdrop-filter: blur(10px);
-        }
-    </style>
-</head>
-<body>
-    <div class="loading" id="loading">
-        <div>📷 Kamera başlatılıyor...</div>
-        <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">Lütfen kamera erişimine izin verin</div>
+<html>
+  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  <!-- we import arjs version without NFT but with marker + location based support -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script>
+    window.onload = function () {
+      document
+        .querySelector(".say-hi-button")
+        .addEventListener("click", function () {
+          // here you can change also a-scene or a-entity properties, like
+          // changing your 3D model source, size, position and so on
+          // or you can just open links, trigger actions...
+          alert("Hi there!");
+        });
+    };
+  </script>
+  <style>
+    .buttons {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .say-hi-button {
+      padding: 0.25em;
+      border-radius: 4px;
+      border: none;
+      background: white;
+      color: black;
+      width: 4em;
+      height: 2em;
+    }
+  </style>
+  <body style="margin : 0px; overflow: hidden;">
+    <div class="buttons">
+      <button class="say-hi-button">SAY HI!</button>
     </div>
-
-    <div class="ui-overlay">
-        <div class="header">
-            <h1>👆 Direkt Kameralı WebAR</h1>
-            <div class="subtitle">Ekrana dokunduğunuz yere 3D objeler yerleşir!</div>
-        </div>
-        
-        <div class="object-selector">
-            <button class="obj-btn active" data-object="box">🧊 Küp</button>
-            <button class="obj-btn" data-object="sphere">🔴 Küre</button>
-            <button class="obj-btn" data-object="cylinder">📦 Silindir</button>
-            <button class="obj-btn" data-object="cone">🎯 Koni</button>
-            <button class="obj-btn" data-object="torus">🍩 Simit</button>
-        </div>
-        
-        <div class="obj-count" id="objCount">0 obje</div>
-        
-        <div class="status" id="status">🟢 Kamera Aktif - Ekrana Dokunun!</div>
-
-        <div class="controls">
-            <button class="control-btn" id="clearAll">🗑️ Temizle</button>
-            <button class="control-btn delete" id="deleteLast">↩️ Geri Al</button>
-        </div>
-    </div>
-
-    <!-- AR Sahnesi -->
-    <a-scene 
-        id="arScene"
-        vr-mode-ui="enabled: false"
-        embedded 
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-        renderer="logarithmicDepthBuffer: true;"
-    >
-        <a-entity camera></a-entity>
+    <a-scene embedded arjs>
+      <a-marker preset="hiro">
+        <a-entity
+          position="0 0 0"
+          scale="0.05 0.05 0.05"
+          gltf-model="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf"
+        ></a-entity>
+      </a-marker>
+      <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-        // Seçilen obje tipi
-        let selectedObject = 'box';
-        let objectCount = 0;
-        let isCameraActive = false;
-
-        // Elementleri seç
-        const loadingElement = document.getElementById('loading');
-        const arScene = document.getElementById('arScene');
-        const clearAllBtn = document.getElementById('clearAll');
-        const deleteLastBtn = document.getElementById('deleteLast');
-        const statusElement = document.getElementById('status');
-        const objCountElement = document.getElementById('objCount');
-        const objectButtons = document.querySelectorAll('.obj-btn');
-
-        // Sayfa yüklendiğinde otomatik başlat
-        window.addEventListener('load', function() {
-            startCamera();
-        });
-
-        // Obje seçim butonları
-        objectButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                objectButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                selectedObject = this.getAttribute('data-object');
-                showTouchIndicator(50, 50);
-            });
-        });
-
-        // Tüm objeleri temizle
-        clearAllBtn.addEventListener('click', function() {
-            clearAllObjects();
-        });
-
-        // Son objeyi sil
-        deleteLastBtn.addEventListener('click', function() {
-            deleteLastObject();
-        });
-
-        // Dokunma olayını dinle
-        arScene.addEventListener('click', function(event) {
-            if (!isCameraActive) return;
-            
-            const touchX = event.clientX || (event.touches && event.touches[0].clientX);
-            const touchY = event.clientY || (event.touches && event.touches[0].clientY);
-            
-            if (touchX && touchY) {
-                placeObjectAt(touchX, touchY);
-                showTouchIndicator(touchX, touchY);
-            }
-        });
-
-        // Mobil dokunma desteği
-        arScene.addEventListener('touchstart', function(event) {
-            if (!isCameraActive) return;
-            event.preventDefault();
-            
-            const touch = event.touches[0];
-            const touchX = touch.clientX;
-            const touchY = touch.clientY;
-            
-            placeObjectAt(touchX, touchY);
-            showTouchIndicator(touchX, touchY);
-        });
-
-        function startCamera() {
-            console.log('🚀 Kamera başlatılıyor...');
-            
-            // 2 saniye sonra loading ekranını kaldır
-            setTimeout(() => {
-                loadingElement.classList.add('hidden');
-                isCameraActive = true;
-                statusElement.textContent = '🟢 Kamera Aktif - Ekrana Dokunun!';
-                console.log('✅ Kamera başarıyla başlatıldı!');
-            }, 2000);
-        }
-
-        function placeObjectAt(screenX, screenY) {
-            if (!isCameraActive) return;
-            
-            // Ekran koordinatlarını 3D koordinatlara çevir
-            const normalizedX = (screenX / window.innerWidth) * 2 - 1;
-            const normalizedY = -(screenY / window.innerHeight) * 2 + 1;
-            
-            // Kameranın önüne objeyi yerleştir
-            const distance = -3; // Kameradan uzaklık
-            const x = normalizedX * 2;
-            const y = normalizedY * 2;
-            const z = distance;
-            
-            const objectId = 'object-' + Date.now() + '-' + Math.random();
-            let objectElement;
-            
-            // Seçilen objeye göre element oluştur
-            switch(selectedObject) {
-                case 'sphere':
-                    objectElement = document.createElement('a-sphere');
-                    objectElement.setAttribute('radius', '0.3');
-                    objectElement.setAttribute('color', getRandomColor());
-                    break;
-                    
-                case 'cylinder':
-                    objectElement = document.createElement('a-cylinder');
-                    objectElement.setAttribute('radius', '0.2');
-                    objectElement.setAttribute('height', '0.5');
-                    objectElement.setAttribute('color', getRandomColor());
-                    break;
-                    
-                case 'cone':
-                    objectElement = document.createElement('a-cone');
-                    objectElement.setAttribute('radius-bottom', '0.3');
-                    objectElement.setAttribute('radius-top', '0');
-                    objectElement.setAttribute('height', '0.5');
-                    objectElement.setAttribute('color', getRandomColor());
-                    break;
-                    
-                case 'torus':
-                    objectElement = document.createElement('a-torus');
-                    objectElement.setAttribute('radius', '0.3');
-                    objectElement.setAttribute('radius-tubular', '0.08');
-                    objectElement.setAttribute('color', getRandomColor());
-                    break;
-                    
-                default: // box
-                    objectElement = document.createElement('a-box');
-                    objectElement.setAttribute('width', '0.4');
-                    objectElement.setAttribute('height', '0.4');
-                    objectElement.setAttribute('depth', '0.4');
-                    objectElement.setAttribute('color', getRandomColor());
-                    break;
-            }
-            
-            // Obje özellikleri
-            objectElement.setAttribute('id', objectId);
-            objectElement.setAttribute('position', `${x} ${y} ${z}`);
-            objectElement.setAttribute('animation', `property: rotation; to: 360 360 360; loop: true; dur: ${4000 + Math.random() * 4000}`);
-            objectElement.setAttribute('animation__2', `property: position; to: ${x} ${y + 0.3} ${z}; dir: alternate; loop: true; dur: ${2000 + Math.random() * 2000}`);
-            objectElement.setAttribute('class', 'ar-object');
-            objectElement.setAttribute('shadow', 'cast: true');
-            
-            // AR sahnesine ekle
-            arScene.appendChild(objectElement);
-            
-            // Obje sayısını güncelle
-            updateObjectCount();
-        }
-
-        function showTouchIndicator(x, y) {
-            const indicator = document.createElement('div');
-            indicator.className = 'touch-indicator';
-            indicator.style.left = x + 'px';
-            indicator.style.top = y + 'px';
-            document.body.appendChild(indicator);
-            
-            // 0.5 saniye sonra kaldır
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.parentNode.removeChild(indicator);
-                }
-            }, 500);
-        }
-
-        function clearAllObjects() {
-            const objects = document.querySelectorAll('.ar-object');
-            objects.forEach(obj => {
-                if (obj.parentNode) {
-                    obj.parentNode.removeChild(obj);
-                }
-            });
-            updateObjectCount();
-        }
-
-        function deleteLastObject() {
-            const objects = document.querySelectorAll('.ar-object');
-            if (objects.length > 0) {
-                const lastObject = objects[objects.length - 1];
-                if (lastObject.parentNode) {
-                    lastObject.parentNode.removeChild(lastObject);
-                    updateObjectCount();
-                }
-            }
-        }
-
-        function updateObjectCount() {
-            const objects = document.querySelectorAll('.ar-object');
-            objCountElement.textContent = `${objects.length} obje`;
-        }
-
-        function getRandomColor() {
-            const colors = [
-                '#4CC9F0', '#F72585', '#7209B7', '#3A0CA3', 
-                '#4361EE', '#FF9E00', '#FF5400', '#00FF88', 
-                '#FFDD00', '#FF006E', '#00F5FF', '#9B5DE5'
-            ];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        // Hata yönetimi
-        window.addEventListener('error', function(e) {
-            console.error('Hata:', e.error);
-            statusElement.textContent = '🔴 Hata oluştu - Sayfayı yenileyin';
-            loadingElement.classList.add('hidden');
-        });
-
-        // Sayfa yüklendiğinde
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Direkt Kameralı WebAR hazır!');
-        });
-    </script>
-</body>
+  </body>
 </html>

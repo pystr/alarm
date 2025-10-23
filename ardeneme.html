@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gelişmiş Hiro Marker WebAR</title>
+    <title>Türk Bayrağı - Hiro Marker WebAR</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
@@ -45,7 +45,7 @@
         h1 {
             font-size: 1.5rem;
             margin-bottom: 5px;
-            color: #4CC9F0;
+            color: #E30A17;
         }
         
         .subtitle {
@@ -121,7 +121,7 @@
         }
         
         .control-btn {
-            background: #4CC9F0;
+            background: #E30A17;
             border: none;
             color: white;
             padding: 10px 15px;
@@ -133,72 +133,29 @@
         }
         
         .control-btn:hover {
-            background: #3aa8c9;
+            background: #c00814;
             transform: scale(1.05);
         }
         
-        .object-selector {
+        .flag-info {
             position: absolute;
             top: 100px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
             background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
+            padding: 15px;
             border-radius: 15px;
+            text-align: center;
             backdrop-filter: blur(10px);
-            pointer-events: auto;
+            max-width: 300px;
         }
         
-        .obj-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            pointer-events: auto;
-        }
-        
-        .obj-btn:hover, .obj-btn.active {
-            background: #4CC9F0;
-            border-color: #4CC9F0;
-            transform: translateY(-2px);
-        }
-        
-        .animation-controls {
-            position: absolute;
-            top: 160px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-        
-        .anim-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            pointer-events: auto;
-        }
-        
-        .anim-btn:hover, .anim-btn.active {
-            background: #F72585;
-            border-color: #F72585;
-            transform: translateY(-2px);
+        .ne-mutlu-turkum-diyene {
+            font-size: 1.1rem;
+            color: #E30A17;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -210,34 +167,27 @@
 
     <div class="ui-overlay">
         <div class="header">
-            <h1>🦖 Hiro Marker ile T-Rex AR</h1>
-            <div class="subtitle">Marker'ı kameraya gösterin ve T-Rex'i görün!</div>
+            <h1>🇹🇷 Türk Bayrağı - Hiro Marker AR</h1>
+            <div class="subtitle">Marker'ı kameraya gösterin ve Türk bayrağını görün!</div>
         </div>
         
-        <div class="object-selector">
-            <button class="obj-btn active" data-model="trex">🦖 T-Rex</button>
-            <button class="obj-btn" data-model="box">🧊 Küp</button>
-            <button class="obj-btn" data-model="sphere">🔴 Küre</button>
-        </div>
-        
-        <div class="animation-controls">
-            <button class="anim-btn" data-animation="rotate">🔄 Döndür</button>
-            <button class="anim-btn" data-animation="scale">📏 Büyüt/Küçült</button>
-            <button class="anim-btn" data-animation="move">🚀 Hareket</button>
+        <div class="flag-info">
+            <div>🎯 Marker okutunca Türk bayrağı belirecek</div>
+            <div class="ne-mutlu-turkum-diyene">Ne mutlu Türk'üm diyene!</div>
         </div>
         
         <div class="status" id="status">🔴 Marker Bekleniyor...</div>
 
         <div class="controls">
-            <button class="control-btn" id="changeScale">📐 Boyut Değiştir</button>
-            <button class="control-btn" id="changeColor">🎨 Renk Değiştir</button>
+            <button class="control-btn" id="changeSize">📏 Bayrak Boyutunu Değiştir</button>
+            <button class="control-btn" id="addAnimation">🎬 Animasyon Ekle/Kaldır</button>
         </div>
 
         <div class="marker-info">
             <div>📱 Hiro Marker'ını kullanın:</div>
             <div class="marker-image"></div>
             <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 10px;">
-                Marker'ı kameraya gösterin ve T-Rex'i görün!
+                Marker'ı kameraya gösterin ve Türk bayrağını görün!
             </div>
         </div>
     </div>
@@ -249,13 +199,54 @@
         vr-mode-ui="enabled: false"
     >
         <a-assets>
-            <!-- T-Rex modeli -->
-            <a-asset-item id="trex-model" src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf"></a-asset-item>
+            <!-- Türk bayrağı için texture yerine renklerle çizeceğiz -->
         </a-assets>
 
         <a-marker id="hiroMarker" preset="hiro" emitevents="true">
-            <!-- 3D Model buraya eklenecek -->
-            <a-entity id="modelContainer"></a-entity>
+            <!-- Türk Bayrağı -->
+            <a-entity id="turkishFlag" position="0 0 0">
+                <!-- Bayrak Dikdörtgeni (Kırmızı zemin) -->
+                <a-plane 
+                    id="flagBase"
+                    position="0 0 0" 
+                    width="3" 
+                    height="2" 
+                    color="#E30A17"
+                    shader="flat"
+                ></a-plane>
+                
+                <!-- Ay -->
+                <a-entity position="-0.5 0.2 0.01">
+                    <!-- Dış beyaz daire -->
+                    <a-circle 
+                        radius="0.4" 
+                        color="#FFFFFF"
+                        segments="32"
+                        shader="flat"
+                    ></a-circle>
+                    <!-- İç kırmızı daire (ayın iç kısmı) -->
+                    <a-circle 
+                        position="0.1 0 0.01" 
+                        radius="0.35" 
+                        color="#E30A17"
+                        segments="32"
+                        shader="flat"
+                    ></a-circle>
+                </a-entity>
+                
+                <!-- Yıldız -->
+                <a-entity position="0.5 -0.3 0.02">
+                    <a-ring 
+                        color="#FFFFFF"
+                        radius-inner="0.15"
+                        radius-outer="0.35"
+                        segments-radial="5"
+                        theta-start="18"
+                        theta-length="360"
+                        shader="flat"
+                    ></a-ring>
+                </a-entity>
+            </a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -263,34 +254,37 @@
 
     <script>
         // Değişkenler
-        let currentModel = 'trex';
-        let currentScale = 0.05;
-        let currentColor = '#FFFFFF';
+        let currentSize = 1.0;
+        let hasAnimation = true;
         let isMarkerVisible = false;
 
         // Elementleri seç
         const loadingElement = document.getElementById('loading');
         const statusElement = document.getElementById('status');
-        const modelContainer = document.getElementById('modelContainer');
+        const turkishFlag = document.getElementById('turkishFlag');
+        const flagBase = document.getElementById('flagBase');
         const hiroMarker = document.getElementById('hiroMarker');
-        const objButtons = document.querySelectorAll('.obj-btn');
-        const animButtons = document.querySelectorAll('.anim-btn');
-        const changeScaleBtn = document.getElementById('changeScale');
-        const changeColorBtn = document.getElementById('changeColor');
+        const changeSizeBtn = document.getElementById('changeSize');
+        const addAnimationBtn = document.getElementById('addAnimation');
 
         // Sayfa yüklendiğinde
         window.addEventListener('load', function() {
             setTimeout(() => {
                 loadingElement.classList.add('hidden');
-                loadModel();
+                applyInitialAnimation();
             }, 3000);
         });
 
         // Marker olaylarını dinle
         hiroMarker.addEventListener('markerFound', function() {
             isMarkerVisible = true;
-            statusElement.textContent = '🟢 Marker Görüldü! T-Rex Aktif!';
+            statusElement.textContent = '🟢 Marker Görüldü! 🇹🇷 Bayrak Aktif!';
             statusElement.style.background = 'rgba(34, 197, 94, 0.8)';
+            
+            // Bayrağa özel efekt
+            if (hasAnimation) {
+                applyFlagAnimation();
+            }
         });
 
         hiroMarker.addEventListener('markerLost', function() {
@@ -299,104 +293,96 @@
             statusElement.style.background = 'rgba(0, 0, 0, 0.8)';
         });
 
-        // Model seçim butonları
-        objButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                objButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentModel = this.getAttribute('data-model');
-                loadModel();
-            });
-        });
-
-        // Animasyon butonları
-        animButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const animationType = this.getAttribute('data-animation');
-                applyAnimation(animationType);
-            });
-        });
-
         // Boyut değiştir butonu
-        changeScaleBtn.addEventListener('click', function() {
-            currentScale = currentScale === 0.05 ? 0.08 : 0.05;
-            loadModel();
-        });
-
-        // Renk değiştir butonu (sadege küp ve küre için)
-        changeColorBtn.addEventListener('click', function() {
-            const colors = ['#4CC9F0', '#F72585', '#7209B7', '#3A0CA3', '#4361EE', '#FF9E00'];
-            currentColor = colors[Math.floor(Math.random() * colors.length)];
-            loadModel();
-        });
-
-        // Model yükleme fonksiyonu
-        function loadModel() {
-            // Önceki modeli temizle
-            while (modelContainer.firstChild) {
-                modelContainer.removeChild(modelContainer.firstChild);
-            }
-
-            let entity;
-            
-            if (currentModel === 'trex') {
-                // T-Rex modeli
-                entity = document.createElement('a-entity');
-                entity.setAttribute('gltf-model', '#trex-model');
-                entity.setAttribute('position', '0 0 0');
-                entity.setAttribute('scale', currentScale + ' ' + currentScale + ' ' + currentScale);
-                entity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 10000');
-            } else if (currentModel === 'sphere') {
-                // Küre
-                entity = document.createElement('a-sphere');
-                entity.setAttribute('radius', '0.5');
-                entity.setAttribute('color', currentColor);
-                entity.setAttribute('position', '0 0.5 0');
-                entity.setAttribute('animation', 'property: rotation; to: 360 360 360; loop: true; dur: 8000');
+        changeSizeBtn.addEventListener('click', function() {
+            // 3 farklı boyut arasında geçiş
+            if (currentSize === 1.0) {
+                currentSize = 1.3;
+                changeSizeBtn.textContent = '📏 Büyük Bayrak';
+            } else if (currentSize === 1.3) {
+                currentSize = 0.7;
+                changeSizeBtn.textContent = '📏 Küçük Bayrak';
             } else {
-                // Küp
-                entity = document.createElement('a-box');
-                entity.setAttribute('width', '0.8');
-                entity.setAttribute('height', '0.8');
-                entity.setAttribute('depth', '0.8');
-                entity.setAttribute('color', currentColor);
-                entity.setAttribute('position', '0 0.4 0');
-                entity.setAttribute('animation', 'property: rotation; to: 360 360 360; loop: true; dur: 6000');
+                currentSize = 1.0;
+                changeSizeBtn.textContent = '📏 Normal Bayrak';
             }
+            
+            turkishFlag.setAttribute('scale', currentSize + ' ' + currentSize + ' ' + currentSize);
+        });
 
-            modelContainer.appendChild(entity);
+        // Animasyon butonu
+        addAnimationBtn.addEventListener('click', function() {
+            hasAnimation = !hasAnimation;
+            
+            if (hasAnimation) {
+                addAnimationBtn.textContent = '🎬 Animasyonu Kaldır';
+                if (isMarkerVisible) {
+                    applyFlagAnimation();
+                }
+            } else {
+                addAnimationBtn.textContent = '🎬 Animasyon Ekle';
+                removeAnimations();
+            }
+        });
+
+        // Bayrak animasyonu
+        function applyFlagAnimation() {
+            removeAnimations();
+            
+            // Bayrak dalgalanma efekti
+            flagBase.setAttribute('animation', {
+                property: 'rotation',
+                to: '0 0 5',
+                dir: 'alternate',
+                loop: true,
+                dur: 2000,
+                easing: 'easeInOutSine'
+            });
+            
+            // Hafif yukarı-aşağı hareket
+            turkishFlag.setAttribute('animation__2', {
+                property: 'position',
+                to: '0 0.1 0',
+                dir: 'alternate',
+                loop: true,
+                dur: 1500,
+                easing: 'easeInOutSine'
+            });
+            
+            // Yavaş dönme animasyonu
+            turkishFlag.setAttribute('animation__3', {
+                property: 'rotation',
+                to: '0 360 0',
+                loop: true,
+                dur: 30000,
+                easing: 'linear'
+            });
         }
 
-        // Animasyon uygula
-        function applyAnimation(type) {
-            const model = modelContainer.firstChild;
-            if (!model) return;
-
-            // Mevcut animasyonları kaldır
-            model.removeAttribute('animation');
-            model.removeAttribute('animation__2');
-            model.removeAttribute('animation__3');
-
-            switch(type) {
-                case 'rotate':
-                    model.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000');
-                    break;
-                case 'scale':
-                    model.setAttribute('animation', 'property: scale; to: ' + (currentScale * 1.5) + ' ' + (currentScale * 1.5) + ' ' + (currentScale * 1.5) + '; dir: alternate; loop: true; dur: 2000');
-                    break;
-                case 'move':
-                    model.setAttribute('animation', 'property: position; to: 0 1 0; dir: alternate; loop: true; dur: 3000');
-                    break;
+        // İlk animasyon
+        function applyInitialAnimation() {
+            if (hasAnimation) {
+                applyFlagAnimation();
             }
         }
 
-        // İlk modeli yükle
-        loadModel();
+        // Animasyonları kaldır
+        function removeAnimations() {
+            turkishFlag.removeAttribute('animation');
+            turkishFlag.removeAttribute('animation__2');
+            turkishFlag.removeAttribute('animation__3');
+            flagBase.removeAttribute('animation');
+        }
 
         // Marker resmini ekle
         document.querySelector('.marker-image').style.backgroundImage = 'url(https://raw.githack.com/AR-js-org/AR.js/master/data/images/hiro.png)';
         document.querySelector('.marker-image').style.backgroundSize = 'cover';
         document.querySelector('.marker-image').style.backgroundPosition = 'center';
+
+        // Sayfa kapatılırken animasyonları temizle
+        window.addEventListener('beforeunload', function() {
+            removeAnimations();
+        });
     </script>
 </body>
 </html>

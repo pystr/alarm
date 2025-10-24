@@ -3,54 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basit QR AR</title>
+    <title>Çalışan AR Deneyimi</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial; background: #000; color: white; }
-        .ui { position: fixed; top: 0; left: 0; width: 100%; z-index: 100; text-align: center; padding: 20px; }
-        .status { background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; margin-top: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+        }
+        
+        .status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        .marker-guide {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 300px;
+        }
+        
+        .marker-image {
+            width: 150px;
+            height: 150px;
+            margin: 10px auto;
+            border: 2px solid white;
+            border-radius: 10px;
+            background: white;
+            display: block;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-size: 18px;
+        }
+        
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="ui">
-        <h2>🎯 QR Kod AR</h2>
-        <div class="status" id="status">QR kod bekleniyor...</div>
-        <div style="margin-top: 10px; font-size: 14px;">
-            QR kod içine <strong>"HELLO_AR"</strong> yazın
+    <div class="loading" id="loading">
+        <div>📷 AR Deneyimi Yükleniyor...</div>
+        <div style="margin-top: 10px; font-size: 14px;">Lütfen bekleyin</div>
+    </div>
+
+    <div class="container">
+        <div class="info">
+            <h2>🎯 3D Video AR Deneyimi</h2>
+            <p>Marker'ı kameraya gösterin</p>
+        </div>
+        
+        <div class="status" id="status">🔴 Marker Bekleniyor</div>
+
+        <div class="marker-guide">
+            <p>Bu marker'ı kullanın:</p>
+            <div class="marker-image"></div>
+            <p style="margin-top: 10px; font-size: 12px;">
+                Marker'ı kameraya gösterin, video otomatik oynayacak
+            </p>
         </div>
     </div>
 
-    <a-scene embedded arjs vr-mode-ui="enabled: false">
-        <!-- QR kod ile gelecek obje -->
-        <a-entity id="arObject" visible="false">
-            <a-box 
-                position="0 0.5 0" 
-                color="#4CC9F0"
-                width="0.5" height="0.5" depth="0.5"
-                animation="property: rotation; to: 360 360 360; loop: true; dur: 5000;"
-            ></a-box>
-        </a-entity>
+    <!-- A-Frame AR Sahnesi -->
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true;"
+    >
+        <a-assets>
+            <video 
+                id="video1" 
+                autoplay 
+                loop 
+                crossorigin="anonymous"
+                webkit-playsinline
+                playsinline
+                preload="auto"
+            >
+                <!-- Buraya kendi videonuzun URL'sini koyabilirsiniz -->
+                <source src="https://assets.codepen.io/3364143/20230515_01.mp4" type="video/mp4">
+            </video>
+        </a-assets>
+
+        <!-- Hiro Marker -->
+        <a-marker preset="hiro" id="marker">
+            <!-- Video -->
+            <a-video
+                src="#video1"
+                width="1.6"
+                height="0.9"
+                position="0 0.5 0"
+                rotation="0 0 0"
+                visible="false"
+                id="arVideo"
+            ></a-video>
+        </a-marker>
+
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // Basit QR kontrolü - sayfayı açtıktan sonra konsoldan test edebilirsiniz
-        let qrDetected = false;
-        
-        // QR kod okunduğunda bu fonksiyonu çağırın
-        window.activateAR = function() {
-            if (!qrDetected) {
-                qrDetected = true;
-                document.getElementById('status').textContent = '🟢 QR Kod Okundu! 3D Küp Aktif!';
-                document.getElementById('status').style.background = 'green';
-                document.getElementById('arObject').setAttribute('visible', 'true');
-            }
-        };
-        
-        // Test için: Sayfayı açtıktan sonra F12 -> Console -> activateAR() yazın
-        console.log("Test için: activateAR() yazın");
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', function() {
+            const loading = document.getElementById('loading');
+            const status = document.getElementById('status');
+            const marker = document.getElementById('marker');
+            const arVideo = document.getElementById('arVideo');
+            const videoElement = document.getElementById('video1');
+            
+            // Marker bulunduğunda
+            marker.addEventListener('markerFound', function() {
+                console.log('✅ Marker bulundu!');
+                status.textContent = '🟢 Video Oynuyor';
+                status.style.background = 'rgba(34, 197, 94, 0.8)';
+                
+                // Videoyu göster
+                arVideo.setAttribute('visible', 'true');
+                
+                // Videoyu oynat
+                videoElement.play().then(() => {
+                    console.log('🎬 Video oynatılıyor');
+                }).catch(error => {
+                    console.log('❌ Video oynatma hatası:', error);
+                });
+            });
+
+            // Marker kaybolduğunda
+            marker.addEventListener('markerLost', function() {
+                console.log('❌ Marker kayboldu');
+                status.textContent = '🔴 Marker Bekleniyor';
+                status.style.background = 'rgba(0, 0, 0, 0.8)';
+                
+                // Videoyu gizle
+                arVideo.setAttribute('visible', 'false');
+                
+                // Videoyu duraklat
+                videoElement.pause();
+            });
+
+            // Loading ekranını kaldır
+            setTimeout(function() {
+                loading.classList.add('hidden');
+                console.log('🚀 AR deneyimi hazır!');
+            }, 3000);
+
+            // Marker resmini göster
+            document.querySelector('.marker-image').style.backgroundImage = 
+                'url(https://raw.githack.com/AR-js-org/AR.js/master/data/images/hiro.png)';
+            document.querySelector('.marker-image').style.backgroundSize = 'cover';
+        });
+
+        // Hata yönetimi
+        window.addEventListener('error', function(e) {
+            console.error('Hata:', e);
+            document.getElementById('status').textContent = '❌ Hata: Sayfayı yenileyin';
+        });
     </script>
 </body>
 </html>

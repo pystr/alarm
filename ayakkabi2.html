@@ -29,6 +29,15 @@
         /* Masaüstü Hover Efektleri */
         .product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
         .quick-add { transform: translateY(10px); opacity: 0; transition: all 0.3s ease; }
+
+        /* Mobil Sayfa Geçişleri */
+        .mobile-page { display: none; }
+        .mobile-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="text-slate-900">
@@ -102,72 +111,139 @@
         <header class="sticky top-0 bg-white/90 backdrop-blur-md z-50 p-4 flex justify-between items-center border-b border-slate-100">
             <div class="flex flex-col">
                 <span class="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Oley Ayakkabı</span>
-                <h1 class="text-lg font-black italic text-blue-900 tracking-tighter">MOBİL <span class="text-blue-500">MAĞAZA</span></h1>
+                <h1 class="text-lg font-black italic text-blue-900 tracking-tighter" id="mobile-title">ANA SAYFA</h1>
             </div>
             <div class="flex gap-2">
                 <button class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center"><i data-lucide="search" class="w-5 h-5"></i></button>
                 <button class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center relative">
                     <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                    <span class="absolute top-0 right-0 bg-blue-600 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+                    <span id="cart-count-mobile" class="absolute top-0 right-0 bg-blue-600 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
                 </button>
             </div>
         </header>
 
-        <!-- Mobil Hero -->
-        <section class="p-4">
-            <div class="relative h-44 rounded-[28px] overflow-hidden shadow-lg">
-                <img src="https://www.extrostyle.it/wp-content/uploads/2021/07/7725__Extrostyle-Copia.jpg" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex flex-col justify-center px-6 text-white">
-                    <h2 class="text-xl font-black uppercase italic mb-2">Sağlıklı<br>Adımlar</h2>
-                    <button class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg w-fit">Şimdi Keşfet</button>
+        <!-- MOBİL SAYFA: ANA SAYFA -->
+        <div id="page-home" class="mobile-page active pb-20">
+            <!-- Mobil Hero -->
+            <section class="p-4">
+                <div class="relative h-44 rounded-[28px] overflow-hidden shadow-lg">
+                    <img src="https://www.extrostyle.it/wp-content/uploads/2021/07/7725__Extrostyle-Copia.jpg" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex flex-col justify-center px-6 text-white">
+                        <h2 class="text-xl font-black uppercase italic mb-2">Sağlıklı<br>Adımlar</h2>
+                        <button onclick="switchMobilePage('products')" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg w-fit uppercase">Şimdi Keşfet</button>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Kategoriler -->
-        <section class="px-4 py-2 flex gap-4 overflow-x-auto hide-scrollbar">
-            <div class="flex-shrink-0 flex flex-col items-center gap-1">
-                <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600"><i data-lucide="activity" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold text-slate-500 uppercase">Medikal</span>
-            </div>
-            <div class="flex-shrink-0 flex flex-col items-center gap-1">
-                <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500"><i data-lucide="heart" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold text-slate-500 uppercase">Konfor</span>
-            </div>
-            <div class="flex-shrink-0 flex flex-col items-center gap-1">
-                <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500"><i data-lucide="sun" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold text-slate-500 uppercase">Yazlık</span>
-            </div>
-            <div class="flex-shrink-0 flex flex-col items-center gap-1">
-                <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500"><i data-lucide="zap" class="w-5 h-5"></i></div>
-                <span class="text-[9px] font-bold text-slate-500 uppercase">Sport</span>
-            </div>
-        </section>
+            <!-- Kategoriler -->
+            <section class="px-4 py-2 flex gap-4 overflow-x-auto hide-scrollbar">
+                <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                    <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Medikal</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                    <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500"><i data-lucide="heart" class="w-5 h-5"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Konfor</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                    <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500"><i data-lucide="sun" class="w-5 h-5"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Yazlık</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                    <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500"><i data-lucide="zap" class="w-5 h-5"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Sport</span>
+                </div>
+            </section>
 
-        <!-- Mobil Hakkımızda Kartı -->
-        <section class="p-4 mt-4">
-            <div class="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
-                <img src="https://i.pinimg.com/736x/6b/73/1a/6b731a7038ed557b423660f58ebb2fba.jpg" class="w-full h-40 object-cover rounded-2xl mb-4">
-                <h3 class="font-black uppercase italic text-blue-900 mb-2">Konforun Adresi</h3>
-                <p class="text-[10px] text-slate-500 leading-relaxed uppercase font-bold tracking-tight">Sancaktepe merkezli, profesyonel medikal ayakkabı çözümleriyle her adımda sağlığınızı koruyoruz.</p>
+            <!-- Mobil Hakkımızda Kartı -->
+            <section class="p-4 mt-4">
+                <div class="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+                    <img src="https://i.pinimg.com/736x/6b/73/1a/6b731a7038ed557b423660f58ebb2fba.jpg" class="w-full h-40 object-cover rounded-2xl mb-4">
+                    <h3 class="font-black uppercase italic text-blue-900 mb-2">Konforun Adresi</h3>
+                    <p class="text-[10px] text-slate-500 leading-relaxed uppercase font-bold tracking-tight">Sancaktepe merkezli, profesyonel medikal ayakkabı çözümleriyle her adımda sağlığınızı koruyoruz.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- MOBİL SAYFA: ÜRÜNLER -->
+        <div id="page-products" class="mobile-page pb-20">
+            <section class="p-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded-[24px] border border-slate-100 shadow-sm">
+                        <div class="aspect-square bg-slate-50 rounded-2xl mb-2 flex items-center justify-center p-2">
+                            <img src="https://www.extrostyle.it/wp-content/uploads/2022/05/10000_Extrostyle.png" class="max-h-full">
+                        </div>
+                        <h4 class="text-[10px] font-black uppercase italic truncate">Larry Tekniği</h4>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-[10px] font-bold text-blue-600">3.450 TL</span>
+                            <button class="bg-blue-600 text-white p-1 rounded-lg"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>
+                    <div class="bg-white p-3 rounded-[24px] border border-slate-100 shadow-sm">
+                        <div class="aspect-square bg-slate-50 rounded-2xl mb-2 flex items-center justify-center p-2">
+                            <img src="https://www.extrostyle.it/wp-content/uploads/2021/06/8052__extrostyle-1.jpg" class="max-h-full">
+                        </div>
+                        <h4 class="text-[10px] font-black uppercase italic truncate">Enerji Mara</h4>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-[10px] font-bold text-blue-600">2.890 TL</span>
+                            <button class="bg-blue-600 text-white p-1 rounded-lg"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- MOBİL SAYFA: FAVORİLER -->
+        <div id="page-favorites" class="mobile-page p-8 text-center pb-20">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="heart" class="w-8 h-8 text-slate-300"></i>
             </div>
-        </section>
+            <h3 class="font-black uppercase italic text-slate-800">Favori Listen Boş</h3>
+            <p class="text-xs text-slate-500 mt-2">Beğendiğin ürünleri buraya ekleyerek daha sonra kolayca bulabilirsin.</p>
+        </div>
+
+        <!-- MOBİL SAYFA: PROFİL -->
+        <div id="page-profile" class="mobile-page pb-20">
+            <section class="p-6">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-black text-xl italic">OA</div>
+                    <div>
+                        <h3 class="font-black uppercase italic text-lg">Ziyaretçi</h3>
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Üye Girişi Yapın</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="bg-white p-4 rounded-2xl flex justify-between items-center border border-slate-100">
+                        <span class="text-xs font-bold uppercase tracking-tight">Siparişlerim</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl flex justify-between items-center border border-slate-100">
+                        <span class="text-xs font-bold uppercase tracking-tight">Adres Bilgilerim</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl flex justify-between items-center border border-slate-100">
+                        <span class="text-xs font-bold uppercase tracking-tight">Ayarlar</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                </div>
+            </section>
+        </div>
 
         <!-- Alt Tab Bar -->
         <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 flex justify-between items-center px-8 py-3 pb-6 z-50">
-            <button class="flex flex-col items-center gap-1 text-blue-600">
+            <button onclick="switchMobilePage('home')" id="nav-home" class="mobile-nav-item flex flex-col items-center gap-1 text-blue-600">
                 <i data-lucide="home" class="w-6 h-6"></i>
                 <span class="text-[8px] font-black uppercase">Ana Sayfa</span>
             </button>
-            <button class="flex flex-col items-center gap-1 text-slate-400">
+            <button onclick="switchMobilePage('products')" id="nav-products" class="mobile-nav-item flex flex-col items-center gap-1 text-slate-400">
                 <i data-lucide="layout-grid" class="w-6 h-6"></i>
-                <span class="text-[8px] font-black uppercase">Ürünler</span>
+                <span class="text-[8px] font-black uppercase">Mağaza</span>
             </button>
-            <button class="flex flex-col items-center gap-1 text-slate-400">
+            <button onclick="switchMobilePage('favorites')" id="nav-favorites" class="mobile-nav-item flex flex-col items-center gap-1 text-slate-400">
                 <i data-lucide="heart" class="w-6 h-6"></i>
                 <span class="text-[8px] font-black uppercase">Favori</span>
             </button>
-            <button class="flex flex-col items-center gap-1 text-slate-400">
+            <button onclick="switchMobilePage('profile')" id="nav-profile" class="mobile-nav-item flex flex-col items-center gap-1 text-slate-400">
                 <i data-lucide="user" class="w-6 h-6"></i>
                 <span class="text-[8px] font-black uppercase">Profil</span>
             </button>
@@ -186,7 +262,45 @@
     </footer>
 
     <script>
+        // İkonları Başlat
         lucide.createIcons();
+        
+        // Mobil Sayfa Geçiş Fonksiyonu
+        function switchMobilePage(pageId) {
+            // Tüm sayfaları gizle
+            document.querySelectorAll('.mobile-page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Seçilen sayfayı göster
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Başlığı Güncelle
+            const titles = {
+                'home': 'ANA SAYFA',
+                'products': 'MAĞAZA',
+                'favorites': 'FAVORİLERİM',
+                'profile': 'PROFİLİM'
+            };
+            document.getElementById('mobile-title').innerText = titles[pageId];
+
+            // Menü İkon Renklerini Güncelle
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('text-blue-600');
+                item.classList.add('text-slate-400');
+            });
+            document.getElementById('nav-' + pageId).classList.add('text-blue-600');
+            document.getElementById('nav-' + pageId).classList.remove('text-slate-400');
+
+            // Sayfayı yukarı kaydır
+            window.scrollTo(0, 0);
+            
+            // Lucide ikonlarını yenile (dinamik içerik için)
+            lucide.createIcons();
+        }
         
         // Ekran boyutu değiştiğinde ikonları tekrar render et
         window.addEventListener('resize', () => {

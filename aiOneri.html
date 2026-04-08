@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oley Ayakkabı - Bütünleşik Diyabetik Ayak Analizi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .gradient-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+        .step-transition { transition: all 0.4s ease-in-out; }
+        #video-container, #preview-container, #preview-container-sole { position: relative; overflow: hidden; border-radius: 1rem; background-color: #000; }
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.5);
+            top: 0;
+            animation: scan 3s linear infinite;
+            display: none;
+            z-index: 20;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .file-upload-box {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .file-upload-box:hover {
+            border-color: #3b82f6;
+            background-color: #f1f5f9;
+        }
+        .progress-bar { height: 4px; background: #e2e8f0; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: #3b82f6; transition: width 0.5s ease; width: 0%; }
+        
+        /* Voice wave animation */
+        .voice-wave {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 20px;
+        }
+        .wave-bar {
+            width: 3px;
+            height: 100%;
+            background: #3b82f6;
+            animation: wave 1s ease-in-out infinite;
+        }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.5); }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="gradient-bg text-white p-6 shadow-md text-center">
+            <h1 class="text-2xl font-bold flex justify-center items-center gap-2">
+                <i data-lucide="activity"></i> Oley Ayakkabı AI Bütünleşik Analiz
+            </h1>
+            <p class="text-blue-100 text-sm mt-1">Tam kapsamlı diyabetik ayak ve basış analizi</p>
+        </header>
+
+        <main class="flex-grow container mx-auto max-w-2xl p-4 mt-4">
+            
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+
+            <!-- ADIM 1: Sağlık Anketi -->
+            <section id="step-1" class="step-transition">
+                <div class="bg-white rounded-2xl p-8 card-shadow">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="clipboard-list" class="text-blue-600"></i> Adım 1: Sağlık Geçmişi
+                    </h2>
+                    <form id="health-form" class="space-y-8">
+                        <!-- Soru 1 -->
+                        <div class="space-y-4">
+                            <label class="block font-semibold">Ayaklarınızda his kaybı veya karıncalanma var mı?</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" onclick="setAnswer('neuropathy', true)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="neuropathy" data-val="true">Evet</button>
+                                <button type="button" onclick="setAnswer('neuropathy', false)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="neuropathy" data-val="false">Hayır</button>
+                            </div>
+                        </div>
+
+                        <!-- Soru 2 -->
+                        <div class="space-y-4 border-t pt-4">
+                            <label class="block font-semibold">Günün sonunda ayaklarınızda belirgin şişlik oluyor mu?</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" onclick="setAnswer('edema', true)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="edema" data-val="true">Evet</button>
+                                <button type="button" onclick="setAnswer('edema', false)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="edema" data-val="false">Hayır</button>
+                            </div>
+                        </div>
+
+                        <!-- Soru 3 -->
+                        <div class="space-y-4 border-t pt-4">
+                            <label class="block font-semibold">Ayaklarınızda iyileşmesi 2 haftadan uzun süren küçük yaralar veya kızarıklıklar oluşuyor mu?</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" onclick="setAnswer('woundHealing', true)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="woundHealing" data-val="true">Evet</button>
+                                <button type="button" onclick="setAnswer('woundHealing', false)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="woundHealing" data-val="false">Hayır</button>
+                            </div>
+                        </div>
+
+                        <!-- Soru 4 -->
+                        <div class="space-y-4 border-t pt-4">
+                            <label class="block font-semibold">Ayaklarınızın sıcaklığında aşırı soğukluk veya aşırı yanma hissi var mı?</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" onclick="setAnswer('tempIssue', true)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="tempIssue" data-val="true">Evet</button>
+                                <button type="button" onclick="setAnswer('tempIssue', false)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="tempIssue" data-val="false">Hayır</button>
+                            </div>
+                        </div>
+
+                        <!-- Soru 5 -->
+                        <div class="space-y-4 border-t pt-4">
+                            <label class="block font-semibold">Tırnaklarınızda kalınlaşma, mantar veya batma sorunu yaşıyor musunuz?</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" onclick="setAnswer('nailIssue', true)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="nailIssue" data-val="true">Evet</button>
+                                <button type="button" onclick="setAnswer('nailIssue', false)" class="ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm" data-key="nailIssue" data-val="false">Hayır</button>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="goToStep(2)" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all mt-6">
+                            Görüntüleme Adımına Geç
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ADIM 2: Görsel Analiz (Ayak ve Taban) -->
+            <section id="step-2" class="step-transition hidden">
+                <div class="bg-white rounded-2xl p-6 card-shadow space-y-8">
+                    
+                    <!-- Bölüm A: Ayak Taraması -->
+                    <div>
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-blue-800">
+                            <i data-lucide="ruler" class="text-blue-600"></i> 1. Ayak Yapısı Taraması
+                        </h2>
+                        <div class="bg-blue-50 p-4 rounded-xl mb-4 text-xs text-blue-800">
+                            Ayağınızı <b>beyaz bir A4 kağıdı</b> üzerine koyarak fotoğrafını çekin.
+                        </div>
+                        <div id="preview-container" class="aspect-video flex items-center justify-center">
+                            <img id="foot-preview" class="hidden w-full h-full object-contain" />
+                            <div id="foot-placeholder" class="text-center p-4">
+                                <label for="foot-photo" class="cursor-pointer">
+                                    <div class="file-upload-box rounded-xl p-6 flex flex-col items-center">
+                                        <i data-lucide="camera" size="32" class="text-slate-400 mb-2"></i>
+                                        <span class="text-slate-600 text-sm">Ayak Fotoğrafı Yükle</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="foot-photo" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'foot')">
+                            </div>
+                            <div id="foot-scan" class="scan-line"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bölüm B: Taban Taraması -->
+                    <div class="border-t pt-8">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-orange-800">
+                            <i data-lucide="footprints" class="text-orange-600"></i> 2. Ayakkabı Taban Analizi
+                        </h2>
+                        <div class="bg-orange-50 p-4 rounded-xl mb-4 text-xs text-orange-800">
+                            En çok giydiğiniz ayakkabınızın <b>alt taban</b> fotoğrafını yükleyin.
+                        </div>
+                        <div id="preview-container-sole" class="aspect-video flex items-center justify-center">
+                            <img id="sole-preview" class="hidden w-full h-full object-contain" />
+                            <div id="sole-placeholder" class="text-center p-4">
+                                <label for="sole-photo" class="cursor-pointer">
+                                    <div class="file-upload-box rounded-xl p-6 flex flex-col items-center">
+                                        <i data-lucide="upload-cloud" size="32" class="text-slate-400 mb-2"></i>
+                                        <span class="text-slate-600 text-sm">Taban Fotoğrafı Yükle</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="sole-photo" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'sole')">
+                            </div>
+                            <div id="sole-scan" class="scan-line"></div>
+                        </div>
+                    </div>
+
+                    <button id="final-analyze-btn" onclick="startUnifiedAnalysis()" disabled class="w-full bg-slate-300 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                        <i data-lucide="zap"></i> Bütünleşik Analizi Başlat
+                    </button>
+                </div>
+            </section>
+
+            <!-- ADIM 3: Sonuçlar -->
+            <section id="step-3" class="step-transition hidden">
+                <div class="bg-white rounded-2xl p-0 card-shadow overflow-hidden">
+                    <div class="p-8 text-center bg-slate-50 border-b">
+                        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="shield-check" size="32"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold">Kapsamlı Rapor Hazır</h2>
+                        <p class="text-slate-500 text-sm">Verileriniz tıbbi algoritmalarla eşleştirildi.</p>
+                        
+                        <!-- AI Voice Summary Module -->
+                        <div class="mt-4 flex flex-col items-center">
+                            <button id="voice-btn" onclick="toggleVoice()" class="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-xs font-bold hover:bg-blue-200 transition-all">
+                                <i data-lucide="volume-2" size="16"></i> <span id="voice-text">Analizi Sesli Dinle</span>
+                            </button>
+                            <div id="voice-animation" class="voice-wave mt-2">
+                                <div class="wave-bar" style="animation-delay: 0.1s"></div>
+                                <div class="wave-bar" style="animation-delay: 0.2s"></div>
+                                <div class="wave-bar" style="animation-delay: 0.3s"></div>
+                                <div class="wave-bar" style="animation-delay: 0.4s"></div>
+                                <div class="wave-bar" style="animation-delay: 0.5s"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 space-y-6">
+                        <div id="unified-results" class="grid grid-cols-2 gap-4 text-center">
+                            <!-- Results here -->
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 relative">
+                            <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                                <i data-lucide="microscope" size="16"></i> Klinik Bulgular
+                            </h3>
+                            <ul id="analysis-list" class="space-y-2 text-xs text-slate-600"></ul>
+                            
+                            <!-- Share Report -->
+                            <div class="mt-4 pt-4 border-t flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400 font-medium italic">Rapor ID: #OLE-2024-8821</span>
+                                <button onclick="shareReport()" class="flex items-center gap-1 text-blue-600 text-xs font-bold hover:underline">
+                                    <i data-lucide="share-2" size="14"></i> Doktorumla Paylaş
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Recommendation -->
+                        <div id="product-card" class="border-2 border-blue-600 rounded-2xl overflow-hidden mt-6">
+                            <div class="bg-blue-600 text-white p-3 text-center text-[10px] font-bold uppercase tracking-widest">
+                                Sizin İçin Optimize Edilen Seçim
+                            </div>
+                            <div class="p-4 flex gap-4 bg-white">
+                                <div class="w-32 h-32 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden shrink-0 border">
+                                    <img id="rec-image" src="" alt="Önerilen Ayakkabı" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 id="rec-name" class="font-bold text-blue-900 text-md">Yükleniyor...</h4>
+                                    <p id="rec-desc" class="text-[10px] text-slate-500 mb-2"></p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-green-50 text-green-700 rounded text-[9px] border border-green-200">Anti-Diyabet</span>
+                                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[9px] border border-blue-200">Ortopedik</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="w-full bg-blue-600 text-white font-bold py-3 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm">
+                                Uygun Numarayı Satın Al <i data-lucide="shopping-cart" size="16"></i>
+                            </button>
+                        </div>
+                        
+                        <button onclick="location.reload()" class="w-full text-slate-400 text-xs py-2 hover:underline">Sıfırla ve Yeniden Başla</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-lg">Raporu Paylaş</h3>
+            <p class="text-sm text-slate-500">Analiz sonuçlarını doktorunuzla paylaşmak için bir yöntem seçin.</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeShare()" class="p-4 border rounded-xl flex flex-col items-center gap-2 hover:bg-slate-50 transition-all">
+                    <i data-lucide="message-circle" class="text-green-600"></i>
+                    <span class="text-xs font-medium">WhatsApp</span>
+                </button>
+                <button onclick="closeShare()" class="p-4 border rounded-xl flex flex-col items-center gap-2 hover:bg-slate-50 transition-all">
+                    <i data-lucide="mail" class="text-blue-600"></i>
+                    <span class="text-xs font-medium">E-Posta</span>
+                </button>
+                <button onclick="closeShare()" class="p-4 border rounded-xl flex flex-col items-center gap-2 hover:bg-slate-50 transition-all col-span-2">
+                    <i data-lucide="link" class="text-slate-600"></i>
+                    <span class="text-xs font-medium">Rapor Linkini Kopyala</span>
+                </button>
+            </div>
+            <button onclick="closeShare()" class="w-full py-2 text-slate-400 text-sm">Kapat</button>
+        </div>
+    </div>
+
+    <script>
+        let userData = { 
+            neuropathy: null, 
+            edema: null, 
+            woundHealing: null,
+            tempIssue: null,
+            nailIssue: null,
+            footImg: null, 
+            soleImg: null 
+        };
+        let isPlaying = false;
+        
+        const products = [
+            {
+                name: "Oley Active-Taranto",
+                desc: "Günlük kullanım için hafif, dikişsiz iç yüzey ve ekstra geniş pençe yapısı.",
+                img: "https://www.extrostyle.it/wp-content/uploads/2021/04/ACTIVE-TARANTO-NERO-UOMO_AA.jpg"
+            },
+            {
+                name: "Oley Energy-Paolo",
+                desc: "İleri seviye koruma sağlayan, şok emici taban ve stabilizasyon desteği.",
+                img: "https://www.extrostyle.it/wp-content/uploads/2021/04/ENERGY-PAOLO-MARRONE_AA.jpg"
+            }
+        ];
+
+        function refreshIcons() {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function setAnswer(key, val) {
+            userData[key] = val;
+            document.querySelectorAll(`.ans-btn[data-key="${key}"]`).forEach(btn => {
+                btn.className = "ans-btn p-4 border-2 rounded-xl text-center hover:border-blue-500 transition-all text-sm";
+                if(btn.dataset.val === String(val)) btn.className += " border-blue-500 bg-blue-50 text-blue-700 font-bold";
+            });
+        }
+
+        function handleFileSelect(event, type) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(`${type}-preview`);
+                    const placeholder = document.getElementById(`${type}-placeholder`);
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    userData[type === 'foot' ? 'footImg' : 'soleImg'] = e.target.result;
+                    checkEnableAnalyze();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function checkEnableAnalyze() {
+            const btn = document.getElementById('final-analyze-btn');
+            if(userData.footImg && userData.soleImg) {
+                btn.disabled = false;
+                btn.className = "w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 flex items-center justify-center gap-2";
+            }
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            document.getElementById('progress-fill').style.width = ((step / 3) * 100) + "%";
+            refreshIcons();
+            window.scrollTo(0, 0);
+        }
+
+        function startUnifiedAnalysis() {
+            const footScan = document.getElementById('foot-scan');
+            const soleScan = document.getElementById('sole-scan');
+            const btn = document.getElementById('final-analyze-btn');
+
+            footScan.style.display = 'block';
+            soleScan.style.display = 'block';
+            btn.innerHTML = "AI Verileri Birleştiriyor...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                renderUnifiedResults();
+                goToStep(3);
+            }, 3500);
+        }
+
+        function renderUnifiedResults() {
+            const resultsDiv = document.getElementById('unified-results');
+            const list = document.getElementById('analysis-list');
+            
+            const highRisk = userData.neuropathy || userData.woundHealing || userData.tempIssue;
+
+            resultsDiv.innerHTML = `
+                <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <span class="text-[9px] uppercase text-blue-600 font-bold block">Tespit Edilen Boyut</span>
+                    <span class="text-xl font-bold">43 Numara</span>
+                </div>
+                <div class="p-3 bg-orange-50 rounded-xl border border-orange-100">
+                    <span class="text-[9px] uppercase text-orange-600 font-bold block">Basış Karakteri</span>
+                    <span class="text-xl font-bold">Dışa Basma</span>
+                </div>
+                <div class="p-3 bg-red-50 rounded-xl border border-red-100">
+                    <span class="text-[9px] uppercase text-red-600 font-bold block">Diyabetik Risk</span>
+                    <span class="text-xl font-bold">${highRisk ? 'Kritik' : 'Düşük'}</span>
+                </div>
+                <div class="p-3 bg-green-50 rounded-xl border border-green-100">
+                    <span class="text-[9px] uppercase text-green-600 font-bold block">Öneri</span>
+                    <span class="text-xl font-bold">Koruyucu Üst</span>
+                </div>
+            `;
+
+            const bulgular = [];
+            bulgular.push("Görsel analiz: Ayak ön bölgesinde hafif genişleme (Haluks Valgus başlangıcı) saptandı.");
+            
+            if(userData.neuropathy || userData.woundHealing) {
+                bulgular.push("Kritik Uyarı: Yara iyileşme hızı veya his kaybı belirtileri nedeniyle dikişsiz ve gümüş iyonlu modeller zorunludur.");
+            } else {
+                bulgular.push("Profilaksi: Diyabetik ayak sağlığını korumak için esnek ve nefes alan deri yapısı önerilir.");
+            }
+
+            if(userData.nailIssue) {
+                bulgular.push("Podolojik Öneri: Tırnak sorunları için ekstra derinlikli (High-Box) burun yapısına sahip modeller tercih edilmeli.");
+            }
+
+            if(userData.edema) {
+                bulgular.push("Ödem Yönetimi: Gün sonundaki şişmeler göz önüne alınarak genişleyebilir cırtlı bağlama sistemi kullanılmalı.");
+            }
+
+            list.innerHTML = bulgular.map(b => `<li class="flex gap-2"><i data-lucide="chevron-right" size="12" class="shrink-0 mt-1"></i> ${b}</li>`).join('');
+
+            const randomProd = products[Math.floor(Math.random() * products.length)];
+            document.getElementById('rec-name').innerText = randomProd.name;
+            document.getElementById('rec-desc').innerText = randomProd.desc;
+            document.getElementById('rec-image').src = randomProd.img;
+
+            refreshIcons();
+        }
+
+        // Voice Summary Function (Simulation)
+        function toggleVoice() {
+            const btnText = document.getElementById('voice-text');
+            const animation = document.getElementById('voice-animation');
+            
+            if (!isPlaying) {
+                isPlaying = true;
+                btnText.innerText = "Anlatım Durduruluyor...";
+                animation.style.display = 'flex';
+                
+                if ('speechSynthesis' in window) {
+                    const msg = new SpeechSynthesisUtterance();
+                    const riskStatus = (userData.neuropathy || userData.woundHealing) ? "yüksek" : "kontrollü";
+                    msg.text = `Analiziniz tamamlandı. Diyabetik risk seviyeniz ${riskStatus} olarak değerlendirildi. Ayak yapınızdaki baskı noktalarını dengelemek için ortopedik Oley ayakkabı modelleri listenize eklendi.`;
+                    msg.lang = 'tr-TR';
+                    msg.onend = stopVoice;
+                    window.speechSynthesis.speak(msg);
+                } else {
+                    setTimeout(stopVoice, 8000);
+                }
+            } else {
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                stopVoice();
+            }
+        }
+
+        function stopVoice() {
+            isPlaying = false;
+            document.getElementById('voice-text').innerText = "Analizi Sesli Dinle";
+            document.getElementById('voice-animation').style.display = 'none';
+        }
+
+        // Sharing Functions
+        function shareReport() {
+            document.getElementById('share-modal').style.display = 'flex';
+        }
+
+        function closeShare() {
+            document.getElementById('share-modal').style.display = 'none';
+        }
+
+        window.onload = refreshIcons;
+    </script>
+</body>
+</html>

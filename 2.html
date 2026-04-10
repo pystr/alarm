@@ -1,91 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <title>AR Ayakkabı</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer@^3.4.0/dist/model-viewer.min.js"></script>
-  <style>
-    body, html { margin:0; padding:0; width:100%; height:100%; overflow:hidden; }
-    model-viewer { width:100%; height:100%; background:#000; }
-    #prompt {
-      position:absolute; top:20px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.8); color:#fff; padding:12px 20px; 
-      border-radius:20px; font-family:system-ui; font-size:14px; display:none;
-    }
-    #start-ar {
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#007aff; color:#fff; border:none; padding:18px 36px;
-      border-radius:16px; font-size:18px; font-weight:600;
-    }
-    #unsupported {
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#ff3b30; color:#fff; padding:20px; border-radius:12px; 
-      text-align:center; display:none; max-width:80%;
-    }
-  </style>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>GeoAR.js demo</title>
+    <script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
+    <script src="https://raw.githack.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.min.js"></script>
+    <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+    <script>
+        THREEx.ArToolkitContext.baseURL = 'https://raw.githack.com/jeromeetienne/ar.js/master/three.js/'
+    </script>
 </head>
-<body>
-  <div id="prompt">Yüzeyi taramak için telefonu yavaşça hareket ettirin. Masaya dokunarak yerleştirin.</div>
-  <button id="start-ar">AR’yi Başlat</button>
-  <div id="unsupported">Cihazınız WebXR desteklemiyor.<br>Chrome’u güncelleyin veya ARCore yükleyin.</div>
-  
-  <model-viewer 
-    id="viewer"
-    src="model.glb" 
-    ios-src="model.usdz"
-    ar 
-    ar-modes="webxr scene-viewer quick-look"
-    ar-placement="floor"
-    ar-scale="fixed"
-    xr-environment
-    camera-controls
-    disable-tap
-    shadow-intensity="1"
-    style="display:none;">
-    
-    <button slot="hotspot-1" data-position="0 0.01 0.08" data-normal="0 1 0"
-            style="background:#007aff; color:#fff; border:0; padding:8px; border-radius:8px;">
-      Çıkarılabilir Taban
-    </button>
-  </model-viewer>
 
-  <script>
-    const viewer = document.querySelector('#viewer');
-    const startBtn = document.querySelector('#start-ar');
-    const prompt = document.querySelector('#prompt');
-    const unsupported = document.querySelector('#unsupported');
-    
-    // WebXR destekliyor mu kontrol et
-    if (!navigator.xr) {
-      startBtn.style.display = 'none';
-      unsupported.style.display = 'block';
-    }
-    
-    startBtn.addEventListener('click', async () => {
-      try {
-        await viewer.activateAR();
-        viewer.style.display = 'block';
-        startBtn.style.display = 'none';
-      } catch(err) {
-        unsupported.style.display = 'block';
-        startBtn.style.display = 'none';
-      }
-    });
-    
-    viewer.addEventListener('ar-status', (event) => {
-      if (event.detail.status === 'session-started') {
-        prompt.style.display = 'block';
-      }
-      if (event.detail.status === 'object-placed') {
-        prompt.innerText = 'Yerleştirildi! Etrafında dolaşabilirsin.';
-        setTimeout(() => prompt.style.display = 'none', 3000);
-      }
-      if (event.detail.status === 'failed') {
-        unsupported.style.display = 'block';
-        viewer.style.display = 'none';
-      }
-    });
-  </script>
+<body style='margin: 0; overflow: hidden;'>
+    <a-scene
+        vr-mode-ui="enabled: false"
+		embedded
+        arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'>
+        
+        <a-camera gps-camera rotation-reader></a-camera>
+	</a-scene>
 </body>
-</html>

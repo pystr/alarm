@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diyabetik Ayakkabı AR Demo</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body { margin:0; font-family:system-ui; background:#f7f7f7; }
+    .header { padding:20px; text-align:center; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    model-viewer { width:100%; height:80vh; background:#e8e8e8; }
+    .ar-btn { 
+      background:#007aff; color:white; border:none; padding:16px 32px; 
+      border-radius:12px; font-size:18px; font-weight:600;
+      position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
+    }
+    .hotspot {
+      background:#fff; border:2px solid #007aff; border-radius:8px; 
+      padding:8px 12px; font-size:14px; box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>030 E Diyabetik Ayakkabı</h2>
+    <p>AR butonuna basıp kamerayı yere tutun. Noktalara tıklayarak özellikleri görün.</p>
+  </div>
+  
+  <model-viewer 
+    src="model.glb" 
+    ar 
+    ar-modes="webxr scene-viewer quick-look" 
+    camera-controls 
+    auto-rotate 
+    shadow-intensity="1"
+    exposure="1"
+    camera-orbit="45deg 75deg 0.6m">
+    
+    <!-- Hotspot 1: Taban -->
+    <button slot="hotspot-1" class="hotspot" data-position="0 0.01 0.08" data-normal="0 1 0">
+      Çıkarılabilir Ortopedik Taban
+    </button>
+    
+    <!-- Hotspot 2: İç astar -->
+    <button slot="hotspot-2" class="hotspot" data-position="0.06 0.03 0" data-normal="1 0 0">
+      Dikişsiz İç Astar<br><small>Yara riski yok</small>
+    </button>
+    
+    <!-- Hotspot 3: Burun -->
+    <button slot="hotspot-3" class="hotspot" data-position="0 0.02 -0.1" data-normal="0 0 -1">
+      Geniş Burun Tasarımı
+    </button>
+    
+    <button slot="ar-button" class="ar-btn">📱 AR’de Görüntüle</button>
+  </model-viewer>
+</body>
+</html>

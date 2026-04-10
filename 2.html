@@ -1,23 +1,153 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>GeoAR.js demo</title>
-    <script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
-    <script src="https://raw.githack.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.min.js"></script>
-    <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
-    <script>
-        THREEx.ArToolkitContext.baseURL = 'https://raw.githack.com/jeromeetienne/ar.js/master/three.js/'
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Diyabetik Ayakkabı AR – Hibrit</title>
+  
+  <!-- WebXR için model-viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer@^3.4.0/dist/model-viewer.min.js"></script>
+  <!-- AR.js için A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
+  
+  <style>
+    body, html { margin:0; padding:0; width:100%; height:100%; font-family:system-ui; background:#f0f0f0; }
+    .screen { display:none; width:100%; height:100%; }
+    .active { display:block; }
+    
+    /* Ana seçim ekranı */
+    #menu { 
+      display:flex; flex-direction:column; align-items:center; justify-content:center; 
+      height:100%; padding:20px; text-align:center; background:#fff;
+    }
+    .btn {
+      width:100%; max-width:340px; padding:18px; margin:10px 0; border:none;
+      border-radius:14px; font-size:17px; font-weight:600; cursor:pointer;
+    }
+    .btn-webxr { background:#007aff; color:#fff; }
+    .btn-arjs { background:#34c759; color:#fff; }
+    .btn-3d { background:#8e8e93; color:#fff; }
+    .info { color:#666; font-size:14px; margin-top:20px; max-width:340px; }
+    
+    /* AR.js ekranı */
+    #arjs-screen a-scene { width:100% !important; height:100% !important; }
+    .arjs-hint {
+      position:fixed; top:10px; left:10px; right:10px; z-index:999;
+      background:rgba(0,0,0,0.8); color:#fff; padding:12px; border-radius:10px;
+      text-align:center; font-size:14px;
+    }
+    .back-btn {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:999;
+      background:#fff; color:#000; border:none; padding:12px 24px; border-radius:10px;
+    }
+  </style>
 </head>
+<body>
 
-<body style='margin: 0; overflow: hidden;'>
-    <a-scene
-        vr-mode-ui="enabled: false"
-		embedded
-        arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'>
-        
-        <a-camera gps-camera rotation-reader></a-camera>
-	</a-scene>
+  <!-- 1. MENÜ EKRANI -->
+  <div id="menu" class="screen active">
+    <h1>030 E Diyabetik Ayakkabı</h1>
+    <p style="color:#666; margin-bottom:30px;">Cihazınıza uygun görüntüleme seçin</p>
+    
+    <button class="btn btn-webxr" id="webxr-btn">📱 AR ile Masana Koy</button>
+    <div style="font-size:12px; color:#888; margin-top:-5px; margin-bottom:15px;">
+      Yeni telefonlar: iPhone 12+, Android 10+
+    </div>
+    
+    <button class="btn btn-arjs" id="arjs-btn">📄 Marker ile Görüntüle</button>
+    <div style="font-size:12px; color:#888; margin-top:-5px; margin-bottom:15px;">
+      Tüm telefonlarda çalışır, çıktı gerekir
+    </div>
+    
+    <button class="btn btn-3d" id="3d-btn">🔄 Sadece 3D İncele</button>
+    <div style="font-size:12px; color:#888; margin-top:-5px;">
+      AR yok, 360° döndür
+    </div>
+    
+    <div class="info">
+      WebXR desteklemiyorsa 3D mod otomatik açılır.<br>
+      Marker indirmek için: <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank">Tıkla</a>
+    </div>
+  </div>
+
+  <!-- 2. WEBXR + 3D FALLBACK EKRANI -->
+  <div id="webxr-screen" class="screen">
+    <model-viewer 
+      id="viewer"
+      src="model.glb" 
+      ios-src="model.usdz"
+      ar 
+      ar-modes="webxr scene-viewer quick-look"
+      ar-placement="floor"
+      ar-scale="fixed"
+      camera-controls 
+      auto-rotate
+      style="width:100%; height:100%;">
+      
+      <button slot="ar-button" style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
+              background:#007aff; color:#fff; border:none; padding:16px 32px; border-radius:12px; font-size:16px;">
+        AR'yi Başlat
+      </button>
+      
+      <div slot="ar-failure" style="position:absolute; bottom:20px; left:20px; right:20px;
+           background:#ff3b30; color:#fff; padding:16px; border-radius:12px; text-align:center;">
+        Cihazınız AR desteklemiyor. 3D modeli döndürerek inceleyebilirsiniz.
+      </div>
+      
+      <button slot="hotspot-1" data-position="0 0.01 0.08" data-normal="0 1 0"
+              style="background:#007aff; color:#fff; border:0; padding:8px; border-radius:8px;">
+        Çıkarılabilir Taban
+      </button>
+    </model-viewer>
+    <button class="back-btn" onclick="showScreen('menu')">← Geri</button>
+  </div>
+
+  <!-- 3. AR.JS EKRANI -->
+  <div id="arjs-screen" class="screen">
+    <div class="arjs-hint">
+      Marker’ı yazdırıp kameraya tutun: 
+      <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" style="color:#4af;">İndir</a>
+    </div>
+    
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      <a-marker preset="hiro">
+        <a-entity gltf-model="url(model.glb)" scale="0.3 0.3 0.3" position="0 0 0"></a-entity>
+        <a-text value="Cikarilabilir Taban" position="0 0.6 0" align="center" color="#FFF" width="4"></a-text>
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+    <button class="back-btn" onclick="showScreen('menu')">← Geri</button>
+  </div>
+
+  <script>
+    const menu = document.getElementById('menu');
+    const webxrScreen = document.getElementById('webxr-screen');
+    const arjsScreen = document.getElementById('arjs-screen');
+    const viewer = document.getElementById('viewer');
+    
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    
+    // WebXR destek kontrolü
+    document.getElementById('webxr-btn').onclick = async () => {
+      if (navigator.xr) {
+        showScreen('webxr-screen');
+      } else {
+        // Destek yoksa direkt 3D mod
+        showScreen('webxr-screen');
+        viewer.removeAttribute('ar'); // AR butonunu kaldır, sadece 3D kalsın
+      }
+    };
+    
+    document.getElementById('arjs-btn').onclick = () => showScreen('arjs-screen');
+    
+    document.getElementById('3d-btn').onclick = () => {
+      showScreen('webxr-screen');
+      viewer.removeAttribute('ar');
+    };
+  </script>
 </body>
+</html>

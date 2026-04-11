@@ -1,77 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diyabetik Ayakkabı AR Kartvizit</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
-  <style>
-    .arjs-loader {
-      height: 100%; width: 100%; position: absolute; top: 0; left: 0;
-      background-color: rgba(0, 0, 0, 0.8); z-index: 9999; display: flex;
-      justify-content: center; align-items: center; color: white; font-family: system-ui;
-    }
-  </style>
-</head>
-<body style="margin: 0; overflow: hidden;">
-  
-  <div class="arjs-loader">
-    <div>Kamera açılıyor... Kartviziti kameraya tutun</div>
-  </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Ayakkabı Demo</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; }
+        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        
+        /* 3D Görüntüleyici Boyutları */
+        model-viewer {
+            width: 100%;
+            height: 80vh;
+            background-color: #ffffff;
+            --poster-color: transparent;
+        }
 
-  <!-- 
-    ÖNEMLİ: target.mind dosyasını oluşturman lazım. 
-    1. Kartvizit tasarımını PNG/JPG yap
-    2. https://hiukim.github.io/mind-ar-js-doc/tools/compile gir
-    3. Görseli yükle → target.mind indir → GitHub’a model.glb yanına at
-  -->
-  <a-scene
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false;"
-    renderer="logarithmicDepthBuffer: true;"
-    vr-mode-ui="enabled: false">
-    
-    <!-- Kartvizit marker’ı. target.mind dosyasını sen oluşturacaksın -->
-    <a-marker type="pattern" url="kartvizit.patt">
-      
-      <!-- Ayakkabı modeli. Kartvizitin üstünde durur -->
-      <a-entity 
-        gltf-model="url(model.glb)"
-        scale="0.5 0.5"
-        position="0 0.1 0"
-        rotation="0 0 0"
-        animation-mixer>
-      </a-entity>
-      
-      <!-- Hotspot: Çıkarılabilir Taban yazısı -->
-      <a-text 
-        value="Cikarilabilir Taban" 
-        position="0 0.8 0" 
-        align="center" 
-        color="#007AFF" 
-        width="3"
-        font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
-      </a-text>
-      
-      <!-- Dönen halka efekti -->
-      <a-ring 
-        position="0 0 0" 
-        radius-inner="0.4" 
-        radius-outer="0.45" 
-        color="#00FF00"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
-      </a-ring>
-      
-    </a-marker>
-    
-    <a-entity camera></a-entity>
-  </a-scene>
-  
-  <script>
-    // Loader’ı gizle
-    document.querySelector('a-scene').addEventListener('loaded', () => {
-      document.querySelector('.arjs-loader').style.display = 'none';
-    });
-  </script>
+        /* AR Butonu Tasarımı */
+        #ar-button {
+            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+            background-position: 12px 50%;
+            background-color: #fff;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            bottom: 32px;
+            padding: 0px 16px 0px 40px;
+            font-family: Roboto Regular, Helvetica Neue, sans-serif;
+            font-size: 14px;
+            color:#4285f4;
+            height: 36px;
+            line-height: 36px;
+            border-radius: 18px;
+            border: 1px solid #DADCE0;
+            cursor: pointer;
+        }
+
+        .info { padding: 20px; text-align: center; }
+        h1 { margin: 0; color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="info">
+            <h1>Ayakkabı Demo V1</h1>
+            <p>3D modeli inceleyin veya odanıza yerleştirin</p>
+        </div>
+
+        <model-viewer 
+            src="model.glb" 
+            ios-src="model.usdz" 
+            alt="3D Ayakkabı Modeli" 
+            ar 
+            ar-modes="webxr scene-viewer quick-look" 
+            camera-controls 
+            auto-rotate 
+            shadow-intensity="1.5" 
+            exposure="1" 
+            environment-image="neutral">
+            
+            <button slot="ar-button" id="ar-button">
+                GERÇEK DÜNYADA GÖR
+            </button>
+
+        </model-viewer>
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </body>
 </html>

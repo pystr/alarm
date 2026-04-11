@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR Ayakkabı Demo</title>
+    <title>WebXR Ayakkabı Görüntüleyici</title>
+    <!-- Model Viewer Kütüphanesi -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; }
-        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        
-        /* 3D Görüntüleyici Boyutları */
+        body {
+            margin: 0;
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         model-viewer {
             width: 100%;
             height: 80vh;
             background-color: #ffffff;
             --poster-color: transparent;
         }
-
-        /* AR Butonu Tasarımı */
-        #ar-button {
+        .ar-button {
             background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
             background-repeat: no-repeat;
             background-size: 20px 20px;
@@ -27,50 +29,125 @@
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
-            bottom: 32px;
-            padding: 0px 16px 0px 40px;
+            bottom: 16px;
+            padding: 0 16px 0 40px;
             font-family: Roboto Regular, Helvetica Neue, sans-serif;
             font-size: 14px;
-            color:#4285f4;
+            color: #4285f4;
             height: 36px;
             line-height: 36px;
             border-radius: 18px;
             border: 1px solid #DADCE0;
-            cursor: pointer;
         }
-
-        .info { padding: 20px; text-align: center; }
-        h1 { margin: 0; color: #333; }
-        p { color: #666; }
+        .ar-button:active {
+            background-color: #E8EAED;
+        }
+        .ar-button:focus {
+            outline: none;
+        }
+        #error-message {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="info">
-            <h1>Ayakkabı Demo V1</h1>
-            <p>3D modeli inceleyin veya odanıza yerleştirin</p>
-        </div>
+    <nav class="bg-white shadow-sm p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-gray-800">AR Ayakkabı Deneyimi</h1>
+        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full uppercase font-semibold">WebXR</span>
+    </nav>
 
+    <div class="relative">
+        <!-- Model Viewer Bileşeni -->
+        <!-- src: Android için GLB, ios-src: iPhone için USDZ -->
         <model-viewer 
-            src="model.glb" 
-            ios-src="model.usdz" 
-            alt="3D Ayakkabı Modeli" 
-            ar 
-            ar-modes="webxr scene-viewer quick-look" 
-            camera-controls 
-            auto-rotate 
-            shadow-intensity="1.5" 
-            exposure="1" 
-            environment-image="neutral">
+            id="shoe-model"
+            src="https://pystr.github.io/alarm/model.glb" 
+            ios-src="https://pystr.github.io/alarm/model.usdz"
+            alt="3D Ayakkabı Modeli"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            auto-rotate
+            shadow-intensity="1"
+            exposure="1"
+            environment-image="neutral"
+            touch-action="pan-y">
             
-            <button slot="ar-button" id="ar-button">
-                GERÇEK DÜNYADA GÖR
+            <button slot="ar-button" class="ar-button">
+                GERÇEK DÜNYADA GÖR (AR)
             </button>
 
+            <div slot="poster" class="flex items-center justify-center h-full">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
         </model-viewer>
     </div>
 
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <div class="p-6 bg-white rounded-t-3xl -mt-6 relative z-10 shadow-2xl">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Premium Spor Ayakkabı</h2>
+        <p class="text-gray-600 mb-4 leading-relaxed">
+            Bu model WebXR teknolojisi kullanılarak hazırlanmıştır. Android cihazlarda "Scene Viewer", iOS cihazlarda ise "Quick Look" modunda çalışır.
+        </p>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <span class="block text-xs text-gray-400 uppercase">Ölçek</span>
+                <span class="font-semibold">Gerçek Boyut (1:1)</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <span class="block text-xs text-gray-400 uppercase">Işıklandırma</span>
+                <span class="font-semibold">Dinamik HDR</span>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="font-semibold text-gray-800">Nasıl Kullanılır?</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+                <li class="flex items-center gap-2">
+                    <span class="w-5 h-5 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full text-[10px] font-bold">1</span>
+                    "Gerçek Dünyada Gör" butonuna tıkla.
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-5 h-5 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
+                    Telefonun kamerasını düz bir zemine tut.
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-5 h-5 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
+                    Modeli parmaklarınla döndürebilir ve ölçeklendirebilirsin.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="error-message">Hata: Model yüklenemedi veya cihazınız AR desteklemiyor.</div>
+
+    <script>
+        const modelViewer = document.querySelector('#shoe-model');
+        const errorMsg = document.querySelector('#error-message');
+
+        modelViewer.addEventListener('error', (event) => {
+            console.error("Yükleme hatası:", event);
+            errorMsg.style.display = 'block';
+            errorMsg.innerText = "Model yüklenirken bir sorun oluştu.";
+        });
+
+        // AR modunun desteklenip desteklenmediğini kontrol edelim
+        modelViewer.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'failed') {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = "Cihazınız AR modunu desteklemiyor olabilir.";
+            }
+        });
+    </script>
 </body>
 </html>

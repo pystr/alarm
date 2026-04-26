@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dürümcü Bekir Usta | Canlı & Soslu Lezzet Deneyimi</title>
-    <meta name="description" content="Sancaktepe Merve Mahallesi'nde Bekir Usta'nın eşsiz soslu dürüm ve kebap lezzetleri.">
+    <title>Dürümcü Bekir Usta | Menü ve Lezzetler</title>
+    <meta name="description" content="Bekir Usta'nın meşhur jüliyan tavuk, et ve köfte çeşitleri. Sancaktepe'nin en lezzetli soslu dürümleri.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -132,15 +132,21 @@
         .sos-tag {
             background-color: #fef3c7;
             color: #92400e;
-            padding: 2px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 600;
             display: inline-block;
-            margin: 3px;
-            transition: transform 0.2s;
+            margin: 4px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
-        .sos-tag:hover { transform: scale(1.1); background-color: #fde68a; }
+        .sos-tag:hover { 
+            transform: translateY(-2px); 
+            background-color: var(--primary); 
+            color: white;
+            border-color: white;
+        }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
@@ -154,7 +160,7 @@
     <a href="https://wa.me/905395558891" target="_blank" class="whatsapp-float group">
         <i class="fab fa-whatsapp text-3xl"></i>
         <div class="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-500 group-hover:max-w-xs group-hover:ml-3">
-            <span class="font-bold text-lg">Sipariş Ver</span>
+            <span class="font-bold text-lg">Hemen Sipariş</span>
         </div>
     </a>
 
@@ -220,14 +226,14 @@
                 Bekir <span class="text-red-600">Usta</span>
             </h1>
             <p class="text-gray-300 text-lg md:text-2xl mb-12 max-w-2xl mx-auto font-light leading-relaxed opacity-0 animate-[fadeInUp_1s_ease_0.6s_forwards]">
-                Geleneksel lezzet, modern dokunuş ve Bekir Usta'nın gizli soslarıyla tanışın.
+                Sancaktepe'nin meşhur soslu dürümleri ve Bekir Usta'nın özel jüliyan lezzetleri kapınıza geliyor.
             </p>
             <div class="flex flex-col sm:flex-row gap-6 justify-center opacity-0 animate-[fadeInUp_1s_ease_0.9s_forwards]">
                 <a href="#menu" class="bg-red-700 text-white px-12 py-5 font-bold rounded-xl hover:bg-red-800 transition transform hover:scale-105 shadow-2xl uppercase text-sm tracking-widest">
                     Yemek Listesi
                 </a>
-                <a href="#soslar" class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 font-bold rounded-xl hover:bg-white/20 transition shadow-xl uppercase text-sm tracking-widest">
-                    Sosları Keşfet
+                <a href="https://wa.me/905395558891" class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 font-bold rounded-xl hover:bg-white/20 transition shadow-xl uppercase text-sm tracking-widest">
+                    Hemen Sipariş Ver
                 </a>
             </div>
         </div>
@@ -238,7 +244,7 @@
         <div class="max-w-7xl mx-auto text-center">
             <div class="reveal">
                 <h2 class="text-white text-4xl md:text-6xl font-bold mb-6 italic">"Sosu <span class="text-red-600">Bekir Usta'dan</span>"</h2>
-                <p class="text-gray-400 mb-16 text-xl font-light italic">Mouse ile üzerlerine gelerek gizli dünyamızı keşfedin.</p>
+                <p class="text-gray-400 mb-16 text-xl font-light italic">Yemeklerimize lezzet veren o meşhur soslarımız.</p>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 reveal">
@@ -289,63 +295,113 @@
     <!-- Menü Section -->
     <section id="menu" class="py-24 bg-stone-50 px-6 md:px-20 overflow-hidden">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-20 reveal">
-                <span class="text-red-700 font-bold uppercase tracking-widest text-sm">Lezzet Kataloğu</span>
-                <h2 class="text-5xl md:text-7xl font-bold mt-4 italic">Zengin <span class="text-red-700">Yemek Listesi</span></h2>
+            <div class="text-center mb-16 reveal">
+                <span class="text-red-700 font-bold uppercase tracking-widest text-sm">Zengin Lezzet Seçenekleri</span>
+                <h2 class="text-5xl md:text-7xl font-bold mt-4 italic">Yemek <span class="text-red-700">Listesi</span></h2>
+                <p class="mt-4 text-gray-500 max-w-xl mx-auto">Broşürümüzdeki tüm lezzetleri tek bir yerden inceleyin ve sipariş verin.</p>
             </div>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 reveal">
-                <!-- Tavuk -->
-                <div class="bg-white p-8 rounded-3xl shadow-xl food-card border-t-8 border-red-700">
-                    <h3 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-drumstick-bite mr-3 text-red-700"></i> Tavuk Çeşitleri</h3>
-                    <ul class="space-y-4 text-lg">
+                
+                <!-- Tavuk Çeşitleri -->
+                <div class="bg-white p-8 rounded-3xl shadow-xl food-card border-t-8 border-red-700 flex flex-col h-full">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold flex items-center"><i class="fas fa-drumstick-bite mr-3 text-red-700"></i> Tavuk Çeşitleri</h3>
+                        <p class="text-xs text-gray-400 mt-1 uppercase tracking-tighter">Özel Soslu Jüliyan Kesim</p>
+                    </div>
+                    <ul class="space-y-4 text-lg mb-8 flex-grow">
                         <li class="flex justify-between border-b pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Jüliyan Göğüs</span> 
-                            <i class="fas fa-plus text-xs text-stone-200"></i>
+                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
                         </li>
                         <li class="flex justify-between border-b pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Jüliyan But</span> 
-                            <i class="fas fa-plus text-xs text-stone-200"></i>
+                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
                         </li>
                         <li class="flex justify-between border-b pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Jüliyan Pirzola</span> 
-                            <i class="fas fa-plus text-xs text-stone-200"></i>
+                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
                         </li>
                     </ul>
+                    <a href="https://wa.me/905395558891?text=Merhaba,%20Tavuk%20Dürüm%20siparişi%20vermek%20istiyorum." class="w-full bg-red-700 text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-red-800 transition transform active:scale-95 shadow-lg">
+                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Sipariş Ver
+                    </a>
                 </div>
 
-                <!-- Et -->
-                <div class="bg-stone-900 p-8 rounded-3xl shadow-xl food-card text-white lg:scale-110 z-10">
-                    <h3 class="text-2xl font-bold mb-6 flex items-center text-red-600"><i class="fas fa-fire mr-3"></i> Et Çeşitleri</h3>
-                    <ul class="space-y-4 text-lg">
+                <!-- Et Çeşitleri (Highlight) -->
+                <div class="bg-stone-900 p-8 rounded-3xl shadow-2xl food-card text-white lg:scale-110 z-10 border-2 border-red-700 flex flex-col h-full">
+                    <div class="mb-6">
+                        <div class="bg-red-700 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full w-max mb-2 animate-bounce">Favori Lezzet</div>
+                        <h3 class="text-2xl font-bold flex items-center text-red-600"><i class="fas fa-fire mr-3"></i> Et Çeşitleri</h3>
+                        <p class="text-xs text-gray-500 mt-1 uppercase tracking-tighter">Birinci Sınıf Dana Eti</p>
+                    </div>
+                    <ul class="space-y-4 text-lg mb-8 flex-grow">
                         <li class="flex justify-between border-b border-white/10 pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Jüliyan Tranç</span> 
-                            <i class="fas fa-plus text-xs text-white/10"></i>
+                            <i class="fas fa-star text-xs text-yellow-500 mt-2"></i>
                         </li>
                         <li class="flex justify-between border-b border-white/10 pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Jüliyan Antrikot</span> 
-                            <i class="fas fa-plus text-xs text-white/10"></i>
+                            <i class="fas fa-star text-xs text-yellow-500 mt-2"></i>
                         </li>
                     </ul>
-                    <div class="mt-8 bg-red-700 p-4 rounded-xl text-center animate-pulse">
-                        <p class="font-bold text-sm uppercase italic">Bekir Usta Tavsiyesi!</p>
-                    </div>
+                    <a href="https://wa.me/905395558891?text=Merhaba,%20Et%20Dürüm%20siparişi%20vermek%20istiyorum." class="w-full bg-red-600 text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-red-700 transition transform active:scale-95 shadow-xl">
+                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Hemen Sipariş Ver
+                    </a>
                 </div>
 
-                <!-- Köfte -->
-                <div class="bg-white p-8 rounded-3xl shadow-xl food-card border-t-8 border-red-700">
-                    <h3 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-hamburger mr-3 text-red-700"></i> Köfte Çeşitleri</h3>
-                    <ul class="space-y-4 text-lg">
+                <!-- Köfte Çeşitleri -->
+                <div class="bg-white p-8 rounded-3xl shadow-xl food-card border-t-8 border-red-700 flex flex-col h-full">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold flex items-center"><i class="fas fa-hamburger mr-3 text-red-700"></i> Köfte Çeşitleri</h3>
+                        <p class="text-xs text-gray-400 mt-1 uppercase tracking-tighter">Ev Yapımı Tadında</p>
+                    </div>
+                    <ul class="space-y-4 text-lg mb-8 flex-grow">
                         <li class="flex justify-between border-b pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Kasap Köfte</span> 
-                            <i class="fas fa-plus text-xs text-stone-200"></i>
+                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
                         </li>
                         <li class="flex justify-between border-b pb-2 group cursor-default">
                             <span class="group-hover:translate-x-2 transition-transform">Patlıcanlı Kıyma</span> 
-                            <i class="fas fa-plus text-xs text-stone-200"></i>
+                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
                         </li>
                     </ul>
+                    <a href="https://wa.me/905395558891?text=Merhaba,%20Köfte%20siparişi%20vermek%20istiyorum." class="w-full bg-red-700 text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-red-800 transition transform active:scale-95 shadow-lg">
+                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Sipariş Ver
+                    </a>
                 </div>
+
+                <!-- İçecekler & Ekstralar -->
+                <div class="bg-stone-100 p-8 rounded-3xl shadow-lg food-card lg:col-span-2">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold flex items-center"><i class="fas fa-glass-whiskey mr-3 text-red-700"></i> İçecekler & Yan Ürünler</h3>
+                            <p class="text-xs text-gray-400 mt-1 uppercase tracking-tighter">Soğuk ve Tatlı Dokunuşlar</p>
+                        </div>
+                        <a href="https://wa.me/905395558891" class="mt-4 md:mt-0 bg-stone-900 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-stone-800 transition flex items-center justify-center">
+                            <i class="fab fa-whatsapp mr-2"></i> Siparişe Ekle
+                        </a>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="sos-tag">Kola / Fanta / Sprite</span>
+                        <span class="sos-tag">Ayran</span>
+                        <span class="sos-tag">Şalgam Suyu</span>
+                        <span class="sos-tag">Meyve Suları</span>
+                        <span class="sos-tag">Didi / Lipton</span>
+                        <span class="sos-tag">Sütlaç</span>
+                        <span class="sos-tag">Maden Suyu</span>
+                        <span class="sos-tag">Su</span>
+                    </div>
+                </div>
+
+                <!-- Paket Servis Bilgisi -->
+                <div class="bg-red-700 p-8 rounded-3xl shadow-xl food-card text-white flex flex-col justify-center items-center text-center">
+                    <i class="fas fa-motorcycle text-5xl mb-4 animate-bounce"></i>
+                    <h3 class="text-2xl font-bold italic">Hızlı Paket Servis</h3>
+                    <p class="text-sm text-white/80 mt-2">Sancaktepe Merve Mahallesi ve çevresine sıcak ve hızlı gönderim yapıyoruz.</p>
+                    <a href="tel:+902162912525" class="mt-6 text-xl font-bold border-b-2 border-white hover:text-stone-900 transition">0216 291 25 25</a>
+                </div>
+
             </div>
         </div>
     </section>
@@ -372,8 +428,8 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-xl text-stone-800">Sipariş Hatları</h4>
-                                <p class="text-red-700 font-bold text-lg">0216 291 25 25</p>
-                                <p class="text-stone-600 font-medium">0539 555 88 91</p>
+                                <p class="text-red-700 font-bold text-xl">0216 291 25 25</p>
+                                <p class="text-stone-600 font-medium text-lg">0539 555 88 91</p>
                             </div>
                         </div>
                     </div>
@@ -392,8 +448,8 @@
                 <div class="bg-red-700 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
                     <i class="fas fa-utensils text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold text-white italic">Dürümcü Bekir Usta 3</h3>
-                <p class="text-xs uppercase tracking-widest mt-1">"Lezzetin En Canlı Hali"</p>
+                <h3 class="text-xl font-bold text-white italic uppercase tracking-tighter">Dürümcü Bekir Usta</h3>
+                <p class="text-[10px] uppercase tracking-widest mt-1 text-red-600">Sancaktepe Şubesi</p>
             </div>
             <div class="border-t border-white/5 pt-8 text-[10px] uppercase tracking-[0.2em]">
                 &copy; 2024 Dürümcü Bekir Usta. Tüm Hakları Saklıdır.
@@ -424,14 +480,14 @@
             follower.style.top = e.clientY + 'px';
         });
 
-        // Parallax
+        // Parallax Effect
         document.addEventListener('mousemove', (e) => {
             const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
             const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
             const bg = document.getElementById('parallax-bg');
             const content = document.getElementById('parallax-content');
-            bg.style.transform = `translate(${moveX * -1}px, ${moveY * -1}px) scale(1.05)`;
-            content.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            if(bg) bg.style.transform = `translate(${moveX * -1}px, ${moveY * -1}px) scale(1.05)`;
+            if(content) content.style.transform = `translate(${moveX}px, ${moveY}px)`;
         });
 
         // Navbar Scroll
@@ -454,7 +510,7 @@
             }
         });
 
-        // Reveal
+        // Reveal Animation
         function reveal() {
             const reveals = document.querySelectorAll('.reveal');
             reveals.forEach(el => {
@@ -469,9 +525,11 @@
         const slides = document.querySelectorAll('.slide');
         let currentSlide = 0;
         setInterval(() => {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
+            if(slides.length > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }
         }, 6000);
 
         // Tilt Card
@@ -480,7 +538,7 @@
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                card.style.transform = `perspective(1000px) rotateX(${(y - rect.height/2)/10}deg) rotateY(${(rect.width/2 - x)/10}deg) translateY(-10px)`;
+                card.style.transform = `perspective(1000px) rotateX(${(y - rect.height/2)/15}deg) rotateY(${(rect.width/2 - x)/15}deg) translateY(-10px)`;
             });
             card.addEventListener('mouseleave', () => card.style.transform = `none`);
         });

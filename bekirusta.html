@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dürümcü Bekir Usta | Menü ve Lezzetler</title>
-    <meta name="description" content="Bekir Usta'nın meşhur jüliyan tavuk, et ve köfte çeşitleri. Sancaktepe'nin en lezzetli soslu dürümleri.">
+    <title>Dürümcü Bekir Usta | İnteraktif Deneyim</title>
+    <meta name="description" content="Bekir Usta'nın meşhur dürümleri ve özel sosları. Sancaktepe lezzet durağı.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- GSAP Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         :root {
             --primary: #c21807; 
             --secondary: #1a1a1a;
-            --accent: #f59e0b; 
         }
         body { 
             font-family: 'Poppins', sans-serif; 
@@ -22,22 +23,7 @@
         }
         h1, h2, h3, .font-serif { font-family: 'Playfair Display', serif; }
 
-        /* Custom Cursor */
-        #cursor-follower {
-            width: 30px;
-            height: 30px;
-            border: 2px solid var(--primary);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            transition: transform 0.1s ease, background 0.3s ease;
-            transform: translate(-50%, -50%);
-            display: none;
-        }
-        @media (min-width: 1024px) { #cursor-follower { display: block; } }
-
-        /* Navbar Animations */
+        /* Navbar Scroll Effect */
         #navbar { transition: all 0.4s ease-in-out; }
         .header-scrolled {
             background-color: rgba(255, 255, 255, 0.98) !important;
@@ -47,30 +33,36 @@
             padding-bottom: 0.5rem !important;
         }
 
-        /* Hero Slider & Parallax */
-        .hero-slider {
-            position: absolute;
-            inset: -50px;
-            z-index: 0;
-            overflow: hidden;
+        /* Mobile Menu Overlay */
+        #mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
         }
-        .slide {
+        #mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        /* Hero Parallax */
+        #home {
+            perspective: 1000px;
+        }
+        .hero-bg {
             position: absolute;
-            inset: 0;
-            opacity: 0;
-            transition: opacity 1.5s ease-in-out;
+            inset: -10%; 
+            background-image: url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
+            z-index: 0;
+            will-change: transform;
         }
-        .slide.active { opacity: 1; }
         .hero-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2), rgba(0,0,0,0.9));
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.3), rgba(0,0,0,0.9));
             z-index: 1;
         }
 
-        /* Reveal Animation Classes */
+        /* Animations */
         .reveal {
             opacity: 0;
             transform: translateY(30px);
@@ -81,32 +73,27 @@
             transform: translateY(0);
         }
 
-        /* Interactive Cards */
+        /* Food Card 3D Setup */
+        .menu-container {
+            perspective: 1200px;
+        }
         .food-card { 
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             transform-style: preserve-3d;
+            will-change: transform, box-shadow;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            /* Zarif Kırmızı Çerçeve */
+            border: 1px solid rgba(194, 24, 7, 0.15);
+            transition: border-color 0.4s ease;
         }
         .food-card:hover {
-            transform: translateY(-10px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.2);
+            border-color: rgba(194, 24, 7, 0.5);
         }
-
-        /* Mobile Menu Overlay */
-        #mobile-menu-overlay {
-            clip-path: circle(0% at 90% 5%);
-            transition: clip-path 0.6s ease-in-out;
+        
+        .food-card ul li {
+            position: relative;
+            will-change: transform, opacity;
         }
-        #mobile-menu-overlay.open {
-            clip-path: circle(150% at 90% 5%);
-        }
-
-        .sos-icon-box { transition: all 0.3s ease; }
-        .sos-icon-box:hover {
-            background-color: var(--primary) !important;
-            border-color: var(--primary) !important;
-            transform: scale(1.1) translateY(-5px);
-        }
-        .sos-icon-box:hover h4, .sos-icon-box:hover i { color: white !important; }
 
         .whatsapp-float {
             position: fixed;
@@ -120,7 +107,6 @@
             padding: 14px 28px;
             border-radius: 50px;
             box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
-            transition: all 0.3s ease;
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
@@ -129,425 +115,337 @@
             100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
         }
 
-        .sos-tag {
-            background-color: #fef3c7;
-            color: #92400e;
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
-            margin: 4px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-        .sos-tag:hover { 
-            transform: translateY(-2px); 
-            background-color: var(--primary); 
-            color: white;
-            border-color: white;
+        .category-img-container {
+            height: 220px;
+            overflow: hidden;
+            position: relative;
         }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        .map-container {
+            filter: grayscale(1) contrast(1.2) opacity(0.8);
+            transition: all 0.5s ease;
+        }
+        .map-container:hover {
+            filter: grayscale(0) contrast(1) opacity(1);
+        }
     </style>
 </head>
 <body class="antialiased">
 
-    <div id="cursor-follower"></div>
-
-    <!-- WhatsApp Button -->
+    <!-- WhatsApp Butonu -->
     <a href="https://wa.me/905395558891" target="_blank" class="whatsapp-float group">
         <i class="fab fa-whatsapp text-3xl"></i>
-        <div class="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-500 group-hover:max-w-xs group-hover:ml-3">
-            <span class="font-bold text-lg">Hemen Sipariş</span>
-        </div>
+        <span class="ml-3 font-bold text-lg">Hemen Sipariş Ver</span>
     </a>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu-overlay" class="fixed inset-0 bg-stone-950 z-[60] flex flex-col items-center justify-center space-y-8 text-center px-6">
-        <button id="close-menu" class="absolute top-8 right-8 text-white text-4xl hover:rotate-90 transition-transform">
-            <i class="fas fa-times"></i>
-        </button>
-        <a href="#home" class="mobile-link text-3xl font-serif text-white hover:text-red-600 transition">Ana Sayfa</a>
-        <a href="#menu" class="mobile-link text-3xl font-serif text-white hover:text-red-600 transition">Yemek Listesi</a>
-        <a href="#soslar" class="mobile-link text-3xl font-serif text-white hover:text-red-600 transition">Özel Soslar</a>
-        <a href="#iletisim" class="mobile-link text-3xl font-serif text-white hover:text-red-600 transition">İletişim</a>
-        <div class="pt-10 border-t border-white/10 w-full max-w-xs">
-            <p class="text-gray-500 text-sm mb-4 uppercase tracking-widest">Sipariş Hattı</p>
-            <a href="tel:+902162912525" class="text-red-600 text-2xl font-bold italic">0216 291 25 25</a>
-        </div>
-    </div>
-
-    <!-- Navigation -->
+    <!-- Navigasyon -->
     <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 py-6 px-4 md:px-20 flex justify-between items-center bg-transparent">
-        <div class="flex items-center space-x-3 group cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-            <div class="bg-red-700 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                <i class="fas fa-utensils text-2xl text-white"></i>
+        <div id="main-logo" class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <div class="logo-box bg-red-700 w-10 h-10 rounded-lg flex items-center justify-center shadow-lg">
+                <i class="fas fa-fire text-white"></i>
             </div>
             <div class="flex flex-col">
-                <span class="text-xl md:text-2xl font-bold tracking-tighter text-white logo-text uppercase leading-none">Dürümcü</span>
-                <span class="text-lg md:text-xl font-light text-red-500 logo-subtext uppercase tracking-[0.2em] leading-none">Bekir Usta</span>
+                <span class="text-xl font-bold text-white logo-text uppercase leading-none">Dürümcü</span>
+                <span class="text-md font-light text-red-500 logo-subtext uppercase tracking-widest leading-none">Bekir Usta</span>
             </div>
         </div>
         
-        <div class="hidden lg:flex space-x-8 text-xs font-bold uppercase tracking-widest">
-            <a href="#home" class="nav-link text-white hover:text-red-600 transition">Ana Sayfa</a>
-            <a href="#menu" class="nav-link text-white hover:text-red-600 transition">Yemek Listesi</a>
-            <a href="#soslar" class="nav-link text-white hover:text-red-600 transition">Özel Soslar</a>
+        <div class="hidden lg:flex space-x-10 text-xs font-bold uppercase tracking-widest">
+            <a href="#home" class="nav-link text-white hover:text-red-600 transition">Giriş</a>
+            <a href="#menu" class="nav-link text-white hover:text-red-600 transition">Menüler</a>
             <a href="#iletisim" class="nav-link text-white hover:text-red-600 transition">İletişim</a>
         </div>
 
         <div class="flex items-center space-x-4">
-            <a href="tel:+902162912525" class="bg-red-700 text-white p-3 md:px-6 md:py-3 rounded-full hover:bg-red-800 transition-all flex items-center shadow-lg hover:scale-105 active:scale-95">
-                <i class="fas fa-phone-alt md:mr-2"></i>
-                <span class="hidden md:inline font-bold uppercase text-xs">Hemen Ara</span>
+            <a href="tel:+902162912525" class="bg-red-700 text-white px-5 py-2 rounded-full font-bold text-xs uppercase shadow-lg hover:scale-105 transition hidden md:block">
+                0216 291 25 25
             </a>
-            <button id="open-menu" class="lg:hidden text-white text-2xl p-2 focus:outline-none">
+            <button id="menu-btn" class="lg:hidden text-white text-2xl focus:outline-none">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Mobil Menü -->
+    <div id="mobile-menu" class="fixed inset-0 bg-stone-950 z-[60] flex flex-col p-10 lg:hidden">
+        <div class="flex justify-between items-center mb-16">
+            <span class="text-red-600 font-bold text-xl uppercase italic">Bekir Usta</span>
+            <button id="close-btn" class="text-white text-3xl">&times;</button>
+        </div>
+        <div class="flex flex-col space-y-8">
+            <a href="#home" class="mobile-nav-link text-4xl font-serif text-white hover:text-red-600 transition">Giriş</a>
+            <a href="#menu" class="mobile-nav-link text-4xl font-serif text-white hover:text-red-600 transition">Menüler</a>
+            <a href="#iletisim" class="mobile-nav-link text-4xl font-serif text-white hover:text-red-600 transition">İletişim</a>
+        </div>
+    </div>
+
+    <!-- Hero Bölümü -->
     <section id="home" class="relative h-screen flex items-center justify-center text-center px-6 overflow-hidden">
-        <div class="hero-slider" id="parallax-bg">
-            <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1920&q=80')"></div>
-            <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=1920&q=80')"></div>
-            <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1920&q=80')"></div>
-        </div>
+        <div class="hero-bg"></div>
         <div class="hero-overlay"></div>
-
-        <div class="relative z-10 max-w-4xl" id="parallax-content">
-            <h4 class="text-red-500 text-lg md:text-2xl font-bold mb-4 tracking-[0.3em] uppercase italic opacity-0 animate-[fadeInDown_1s_ease_forwards]">
-                "Sosuyla İlk, Lezzetiyle Tek"
-            </h4>
-            <h1 class="text-6xl md:text-9xl font-bold text-white mb-8 leading-tight drop-shadow-2xl italic opacity-0 animate-[fadeIn_1s_ease_0.3s_forwards]">
-                Bekir <span class="text-red-600">Usta</span>
-            </h1>
-            <p class="text-gray-300 text-lg md:text-2xl mb-12 max-w-2xl mx-auto font-light leading-relaxed opacity-0 animate-[fadeInUp_1s_ease_0.6s_forwards]">
-                Sancaktepe'nin meşhur soslu dürümleri ve Bekir Usta'nın özel jüliyan lezzetleri kapınıza geliyor.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center opacity-0 animate-[fadeInUp_1s_ease_0.9s_forwards]">
-                <a href="#menu" class="bg-red-700 text-white px-12 py-5 font-bold rounded-xl hover:bg-red-800 transition transform hover:scale-105 shadow-2xl uppercase text-sm tracking-widest">
-                    Yemek Listesi
-                </a>
-                <a href="https://wa.me/905395558891" class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 font-bold rounded-xl hover:bg-white/20 transition shadow-xl uppercase text-sm tracking-widest">
-                    Hemen Sipariş Ver
-                </a>
-            </div>
+        <div id="hero-content" class="relative z-10">
+            <h1 class="text-6xl md:text-9xl font-bold text-white mb-4 italic leading-tight">Lezzet <span class="text-red-600">Galerisi</span></h1>
+            <p class="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto font-light mb-10">Sancaktepe'de Bekir Usta'nın meşhur dokunuşuyla hazırlanan dürümler.</p>
+            <a href="#menu" class="bg-red-700 text-white px-12 py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-red-800 transition shadow-2xl">Menüyü İncele</a>
         </div>
     </section>
 
-    <!-- Soslar Bölümü -->
-    <section id="soslar" class="py-24 bg-stone-900 px-6 overflow-hidden">
-        <div class="max-w-7xl mx-auto text-center">
-            <div class="reveal">
-                <h2 class="text-white text-4xl md:text-6xl font-bold mb-6 italic">"Sosu <span class="text-red-600">Bekir Usta'dan</span>"</h2>
-                <p class="text-gray-400 mb-16 text-xl font-light italic">Yemeklerimize lezzet veren o meşhur soslarımız.</p>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 reveal">
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-magic text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Mantarlı Sebze</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-fire text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Közde Patlıcan</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-pepper-hot text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Meksika Acı</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-drumstick-bite text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Barbekü Soğan</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-leaf text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Sebze Soslu</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-blender text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Harman</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-cheese text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Cheddar</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-utensils text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Barbekü</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-honey-pot text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Ballı Kaşarlı</h4>
-                </div>
-                <div class="sos-icon-box bg-stone-800 p-6 rounded-2xl border border-stone-700">
-                    <i class="fas fa-sun text-red-600 mb-4 text-2xl"></i>
-                    <h4 class="text-white font-bold">Körili</h4>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Menü Section -->
-    <section id="menu" class="py-24 bg-stone-50 px-6 md:px-20 overflow-hidden">
+    <!-- Menü Bölümü -->
+    <section id="menu" class="py-24 bg-stone-100 px-6 md:px-20 overflow-hidden">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16 reveal">
-                <span class="text-red-700 font-bold uppercase tracking-widest text-sm">Zengin Lezzet Seçenekleri</span>
-                <h2 class="text-5xl md:text-7xl font-bold mt-4 italic">Yemek <span class="text-red-700">Listesi</span></h2>
-                <p class="mt-4 text-gray-500 max-w-xl mx-auto">Broşürümüzdeki tüm lezzetleri tek bir yerden inceleyin ve sipariş verin.</p>
+                <h2 class="text-4xl md:text-6xl font-bold italic mb-4">Usta'nın <span class="text-red-700">Seçtikleri</span></h2>
+                <div class="h-1 w-24 bg-red-700 mx-auto"></div>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 reveal">
-                
-                <!-- Tavuk Çeşitleri -->
-                <div class="bg-white p-8 rounded-3xl shadow-xl food-card border-t-8 border-red-700 flex flex-col h-full">
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold flex items-center"><i class="fas fa-drumstick-bite mr-3 text-red-700"></i> Tavuk Çeşitleri</h3>
-                        <p class="text-xs text-gray-400 mt-1 uppercase tracking-tighter">Özel Soslu Jüliyan Kesim</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 menu-container">
+                <!-- Tavuk Grubu -->
+                <div class="bg-white rounded-[2.5rem] food-card flex flex-col reveal overflow-hidden">
+                    <div class="category-img-container">
+                        <img src="https://i.pinimg.com/736x/32/07/e0/3207e01182f943af774136dc829aa183.jpg" alt="Tavuk Grubu" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <h3 class="absolute bottom-6 left-8 text-2xl font-bold text-white italic">Tavuk Grubu</h3>
                     </div>
-                    <ul class="space-y-4 text-lg mb-8 flex-grow">
-                        <li class="flex justify-between border-b pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Jüliyan Göğüs</span> 
-                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
-                        </li>
-                        <li class="flex justify-between border-b pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Jüliyan But</span> 
-                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
-                        </li>
-                        <li class="flex justify-between border-b pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Jüliyan Pirzola</span> 
-                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
-                        </li>
-                    </ul>
-                    <a href="https://wa.me/905395558891?text=Merhaba,%20Tavuk%20Dürüm%20siparişi%20vermek%20istiyorum." class="w-full bg-red-700 text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-red-800 transition transform active:scale-95 shadow-lg">
-                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Sipariş Ver
-                    </a>
-                </div>
-
-                <!-- Et Çeşitleri (Highlight) -->
-                <div class="bg-stone-900 p-8 rounded-3xl shadow-2xl food-card text-white lg:scale-110 z-10 border-2 border-red-700 flex flex-col h-full">
-                    <div class="mb-6">
-                        <div class="bg-red-700 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full w-max mb-2 animate-bounce">Favori Lezzet</div>
-                        <h3 class="text-2xl font-bold flex items-center text-red-600"><i class="fas fa-fire mr-3"></i> Et Çeşitleri</h3>
-                        <p class="text-xs text-gray-500 mt-1 uppercase tracking-tighter">Birinci Sınıf Dana Eti</p>
-                    </div>
-                    <ul class="space-y-4 text-lg mb-8 flex-grow">
-                        <li class="flex justify-between border-b border-white/10 pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Jüliyan Tranç</span> 
-                            <i class="fas fa-star text-xs text-yellow-500 mt-2"></i>
-                        </li>
-                        <li class="flex justify-between border-b border-white/10 pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Jüliyan Antrikot</span> 
-                            <i class="fas fa-star text-xs text-yellow-500 mt-2"></i>
-                        </li>
-                    </ul>
-                    <a href="https://wa.me/905395558891?text=Merhaba,%20Et%20Dürüm%20siparişi%20vermek%20istiyorum." class="w-full bg-red-600 text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-red-700 transition transform active:scale-95 shadow-xl">
-                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Hemen Sipariş Ver
-                    </a>
-                </div>
-
-                <!-- Köfte Çeşitleri -->
-                <div class="bg-white p-8 rounded-3xl shadow-xl food-card border-t-8 border-red-700 flex flex-col h-full">
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold flex items-center"><i class="fas fa-hamburger mr-3 text-red-700"></i> Köfte Çeşitleri</h3>
-                        <p class="text-xs text-gray-400 mt-1 uppercase tracking-tighter">Ev Yapımı Tadında</p>
-                    </div>
-                    <ul class="space-y-4 text-lg mb-8 flex-grow">
-                        <li class="flex justify-between border-b pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Kasap Köfte</span> 
-                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
-                        </li>
-                        <li class="flex justify-between border-b pb-2 group cursor-default">
-                            <span class="group-hover:translate-x-2 transition-transform">Patlıcanlı Kıyma</span> 
-                            <i class="fas fa-check-circle text-xs text-green-500 mt-2"></i>
-                        </li>
-                    </ul>
-                    <a href="https://wa.me/905395558891?text=Merhaba,%20Köfte%20siparişi%20vermek%20istiyorum." class="w-full bg-red-700 text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-red-800 transition transform active:scale-95 shadow-lg">
-                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Sipariş Ver
-                    </a>
-                </div>
-
-                <!-- İçecekler & Ekstralar -->
-                <div class="bg-stone-100 p-8 rounded-3xl shadow-lg food-card lg:col-span-2">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                        <div>
-                            <h3 class="text-2xl font-bold flex items-center"><i class="fas fa-glass-whiskey mr-3 text-red-700"></i> İçecekler & Yan Ürünler</h3>
-                            <p class="text-xs text-gray-400 mt-1 uppercase tracking-tighter">Soğuk ve Tatlı Dokunuşlar</p>
-                        </div>
-                        <a href="https://wa.me/905395558891" class="mt-4 md:mt-0 bg-stone-900 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-stone-800 transition flex items-center justify-center">
-                            <i class="fab fa-whatsapp mr-2"></i> Siparişe Ekle
-                        </a>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="sos-tag">Kola / Fanta / Sprite</span>
-                        <span class="sos-tag">Ayran</span>
-                        <span class="sos-tag">Şalgam Suyu</span>
-                        <span class="sos-tag">Meyve Suları</span>
-                        <span class="sos-tag">Didi / Lipton</span>
-                        <span class="sos-tag">Sütlaç</span>
-                        <span class="sos-tag">Maden Suyu</span>
-                        <span class="sos-tag">Su</span>
+                    <div class="p-8 flex-grow flex flex-col">
+                        <ul class="space-y-4 text-gray-700 mb-8 menu-list flex-grow">
+                            <li class="flex justify-between border-b pb-2"><span>Tavuk Şiş Dürüm</span> <i class="fas fa-check text-red-600"></i></li>
+                            <li class="flex justify-between border-b pb-2"><span>Jüliyan Göğüs Dürüm</span> <i class="fas fa-check text-red-600"></i></li>
+                            <li class="flex justify-between border-b pb-2"><span>Tavuk Kanat</span> <i class="fas fa-check text-red-600"></i></li>
+                            <li class="flex justify-between border-b pb-2"><span>Tavuk Pirzola</span> <i class="fas fa-check text-red-600"></i></li>
+                        </ul>
+                        <a href="https://wa.me/905395558891" class="w-full bg-red-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-red-800 transition">Sipariş Ver</a>
                     </div>
                 </div>
 
-                <!-- Paket Servis Bilgisi -->
-                <div class="bg-red-700 p-8 rounded-3xl shadow-xl food-card text-white flex flex-col justify-center items-center text-center">
-                    <i class="fas fa-motorcycle text-5xl mb-4 animate-bounce"></i>
-                    <h3 class="text-2xl font-bold italic">Hızlı Paket Servis</h3>
-                    <p class="text-sm text-white/80 mt-2">Sancaktepe Merve Mahallesi ve çevresine sıcak ve hızlı gönderim yapıyoruz.</p>
-                    <a href="tel:+902162912525" class="mt-6 text-xl font-bold border-b-2 border-white hover:text-stone-900 transition">0216 291 25 25</a>
+                <!-- Kebap & Et Grubu -->
+                <div class="bg-stone-900 rounded-[2.5rem] food-card flex flex-col text-white reveal overflow-hidden">
+                    <div class="category-img-container">
+                        <img src="https://i.pinimg.com/736x/7c/a6/13/7ca6135e2cd7f9cb09a6875a5b4487d0.jpg" alt="Kebap Grubu" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-red-900/60 to-transparent"></div>
+                        <h3 class="absolute bottom-6 left-8 text-2xl font-bold text-white italic">Kebap & Et</h3>
+                    </div>
+                    <div class="p-8 flex-grow flex flex-col">
+                        <ul class="space-y-4 mb-8 menu-list flex-grow">
+                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Adana Dürüm</span> <i class="fas fa-fire-alt text-red-500"></i></li>
+                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Urfa Dürüm</span> <i class="fas fa-fire-alt text-red-500"></i></li>
+                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Et Döner Dürüm</span> <i class="fas fa-star text-yellow-500"></i></li>
+                            <li class="flex justify-between border-b border-white/10 pb-2"><span>Kuzu Şiş Dürüm</span> <i class="fas fa-check text-red-500"></i></li>
+                        </ul>
+                        <a href="https://wa.me/905395558891" class="w-full bg-red-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-red-700 transition">Sipariş Ver</a>
+                    </div>
                 </div>
 
+                <!-- Köfte Grubu -->
+                <div class="bg-white rounded-[2.5rem] food-card flex flex-col reveal overflow-hidden">
+                    <div class="category-img-container">
+                        <img src="https://i.pinimg.com/1200x/40/f3/e6/40f3e61127825afbdd397f06cc8beb82.jpg" alt="Köfte Grubu" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <h3 class="absolute bottom-6 left-8 text-2xl font-bold text-white italic">Köfte Grubu</h3>
+                    </div>
+                    <div class="p-8 flex-grow flex flex-col">
+                        <ul class="space-y-4 text-gray-700 mb-8 menu-list flex-grow">
+                            <li class="flex justify-between border-b pb-2"><span>Köfte Dürüm</span> <i class="fas fa-check text-red-600"></i></li>
+                            <li class="flex justify-between border-b pb-2"><span>Kasap Köfte (Porsiyon)</span> <i class="fas fa-check text-red-600"></i></li>
+                            <li class="flex justify-between border-b pb-2"><span>Köfte Ekmek</span> <i class="fas fa-check text-red-600"></i></li>
+                        </ul>
+                        <a href="https://wa.me/905395558891" class="w-full bg-red-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-red-800 transition">Sipariş Ver</a>
+                    </div>
+                </div>
+
+                <!-- Özel Soslar -->
+                <div class="bg-red-800 rounded-[2.5rem] food-card flex flex-col text-white reveal overflow-hidden">
+                    <div class="category-img-container">
+                        <img src="https://i.pinimg.com/1200x/6a/bf/af/6abfafbb67e503da19704b2fcb8d1119.jpg" alt="Usta'nın Özel Sosları" class="w-full h-full object-cover contrast-125 brightness-90">
+                        <div class="absolute inset-0 bg-gradient-to-t from-red-950/80 to-transparent"></div>
+                        <h3 class="absolute bottom-6 left-8 text-2xl font-bold text-white italic">Usta'nın Sosları</h3>
+                    </div>
+                    <div class="p-8 flex-grow flex flex-col">
+                        <ul class="space-y-4 mb-8 menu-list flex-grow">
+                            <li class="flex justify-between border-b border-white/20 pb-2"><span>Acı Biber Sosu</span> <i class="fas fa-pepper-hot text-yellow-400"></i></li>
+                            <li class="flex justify-between border-b border-white/20 pb-2"><span>Sarımsaklı Yoğurt</span> <i class="fas fa-leaf text-green-400"></i></li>
+                            <li class="flex justify-between border-b border-white/20 pb-2"><span>Özel Baharat Karışımı</span> <i class="fas fa-mortar-pestle text-orange-400"></i></li>
+                        </ul>
+                        <p class="text-xs text-red-200 italic mb-4">*Tüm dürümlere usta dokunuşu.</p>
+                        <a href="https://wa.me/905395558891" class="w-full bg-white text-red-800 py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-gray-100 transition">Soslu Sipariş</a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- İletişim & Harita -->
-    <section id="iletisim" class="py-24 px-6 md:px-20 bg-white">
+    <!-- İletişim & Harita Bölümü -->
+    <section id="iletisim" class="py-24 bg-white px-6">
         <div class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="reveal">
-                    <h2 class="text-5xl font-bold italic mb-10">Bize <span class="text-red-700">Ulaşın</span></h2>
+                    <h2 class="text-5xl font-bold mb-8 italic">Bize <span class="text-red-700">Ulaşın</span></h2>
                     <div class="space-y-8">
-                        <div class="flex items-start space-x-6 group">
-                            <div class="w-14 h-14 bg-red-700 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:rotate-12 transition-transform">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-stone-100 p-4 rounded-2xl text-red-700">
                                 <i class="fas fa-map-marker-alt text-2xl"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-xl text-stone-800">Adres</h4>
-                                <p class="text-gray-500 mt-1">Merve Mah. Bahçelievler Cad. No: 96/A Sancaktepe/İstanbul</p>
+                                <h4 class="font-bold text-lg">Adres</h4>
+                                <p class="text-gray-600">Merve Mah. Bahçelievler Cad. No: 96/A Sancaktepe/İstanbul</p>
                             </div>
                         </div>
-                        <div class="flex items-start space-x-6 group">
-                            <div class="w-14 h-14 bg-green-600 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:-rotate-12 transition-transform">
-                                <i class="fab fa-whatsapp text-2xl"></i>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-stone-100 p-4 rounded-2xl text-red-700">
+                                <i class="fas fa-phone-alt text-2xl"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-xl text-stone-800">Sipariş Hatları</h4>
-                                <p class="text-red-700 font-bold text-xl">0216 291 25 25</p>
-                                <p class="text-stone-600 font-medium text-lg">0539 555 88 91</p>
+                                <h4 class="font-bold text-lg">Paket Servis</h4>
+                                <p class="text-2xl font-bold text-stone-900">0216 291 25 25</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="h-[450px] rounded-[3rem] overflow-hidden shadow-2xl border-4 border-stone-50 reveal">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.8710927503713!2d29.23190477610488!3d40.96220792156829!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cad13824f1e58d%3A0xe210287a93a74653!2zTWVydmUsIEJhaMOnZWxpZXZsZXIgQ2QuIE5vOjk2LCAzNDc5MSBTYW5jYWt0ZXBlL8Swc3RhbmJ1bA!5e0!3m2!1str!2str!4v1715433000000!5m2!1str!2str" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+
+                <div class="reveal rounded-[3rem] overflow-hidden shadow-2xl h-[450px] map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.8710927503713!2d29.23190477610488!3d40.96220792156829!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cad13824f1e58d%3A0xe210287a93a74653!2zTWVydmUsIEJhaMOnZWxpZXZsZXIgQ2QuIE5vOjk2LCAzNDc5MSBTYW5jYWt0ZXBlL8Swc3RhbmJ1bA!5e0!3m2!1str!2str!4v1715433000000!5m2!1str!2str" 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="py-12 bg-stone-950 text-white/30 text-center px-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col items-center mb-8 reveal">
-                <div class="bg-red-700 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                    <i class="fas fa-utensils text-white"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white italic uppercase tracking-tighter">Dürümcü Bekir Usta</h3>
-                <p class="text-[10px] uppercase tracking-widest mt-1 text-red-600">Sancaktepe Şubesi</p>
-            </div>
-            <div class="border-t border-white/5 pt-8 text-[10px] uppercase tracking-[0.2em]">
-                &copy; 2024 Dürümcü Bekir Usta. Tüm Hakları Saklıdır.
-            </div>
-        </div>
+    <footer class="py-12 bg-stone-950 text-center">
+        <p class="text-white/30 text-xs uppercase tracking-widest">&copy; 2024 Dürümcü Bekir Usta. Tüm Hakları Saklıdır.</p>
     </footer>
 
     <script>
-        // Mobile Menu Logic
-        const mobileMenu = document.getElementById('mobile-menu-overlay');
-        const openBtn = document.getElementById('open-menu');
-        const closeBtn = document.getElementById('close-menu');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
-
-        const toggleMenu = (isOpen) => {
-            mobileMenu.classList.toggle('open', isOpen);
-            document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-        };
-
-        openBtn.addEventListener('click', () => toggleMenu(true));
-        closeBtn.addEventListener('click', () => toggleMenu(false));
-        mobileLinks.forEach(link => link.addEventListener('click', () => toggleMenu(false)));
-
-        // Custom Cursor
-        const follower = document.getElementById('cursor-follower');
-        document.addEventListener('mousemove', (e) => {
-            follower.style.left = e.clientX + 'px';
-            follower.style.top = e.clientY + 'px';
+        // GSAP: Logo Hover Animasyonu
+        const logo = document.getElementById('main-logo');
+        const logoBox = logo.querySelector('.logo-box');
+        
+        logo.addEventListener('mouseenter', () => {
+            gsap.to(logoBox, { rotation: 360, duration: 0.8, ease: "back.out(1.7)" });
+            gsap.to(logo.querySelector('.logo-text'), { x: 5, color: "#ef4444", duration: 0.3 });
+        });
+        
+        logo.addEventListener('mouseleave', () => {
+            gsap.to(logoBox, { rotation: 0, duration: 0.6 });
+            gsap.to(logo.querySelector('.logo-text'), { x: 0, color: window.scrollY > 80 ? "#1c1917" : "#ffffff", duration: 0.3 });
         });
 
-        // Parallax Effect
-        document.addEventListener('mousemove', (e) => {
-            const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
-            const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
-            const bg = document.getElementById('parallax-bg');
-            const content = document.getElementById('parallax-content');
-            if(bg) bg.style.transform = `translate(${moveX * -1}px, ${moveY * -1}px) scale(1.05)`;
-            if(content) content.style.transform = `translate(${moveX}px, ${moveY}px)`;
-        });
+        // Hero Parallax Etkisi
+        const hero = document.getElementById('home');
+        const heroBg = document.querySelector('.hero-bg');
+        const heroContent = document.getElementById('hero-content');
 
-        // Navbar Scroll
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            const logoTexts = document.querySelectorAll('.logo-text');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const menuBtn = document.getElementById('open-menu');
-            
-            if (window.scrollY > 80) {
-                nav.classList.add('header-scrolled');
-                logoTexts.forEach(t => t.classList.replace('text-white', 'text-stone-900'));
-                navLinks.forEach(l => l.classList.replace('text-white', 'text-stone-700'));
-                menuBtn.classList.replace('text-white', 'text-stone-900');
-            } else {
-                nav.classList.remove('header-scrolled');
-                logoTexts.forEach(t => t.classList.replace('text-stone-900', 'text-white'));
-                navLinks.forEach(l => l.classList.replace('text-stone-700', 'text-white'));
-                menuBtn.classList.replace('text-stone-900', 'text-white');
-            }
-        });
+        hero.addEventListener('mousemove', (e) => {
+            const { clientX, clientY } = e;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const moveX = (clientX - centerX) / 30;
+            const moveY = (clientY - centerY) / 30;
+            const contentX = (clientX - centerX) / 50;
+            const contentY = (clientY - centerY) / 50;
 
-        // Reveal Animation
-        function reveal() {
-            const reveals = document.querySelectorAll('.reveal');
-            reveals.forEach(el => {
-                const elementTop = el.getBoundingClientRect().top;
-                if (elementTop < window.innerHeight - 150) el.classList.add('active');
+            gsap.to(heroBg, { x: -moveX, y: -moveY, duration: 1, ease: "power2.out" });
+            gsap.to(heroContent, { 
+                x: contentX, 
+                y: contentY, 
+                rotateY: contentX / 10,
+                rotateX: -contentY / 10,
+                duration: 1, 
+                ease: "power2.out" 
             });
-        }
-        window.addEventListener('scroll', reveal);
-        window.onload = reveal;
+        });
 
-        // Slider
-        const slides = document.querySelectorAll('.slide');
-        let currentSlide = 0;
-        setInterval(() => {
-            if(slides.length > 0) {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }
-        }, 6000);
+        // MENÜ KARTLARI: 3D TILT + KIRMIZI DİNAMİK GÖLGE + YAZI ANİMASYONU
+        const cards = document.querySelectorAll('.food-card');
+        
+        cards.forEach(card => {
+            const listItems = card.querySelectorAll('.menu-list li');
+            
+            card.addEventListener('mouseenter', () => {
+                // Yazı animasyonu
+                gsap.fromTo(listItems, 
+                    { x: -15, opacity: 0.3 }, 
+                    { x: 0, opacity: 1, duration: 0.5, stagger: 0.12, ease: "elastic.out(1, 0.75)" }
+                );
+            });
 
-        // Tilt Card
-        document.querySelectorAll('.food-card').forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                card.style.transform = `perspective(1000px) rotateX(${(y - rect.height/2)/15}deg) rotateY(${(rect.width/2 - x)/15}deg) translateY(-10px)`;
-            });
-            card.addEventListener('mouseleave', () => card.style.transform = `none`);
-        });
-    </script>
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 15;
+                const rotateY = (centerX - x) / 15;
 
-    <style>
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+                const shadowX = (centerX - x) / 5;
+                const shadowY = (centerY - y) / 5;
+                const shadowBlur = 30 + Math.abs(rotateX * 2);
+                
+                gsap.to(card, {
+                    rotateX: rotateX,
+                    rotateY: rotateY,
+                    scale: 1.05,
+                    boxShadow: `${shadowX}px ${shadowY}px ${shadowBlur}px rgba(194, 24, 7, 0.4)`,
+                    duration: 0.4,
+                    ease: "power1.out"
+                });
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    rotateX: 0,
+                    rotateY: 0,
+                    scale: 1,
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+                    duration: 1.2,
+                    ease: "elastic.out(1.2, 0.4)"
+                });
+            });
+        });
+
+        // Navbar scroll etkisi
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            const menuBtn = document.getElementById('menu-btn');
+            if (window.scrollY > 80) {
+                nav.classList.add('header-scrolled');
+                document.querySelectorAll('.logo-text').forEach(t => t.style.color = "#1c1917");
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.replace('text-white', 'text-stone-700'));
+                menuBtn.classList.replace('text-white', 'text-stone-900');
+            } else {
+                nav.classList.remove('header-scrolled');
+                document.querySelectorAll('.logo-text').forEach(t => t.style.color = "#ffffff");
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.replace('text-stone-700', 'text-white'));
+                menuBtn.classList.replace('text-stone-900', 'text-white');
+            }
+        });
+
+        // Mobil Menü Kontrolleri
+        const menuBtn = document.getElementById('menu-btn');
+        const closeBtn = document.getElementById('close-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuBtn.addEventListener('click', () => mobileMenu.classList.add('active'));
+        closeBtn.addEventListener('click', () => mobileMenu.classList.remove('active'));
+        document.querySelectorAll('.mobile-nav-link').forEach(l => l.addEventListener('click', () => mobileMenu.classList.remove('active')));
+
+        // Reveal Scroll
+        function reveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            reveals.forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add('active');
+            });
+        }
+        window.addEventListener('scroll', reveal);
+        window.onload = reveal;
+    </script>
 </body>
 </html>

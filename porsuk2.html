@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Porsuk Mineral – Doğal Diatomit Tozu Üreticisi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+          colors: {
+            brand: { dark: '#1a1a2e', card: '#f8f9fa', accent: '#b8860b', 'accent-hover': '#d4a853', text: '#374151' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: auto; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #1a1a2e; overflow-x: hidden; }
+    .font-serif { font-family: 'Playfair Display', serif; }
+
+    .pattern-bg {
+      background-color: #f3f4f6;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d1d5db' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .logo-svg-nav { height: 44px; width: auto; }
+    .logo-svg-footer { height: 52px; width: auto; }
+
+    .hero-3d { position: relative; height: 100vh; min-height: 700px; overflow: hidden; perspective: 1000px; }
+    .hero-layer-bg { position: absolute; inset: -15% 0; background: url('https://i.pinimg.com/1200x/24/e0/3c/24e03ce4d4762dcbc3980ce4a49983f6.jpg') center/cover no-repeat; will-change: transform; z-index: 1; transform: scale(1.15); }
+    .hero-dark-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 35%, rgba(255,255,255,0.95) 100%); z-index: 2; }
+    .hero-layer-text { position: relative; z-index: 3; will-change: transform; }
+    .hero-particles-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; background: rgba(184,134,11,0.3); border-radius: 50%; pointer-events: none; }
+
+    .mouse-follower { position: fixed; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(184,134,11,0.04) 0%, transparent 70%); pointer-events: none; z-index: 1; transform: translate(-50%, -50%); will-change: left, top; }
+    .gradient-text { background: linear-gradient(135deg, #b8860b 0%, #d4a853 50%, #b8860b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glow-accent { box-shadow: 0 0 40px rgba(184,134,11,0.08), 0 0 80px rgba(184,134,11,0.03); }
+    .stat-counter { background: rgba(255,255,255,0.9); border: 1px solid #e5e7eb; backdrop-filter: blur(8px); }
+    .scroll-line { position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(184,134,11,0.2), transparent); transform: translateY(-50%) scaleX(0); transform-origin: left; }
+    .toast { animation: toastIn 0.4s ease-out, toastOut 0.4s ease-in 2.6s forwards; }
+    @keyframes toastIn { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+    .marquee-track { display: flex; animation: marquee 30s linear infinite; width: max-content; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .tilt-card { transform-style: preserve-3d; }
+    .tilt-card .tilt-inner { transform: translateZ(30px); }
+    .reveal { opacity: 0; transform: translateY(60px); }
+    .reveal-right { opacity: 0; transform: translateX(80px); }
+    .reveal-scale { opacity: 0; transform: scale(0.85); }
+    .float-element { will-change: transform; }
+    .parallax-section { position: relative; overflow: hidden; }
+    .parallax-bg { position: absolute; inset: -20% 0; background-size: cover; background-position: center; will-change: transform; }
+    ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #f3f4f6; } ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .magnetic-btn { transition: transform 0.3s ease-out; will-change: transform; }
+
+    .card-white { background: #ffffff; border: 1px solid #e5e7eb; }
+    .card-white:hover { border-color: rgba(184,134,11,0.4); }
+    .section-white { background: #ffffff; }
+    .section-gray { background: #f9fafb; }
+  </style>
+</head>
+<body class="antialiased">
+
+  <div class="mouse-follower" id="mouseFollower"></div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" style="background:transparent;">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#hero" class="flex items-center gap-3">
+        <svg class="logo-svg-nav" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="25" cy="25" r="22" stroke="#1a1a2e" stroke-width="2" fill="none"/>
+          <text x="25" y="31" text-anchor="middle" font-family="serif" font-size="22" font-weight="600" fill="#1a1a2e" font-style="italic">P</text>
+          <text x="62" y="22" font-family="Inter, sans-serif" font-size="18" font-weight="800" fill="#1a1a2e" letter-spacing="2">POR SUK</text>
+          <text x="62" y="42" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#1a1a2e" letter-spacing="4">MINERAL</text>
+        </svg>
+      </a>
+      <div class="hidden lg:flex items-center gap-8">
+        <a href="#hakkimizda" class="nav-link text-sm text-gray-600 hover:text-brand-dark transition relative font-medium">Hakkımızda<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 nav-underline"></span></a>
+        <a href="#neden" class="nav-link text-sm text-gray-600 hover:text-brand-dark transition relative font-medium">Neden Diatomit<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 nav-underline"></span></a>
+        <a href="#urunler" class="nav-link text-sm text-gray-600 hover:text-brand-dark transition relative font-medium">Ürünler<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 nav-underline"></span></a>
+        <a href="#kullanim" class="nav-link text-sm text-gray-600 hover:text-brand-dark transition relative font-medium">Kullanım Alanları<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 nav-underline"></span></a>
+        <a href="#sss" class="nav-link text-sm text-gray-600 hover:text-brand-dark transition relative font-medium">S.S.S.<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 nav-underline"></span></a>
+        <a href="#iletisim" class="magnetic-btn bg-brand-dark hover:bg-gray-800 text-white text-sm font-medium py-2.5 px-6 rounded-lg transition">Satın Al</a>
+      </div>
+      <button id="mobileToggle" class="lg:hidden text-gray-800 p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
+    </div>
+    <div id="mobileMenu" class="hidden lg:hidden bg-white/95 backdrop-blur-lg border-t border-gray-200">
+      <div class="px-6 py-4 flex flex-col gap-3">
+        <a href="#hakkimizda" class="mobile-link text-gray-600 hover:text-brand-dark py-2 transition font-medium">Hakkımızda</a>
+        <a href="#neden" class="mobile-link text-gray-600 hover:text-brand-dark py-2 transition font-medium">Neden Diatomit</a>
+        <a href="#urunler" class="mobile-link text-gray-600 hover:text-brand-dark py-2 transition font-medium">Ürünler</a>
+        <a href="#kullanim" class="mobile-link text-gray-600 hover:text-brand-dark py-2 transition font-medium">Kullanım Alanları</a>
+        <a href="#sss" class="mobile-link text-gray-600 hover:text-brand-dark py-2 transition font-medium">S.S.S.</a>
+        <a href="#iletisim" class="bg-brand-dark text-white text-center font-medium py-3 rounded-lg mt-2">Satın Al</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero" class="hero-3d">
+    <div class="hero-layer-bg" id="heroLayerBg"></div>
+    <div class="hero-dark-overlay"></div>
+    <div class="hero-layer-text" id="heroLayerText">
+      <div class="flex items-center justify-center min-h-screen px-6 pt-20 pb-10">
+        <div class="text-center max-w-5xl mx-auto" id="heroInnerContent">
+          <div id="heroBadge" class="reveal inline-flex items-center gap-2 bg-black/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full mb-8">
+            <span class="w-2 h-2 bg-brand-accent rounded-full"></span>
+            <span class="text-xs font-medium text-white/90 tracking-wide uppercase">Türkiye'nin Güvenilir Diatomit Tedarikçisi</span>
+          </div>
+          <h1 class="mb-6">
+            <span class="block overflow-hidden mb-2"><span class="hero-word inline-block text-5xl md:text-7xl lg:text-8xl font-serif leading-[1.05] tracking-tight text-white">Porsuk Diatom</span></span>
+            <span class="block overflow-hidden"><span class="hero-word inline-block text-4xl md:text-6xl lg:text-7xl font-serif leading-[1.1] tracking-tight gradient-text italic">Doğal Koruma</span></span>
+          </h1>
+          <p id="heroDesc" class="reveal text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl mx-auto mb-12">
+            Tarımdan sanayiye, filtrelmeden inşaata kadar geniş kullanım alanına sahip, %100 doğal diatomit tozu çözümleri sunuyoruz.
+          </p>
+          <div id="heroButtons" class="reveal flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <a href="#urunler" class="magnetic-btn bg-brand-accent hover:bg-brand-accent-hover text-white font-medium py-4 px-8 rounded-lg transition inline-flex items-center justify-center gap-2 text-base">
+              Ürünlerimizi Keşfedin <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <a href="#hakkimizda" class="magnetic-btn bg-white/15 hover:bg-white/25 backdrop-blur border border-white/30 text-white font-medium py-4 px-8 rounded-lg transition inline-flex items-center justify-center gap-2 text-base">
+              <i data-lucide="play-circle" class="w-4 h-4"></i> Daha Fazla Bilgi
+            </a>
+          </div>
+          <div id="heroStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+            <div class="stat-counter rounded-xl p-5 text-center reveal-scale"><div class="text-3xl md:text-4xl font-serif text-brand-accent font-semibold counter" data-target="15">0</div><div class="text-xs text-gray-500 mt-1">Yıllık Deneyim</div></div>
+            <div class="stat-counter rounded-xl p-5 text-center reveal-scale"><div class="text-3xl md:text-4xl font-serif text-brand-accent font-semibold counter" data-target="5000">0</div><div class="text-xs text-gray-500 mt-1">Mutlu Müşteri</div></div>
+            <div class="stat-counter rounded-xl p-5 text-center reveal-scale"><div class="text-3xl md:text-4xl font-serif text-brand-accent font-semibold counter" data-target="20000">0</div><div class="text-xs text-gray-500 mt-1">Ton/Yıl Kapasite</div></div>
+            <div class="stat-counter rounded-xl p-5 text-center reveal-scale"><div class="text-3xl md:text-4xl font-serif text-brand-accent font-semibold counter" data-target="81">0</div><div class="text-xs text-gray-500 mt-1">İl Teslimat</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-particles-layer" id="heroParticles"></div>
+    <div id="scrollIndicator" class="absolute bottom-8 left-1/2 z-[10]">
+      <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
+        <div class="w-1 h-2 bg-brand-accent rounded-full" id="scrollDot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="py-5 bg-brand-dark overflow-hidden relative z-10">
+    <div class="marquee-track">
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ DİYATOMİT TOZU</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ FİLTRE YARDIMCISI</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ TOPRAK DÜZENLEYİCİ</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ HAFİF BETON KATKISI</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ DOĞAL BÖCEK KONTROLÜ</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ ISI YALITIM MALZEMESİ</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ GIDA GRADE FİLTRE</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ DİYATOMİT TOZU</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ FİLTRE YARDIMCISI</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ TOPRAK DÜZENLEYİCİ</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ HAFİF BETON KATKISI</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ DOĞAL BÖCEK KONTROLÜ</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ ISI YALITIM MALZEMESİ</span>
+      <span class="text-white/80 font-semibold text-sm tracking-widest uppercase whitespace-nowrap mx-8">◆ GIDA GRADE FİLTRE</span>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section id="hakkimizda" class="section-white py-28 relative">
+    <div class="parallax-bg" id="aboutBg" style="background-image:url('https://i.pinimg.com/736x/b5/44/0a/b5440abc8184059bcfa50028195e5253.jpg');opacity:0.08;"></div>
+    <div class="absolute inset-0 bg-white/90 z-[1]"></div>
+    <div class="max-w-7xl mx-auto px-6 relative z-[2]">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Hakkımızda</span>
+          <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 leading-tight text-brand-dark">Porsuk Mineral ile<br><span class="italic gradient-text">Doğayı Keşfedin</span></h2>
+          <p class="reveal text-gray-600 leading-relaxed mb-6">Porsuk Mineral, Türkiye'nin zengin diatomit yataklarından elde edilen doğal diatomit tozlarını modern işleme tesislerinde kırma, elenme, kalsinasyon ve sınıflandırma işlemlerinden geçirerek farklı sektörlere özel ürünler haline getirir.</p>
+          <p class="reveal text-gray-600 leading-relaxed mb-8">Diyatomit, milyonlarca yıl önce deniz ve göl ortamında yaşamış mikroskobik alglerin silis kabuklarının birikmesiyle oluşan doğal bir mineraldir.</p>
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="reveal flex items-start gap-3"><div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 float-element" data-speed="2"><i data-lucide="shield-check" class="w-5 h-5 text-brand-accent"></i></div><div><div class="text-sm font-medium text-brand-dark">ISO 9001</div><div class="text-xs text-gray-400">Kalite Yönetimi</div></div></div>
+            <div class="reveal flex items-start gap-3"><div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 float-element" data-speed="3"><i data-lucide="leaf" class="w-5 h-5 text-green-600"></i></div><div><div class="text-sm font-medium text-brand-dark">%100 Doğal</div><div class="text-xs text-gray-400">Kimyasal Katkı Yok</div></div></div>
+            <div class="reveal flex items-start gap-3"><div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 float-element" data-speed="2.5"><i data-lucide="truck" class="w-5 h-5 text-blue-600"></i></div><div><div class="text-sm font-medium text-brand-dark">Hızlı Teslimat</div><div class="text-xs text-gray-400">Tüm Türkiye'ye</div></div></div>
+            <div class="reveal flex items-start gap-3"><div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 float-element" data-speed="1.5"><i data-lucide="flask-conical" class="w-5 h-5 text-purple-600"></i></div><div><div class="text-sm font-medium text-brand-dark">Laboratuvar</div><div class="text-xs text-gray-400">Kalite Kontrol</div></div></div>
+          </div>
+          <a href="#iletisim" class="reveal inline-flex items-center gap-2 text-brand-accent hover:text-brand-accent-hover transition text-sm font-medium magnetic-btn">Bizimle İletişime Geçin <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+        </div>
+        <div class="reveal-right relative">
+          <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-lg"><img src="https://i.pinimg.com/736x/b5/44/0a/b5440abc8184059bcfa50028195e5253.jpg" alt="Porsuk Mineral" class="w-full h-auto object-cover float-element" data-speed="1"></div>
+          <div class="absolute -bottom-6 -left-6 bg-white border border-gray-200 rounded-xl p-5 shadow-lg float-element" data-speed="3"><div class="flex items-center gap-3"><div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center"><i data-lucide="mountain" class="w-6 h-6 text-brand-accent"></i></div><div><div class="text-lg font-serif font-semibold text-brand-dark">%85+ SiO₂</div><div class="text-xs text-gray-400">Yüksek Silis İçeriği</div></div></div></div>
+          <div class="absolute -top-4 -right-4 w-20 h-20 border border-brand-accent/30 rounded-full flex items-center justify-center bg-white shadow-md float-element" data-speed="4"><div class="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center"><i data-lucide="circle-check" class="w-6 h-6 text-brand-accent"></i></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-line"></div>
+  </section>
+
+  <!-- WHY DIATOMITE -->
+  <section id="neden" class="section-gray py-28 relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Neden Diatomit?</span>
+        <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">Doğanın En Çok Yönlü <span class="italic gradient-text">Minerali</span></h2>
+        <p class="reveal text-gray-600 leading-relaxed">Diyatomit'in benzersiz fiziksel ve kimyasal özellikleri, onu pek çok endüstride vazgeçilmez kılar.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition duration-300 group hover:shadow-lg"><div class="tilt-inner"><div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-blue-100 transition"><i data-lucide="droplets" class="w-7 h-7 text-blue-500"></i></div><h3 class="text-lg font-semibold mb-3 text-brand-dark">Yüksek Emilme Kapasitesi</h3><p class="text-sm text-gray-500 leading-relaxed">Kendi ağırlığının 1.5-4 katı kadar sıvı emer. Döküntü kontrolü ve endüstriyel emicilerde ideal.</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition duration-300 group hover:shadow-lg"><div class="tilt-inner"><div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-green-100 transition"><i data-lucide="filter" class="w-7 h-7 text-green-500"></i></div><h3 class="text-lg font-semibold mb-3 text-brand-dark">Mükemmel Filtreleme</h3><p class="text-sm text-gray-500 leading-relaxed">Mikroskobik gözenek yapısı ile sıvı ve gazları yüksek verimle filtreler.</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition duration-300 group hover:shadow-lg"><div class="tilt-inner"><div class="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-orange-100 transition"><i data-lucide="thermometer" class="w-7 h-7 text-orange-500"></i></div><h3 class="text-lg font-semibold mb-3 text-brand-dark">Termal Yalıtım</h3><p class="text-sm text-gray-500 leading-relaxed">Düşük ısıl iletkenliği ile yüksek sıcaklık yalıtımı sağlar.</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition duration-300 group hover:shadow-lg"><div class="tilt-inner"><div class="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-red-100 transition"><i data-lucide="bug" class="w-7 h-7 text-red-500"></i></div><h3 class="text-lg font-semibold mb-3 text-brand-dark">Doğal Böcek Kontrolü</h3><p class="text-sm text-gray-500 leading-relaxed">Fiziksel mekanizma ile böceklerin vücut sıvısını emer ve kurutur.</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition duration-300 group hover:shadow-lg"><div class="tilt-inner"><div class="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-purple-100 transition"><i data-lucide="sprout" class="w-7 h-7 text-purple-500"></i></div><h3 class="text-lg font-semibold mb-3 text-brand-dark">Toprak İyileştirici</h3><p class="text-sm text-gray-500 leading-relaxed">Toprağın su tutma kapasitesini artırır, havalanmasını sağlar.</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition duration-300 group hover:shadow-lg"><div class="tilt-inner"><div class="w-14 h-14 bg-cyan-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-cyan-100 transition"><i data-lucide="atom" class="w-7 h-7 text-cyan-500"></i></div><h3 class="text-lg font-semibold mb-3 text-brand-dark">Hafif ve Dayanıklı</h3><p class="text-sm text-gray-500 leading-relaxed">Düşük hacim ağırlığına rağmen yüksek mukavemet gösterir.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="urunler" class="section-white py-28 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6 relative z-[2]">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Ürünlerimiz</span>
+        <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">İhtiyacınıza Özel <span class="italic gradient-text">Diyatomit Çözümleri</span></h2>
+      </div>
+      <div class="reveal flex flex-wrap justify-center gap-2 mb-12">
+        <button onclick="filterProducts('all')" class="filter-btn text-sm py-2.5 px-6 rounded-lg border border-brand-dark bg-brand-dark text-white font-medium transition" data-filter="all">Tümü</button>
+        <button onclick="filterProducts('tarim')" class="filter-btn text-sm py-2.5 px-6 rounded-lg border border-gray-200 hover:border-brand-accent/50 text-gray-600 transition font-medium" data-filter="tarim">Tarım</button>
+        <button onclick="filterProducts('filtre')" class="filter-btn text-sm py-2.5 px-6 rounded-lg border border-gray-200 hover:border-brand-accent/50 text-gray-600 transition font-medium" data-filter="filtre">Filtre</button>
+        <button onclick="filterProducts('insaat')" class="filter-btn text-sm py-2.5 px-6 rounded-lg border border-gray-200 hover:border-brand-accent/50 text-gray-600 transition font-medium" data-filter="insaat">İnşaat</button>
+        <button onclick="filterProducts('hayvan')" class="filter-btn text-sm py-2.5 px-6 rounded-lg border border-gray-200 hover:border-brand-accent/50 text-gray-600 transition font-medium" data-filter="hayvan">Hayvan Bakımı</button>
+      </div>
+      <div id="productsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="product-card tilt-card card-white rounded-xl overflow-hidden transition duration-300 group hover:shadow-lg" data-category="tarim"><div class="h-52 overflow-hidden relative"><img src="https://i.pinimg.com/736x/6b/04/2f/6b042f88c41a8c79eb6bbf13eb038f0a.jpg" alt="Agro Diatom" class="product-img w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-110"><div class="absolute top-3 left-3 bg-green-500/90 text-white text-xs font-bold px-3 py-1 rounded-full">Tarım</div></div><div class="p-6 tilt-inner"><h3 class="text-lg font-semibold mb-2 text-brand-dark">Porsuk Agro Diatom</h3><p class="text-sm text-gray-500 leading-relaxed mb-4">Toprak düzenleyici ve bitki koruma amaçlı doğal diatomit tozu. 0-200 mikron.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-xs text-gray-400"><i data-lucide="package" class="w-3.5 h-3.5"></i>5kg – 25kg – Big Bag</div><a href="#iletisim" class="text-brand-accent text-sm font-medium inline-flex items-center gap-1">Satın Al <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a></div></div></div>
+        <div class="product-card tilt-card card-white rounded-xl overflow-hidden transition duration-300 group hover:shadow-lg" data-category="filtre"><div class="h-52 overflow-hidden relative"><img src="https://i.pinimg.com/736x/12/38/e6/1238e6b6ebc8c5b5329954f161a96ecf.jpg" alt="Filter-Aid" class="product-img w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-110"><div class="absolute top-3 left-3 bg-blue-500/90 text-white text-xs font-bold px-3 py-1 rounded-full">Filtre</div></div><div class="p-6 tilt-inner"><h3 class="text-lg font-semibold mb-2 text-brand-dark">Porsuk Filter-Aid</h3><p class="text-sm text-gray-500 leading-relaxed mb-4">İçme suyu, meyve suyu, bira ve yağ filtrelemesinde. Kalsine edilmiş.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-xs text-gray-400"><i data-lucide="package" class="w-3.5 h-3.5"></i>20kg – 40kg</div><a href="#iletisim" class="text-brand-accent text-sm font-medium inline-flex items-center gap-1">Satın Al <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a></div></div></div>
+        <div class="product-card tilt-card card-white rounded-xl overflow-hidden transition duration-300 group hover:shadow-lg" data-category="insaat"><div class="h-52 overflow-hidden relative"><img src="https://i.pinimg.com/1200x/79/9b/99/799b993f00d8f727f778b5dce73cb610.jpg" alt="Build Lite" class="product-img w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-110"><div class="absolute top-3 left-3 bg-orange-500/90 text-white text-xs font-bold px-3 py-1 rounded-full">İnşaat</div></div><div class="p-6 tilt-inner"><h3 class="text-lg font-semibold mb-2 text-brand-dark">Porsuk Build Lite</h3><p class="text-sm text-gray-500 leading-relaxed mb-4">Hafif beton, ısı yalıtım harcı ve boya katkısı.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-xs text-gray-400"><i data-lucide="package" class="w-3.5 h-3.5"></i>25kg – Big Bag</div><a href="#iletisim" class="text-brand-accent text-sm font-medium inline-flex items-center gap-1">Satın Al <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a></div></div></div>
+        <div class="product-card tilt-card card-white rounded-xl overflow-hidden transition duration-300 group hover:shadow-lg" data-category="hayvan"><div class="h-52 overflow-hidden relative"><img src="https://i.pinimg.com/1200x/47/d4/75/47d475e7818bb96d4e04ac4fa3d005b6.jpg" alt="Pet & Farm" class="product-img w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-110"><div class="absolute top-3 left-3 bg-red-500/90 text-white text-xs font-bold px-3 py-1 rounded-full">Hayvan</div></div><div class="p-6 tilt-inner"><h3 class="text-lg font-semibold mb-2 text-brand-dark">Porsuk Pet & Farm</h3><p class="text-sm text-gray-500 leading-relaxed mb-4">Gıda grade, koku kontrolü ve parazit önleyici.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-xs text-gray-400"><i data-lucide="package" class="w-3.5 h-3.5"></i>2kg – 20kg</div><a href="#iletisim" class="text-brand-accent text-sm font-medium inline-flex items-center gap-1">Satın Al <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a></div></div></div>
+        <div class="product-card tilt-card card-white rounded-xl overflow-hidden transition duration-300 group hover:shadow-lg" data-category="tarim"><div class="h-52 overflow-hidden relative"><img src="https://i.pinimg.com/1200x/e3/dc/8a/e3dc8ad6c759fd0fd479660f98aeed86.jpg" alt="Garden Mix" class="product-img w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-110"><div class="absolute top-3 left-3 bg-green-500/90 text-white text-xs font-bold px-3 py-1 rounded-full">Tarım</div></div><div class="p-6 tilt-inner"><h3 class="text-lg font-semibold mb-2 text-brand-dark">Porsuk Garden Mix</h3><p class="text-sm text-gray-500 leading-relaxed mb-4">Bahçe ve saksı bitkileri için özel karışım.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-xs text-gray-400"><i data-lucide="package" class="w-3.5 h-3.5"></i>1kg – 10kg</div><a href="#iletisim" class="text-brand-accent text-sm font-medium inline-flex items-center gap-1">Satın Al <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a></div></div></div>
+        <div class="product-card tilt-card card-white rounded-xl overflow-hidden transition duration-300 group hover:shadow-lg" data-category="filtre"><div class="h-52 overflow-hidden relative"><img src="https://i.pinimg.com/1200x/a8/10/6b/a8106b731ff2313d8a56366cbf6be75e.jpg" alt="Pool Clean" class="product-img w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-110"><div class="absolute top-3 left-3 bg-blue-500/90 text-white text-xs font-bold px-3 py-1 rounded-full">Filtre</div></div><div class="p-6 tilt-inner"><h3 class="text-lg font-semibold mb-2 text-brand-dark">Porsuk Pool Clean</h3><p class="text-sm text-gray-500 leading-relaxed mb-4">Havuz filtreleri için özel. Ultra berrak su.</p><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-xs text-gray-400"><i data-lucide="package" class="w-3.5 h-3.5"></i>5kg – 15kg</div><a href="#iletisim" class="text-brand-accent text-sm font-medium inline-flex items-center gap-1">Satın Al <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></a></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USAGE -->
+  <section id="kullanim" class="section-gray py-28 relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Kullanım Alanları</span>
+        <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">20'den Fazla Sektörde <span class="italic gradient-text">Güvenilir Çözüm</span></h2>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="wheat" class="w-8 h-8 text-green-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">Tarım</h3><p class="text-xs text-gray-500">Toprak iyileştirme, böcek kontrolü</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="beaker" class="w-8 h-8 text-blue-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">Gıda & İçecek</h3><p class="text-xs text-gray-500">Bira, şarap filtreleme</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="building-2" class="w-8 h-8 text-orange-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">İnşaat</h3><p class="text-xs text-gray-500">Hafif beton, ısı yalıtımı</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="heart-pulse" class="w-8 h-8 text-red-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">İlaç & Kozmetik</h3><p class="text-xs text-gray-500">Tablet yardımcı madde</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="droplet" class="w-8 h-8 text-cyan-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">Su Arıtma</h3><p class="text-xs text-gray-500">İçme suyu, havuz</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="cat" class="w-8 h-8 text-yellow-600"></i></div><h3 class="font-semibold mb-2 text-brand-dark">Evcil Hayvan</h3><p class="text-xs text-gray-500">Kedi kumu, pire kontrolü</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="factory" class="w-8 h-8 text-purple-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">Sanayi</h3><p class="text-xs text-gray-500">Yağ filtreleme, kağıt</p></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-6 text-center transition group hover:shadow-lg"><div class="tilt-inner"><div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="sparkles" class="w-8 h-8 text-pink-500"></i></div><h3 class="font-semibold mb-2 text-brand-dark">Temizlik</h3><p class="text-xs text-gray-500">Doğal ovucu, koku giderici</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH SPECS -->
+  <section class="section-white py-28 relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Teknik Özellikler</span>
+          <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">Kalite <span class="italic gradient-text">Laboratuvarımızda</span> Kanıtlanır</h2>
+          <p class="reveal text-gray-600 leading-relaxed mb-8">Her parti üretim öncesi ve sonrası laboratuvarımızda test edilir.</p>
+          <div class="space-y-4">
+            <div class="reveal flex items-center gap-4 card-white rounded-lg p-4"><div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0"><i data-lucide="flask-conical" class="w-5 h-5 text-brand-accent"></i></div><div class="flex-1"><div class="text-sm font-medium text-brand-dark">SiO₂ İçeriği</div><div class="w-full bg-gray-100 rounded-full h-2 mt-2"><div class="progress-bar bg-brand-accent rounded-full h-2" style="width:0%" data-width="88%"></div></div></div><span class="text-sm font-semibold text-brand-accent">%85+</span></div>
+            <div class="reveal flex items-center gap-4 card-white rounded-lg p-4"><div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0"><i data-lucide="droplets" class="w-5 h-5 text-green-500"></i></div><div class="flex-1"><div class="text-sm font-medium text-brand-dark">Su Emilme</div><div class="w-full bg-gray-100 rounded-full h-2 mt-2"><div class="progress-bar bg-green-500 rounded-full h-2" style="width:0%" data-width="75%"></div></div></div><span class="text-sm font-semibold text-green-600">%150+</span></div>
+            <div class="reveal flex items-center gap-4 card-white rounded-lg p-4"><div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0"><i data-lucide="gauge" class="w-5 h-5 text-blue-500"></i></div><div class="flex-1"><div class="text-sm font-medium text-brand-dark">Beyazlık</div><div class="w-full bg-gray-100 rounded-full h-2 mt-2"><div class="progress-bar bg-blue-500 rounded-full h-2" style="width:0%" data-width="70%"></div></div></div><span class="text-sm font-semibold text-blue-600">70-85</span></div>
+          </div>
+        </div>
+        <div class="reveal-right card-white rounded-xl p-8 shadow-lg">
+          <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-brand-dark"><i data-lucide="clipboard-list" class="w-5 h-5 text-brand-accent"></i>Tipik Analiz</h3>
+          <table class="w-full text-sm"><thead><tr class="border-b border-gray-200"><th class="text-left py-3 text-gray-400 font-medium">Parametre</th><th class="text-right py-3 text-gray-400 font-medium">Değer</th></tr></thead>
+          <tbody class="text-gray-600">
+            <tr class="border-b border-gray-100"><td class="py-3">SiO₂</td><td class="py-3 text-right font-medium text-brand-dark">%85 – %92</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-3">Al₂O₃</td><td class="py-3 text-right font-medium text-brand-dark">%1.5 – %3.5</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-3">Fe₂O₃</td><td class="py-3 text-right font-medium text-brand-dark">%0.5 – %1.5</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-3">CaO</td><td class="py-3 text-right font-medium text-brand-dark">%0.3 – %1.2</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-3">LOI</td><td class="py-3 text-right font-medium text-brand-dark">%3 – %8</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-3">Nem</td><td class="py-3 text-right font-medium text-brand-dark">%0.5 maks</td></tr>
+            <tr><td class="py-3">pH</td><td class="py-3 text-right font-medium text-brand-dark">7.0 – 9.0</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section-gray py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Üretim Süreci</span>
+        <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">Madenden <span class="italic gradient-text">Ürüne</span></h2>
+      </div>
+      <div class="relative">
+        <div class="hidden lg:block absolute top-[52px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-transparent via-brand-accent/20 to-transparent"><div class="process-line h-full bg-brand-accent" style="width:0%"></div></div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div class="reveal-scale text-center"><div class="w-[104px] h-[104px] bg-white border-2 border-brand-accent/40 rounded-full flex items-center justify-center mx-auto mb-4 relative z-[2] shadow-sm"><span class="text-brand-accent font-serif text-2xl font-semibold">1</span></div><h4 class="font-semibold text-sm mb-2 text-brand-dark">Madencilik</h4><p class="text-xs text-gray-500">Cevher çıkarma</p></div>
+          <div class="reveal-scale text-center"><div class="w-[104px] h-[104px] bg-white border-2 border-brand-accent/40 rounded-full flex items-center justify-center mx-auto mb-4 relative z-[2] shadow-sm"><span class="text-brand-accent font-serif text-2xl font-semibold">2</span></div><h4 class="font-semibold text-sm mb-2 text-brand-dark">Kırma</h4><p class="text-xs text-gray-500">Boyut küçültme</p></div>
+          <div class="reveal-scale text-center"><div class="w-[104px] h-[104px] bg-white border-2 border-brand-accent/40 rounded-full flex items-center justify-center mx-auto mb-4 relative z-[2] shadow-sm"><span class="text-brand-accent font-serif text-2xl font-semibold">3</span></div><h4 class="font-semibold text-sm mb-2 text-brand-dark">Sınıflandırma</h4><p class="text-xs text-gray-500">Granülometri</p></div>
+          <div class="reveal-scale text-center"><div class="w-[104px] h-[104px] bg-white border-2 border-brand-accent/40 rounded-full flex items-center justify-center mx-auto mb-4 relative z-[2] shadow-sm"><span class="text-brand-accent font-serif text-2xl font-semibold">4</span></div><h4 class="font-semibold text-sm mb-2 text-brand-dark">Kalsinasyon</h4><p class="text-xs text-gray-500">600-1000°C</p></div>
+          <div class="reveal-scale text-center"><div class="w-[104px] h-[104px] bg-white border-2 border-brand-accent/40 rounded-full flex items-center justify-center mx-auto mb-4 relative z-[2] shadow-sm"><span class="text-brand-accent font-serif text-2xl font-semibold">5</span></div><h4 class="font-semibold text-sm mb-2 text-brand-dark">Paketleme</h4><p class="text-xs text-gray-500">Sevkiyat</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section id="referanslar" class="section-white py-28 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6 relative z-[2]">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">Referanslar</span>
+        <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">Müşterilerimiz Ne <span class="italic gradient-text">Diyor?</span></h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition hover:shadow-lg"><div class="tilt-inner"><div class="flex items-center gap-1 mb-4"><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i></div><p class="text-sm text-gray-600 leading-relaxed mb-6">"3 sezondur bağımızda kullanıyoruz. Yaprak bitlerinde kimyasal ilaç olmadan ciddi sonuç."</p><div class="flex items-center gap-3"><div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"><span class="text-green-700 text-sm font-semibold">AY</span></div><div><div class="text-sm font-medium text-brand-dark">Ahmet Yılmaz</div><div class="text-xs text-gray-400">Manisa</div></div></div></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition hover:shadow-lg"><div class="tilt-inner"><div class="flex items-center gap-1 mb-4"><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i></div><p class="text-sm text-gray-600 leading-relaxed mb-6">"Filtrasyon hızı %25 arttı, berraklık mükemmel."</p><div class="flex items-center gap-3"><div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"><span class="text-blue-700 text-sm font-semibold">MK</span></div><div><div class="text-sm font-medium text-brand-dark">Mehmet Kaya</div><div class="text-xs text-gray-400">Bursa</div></div></div></div></div>
+        <div class="tilt-card reveal-scale card-white rounded-xl p-7 transition hover:shadow-lg"><div class="tilt-inner"><div class="flex items-center gap-1 mb-4"><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i><i data-lucide="star" class="w-4 h-4 text-brand-accent fill-brand-accent"></i></div><p class="text-sm text-gray-600 leading-relaxed mb-6">"Hafif betonda hacim ağırlığını %15 düşürürken dayanımı koruduk."</p><div class="flex items-center gap-3"><div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center"><span class="text-orange-700 text-sm font-semibold">FÖ</span></div><div><div class="text-sm font-medium text-brand-dark">Fatma Özdemir</div><div class="text-xs text-gray-400">İstanbul</div></div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="sss" class="section-gray py-28">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="text-center mb-16"><span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">S.S.S.</span><h2 class="reveal text-3xl md:text-5xl font-serif text-brand-dark">Merak <span class="italic gradient-text">Edilenler</span></h2></div>
+      <div class="space-y-3">
+        <div class="faq-item reveal card-white rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left"><span class="text-sm font-medium pr-4 text-brand-dark">Diyatomit tozu nedir?</span><i data-lucide="plus" class="w-5 h-5 text-gray-400 flex-shrink-0 faq-icon transition duration-300"></i></button><div class="faq-answer hidden px-5 pb-5"><p class="text-sm text-gray-500">Milyonlarca yıl önce göl ve denizlerde yaşamış mikroskobik alglerin silisli kabuklarının çökelmesiyle oluşan doğal bir sediment kayacıdır.</p></div></div>
+        <div class="faq-item reveal card-white rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left"><span class="text-sm font-medium pr-4 text-brand-dark">Gıda ile temasta kullanılabilir mi?</span><i data-lucide="plus" class="w-5 h-5 text-gray-400 flex-shrink-0 faq-icon transition duration-300"></i></button><div class="faq-answer hidden px-5 pb-5"><p class="text-sm text-gray-500">Evet, belirli ürünlerimiz Food Grade olarak üretilir. COA ve sertifikalar sunulmaktadır.</p></div></div>
+        <div class="faq-item reveal card-white rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left"><span class="text-sm font-medium pr-4 text-brand-dark">Minimum sipariş miktarı?</span><i data-lucide="plus" class="w-5 h-5 text-gray-400 flex-shrink-0 faq-icon transition duration-300"></i></button><div class="faq-answer hidden px-5 pb-5"><p class="text-sm text-gray-500">Perakendede 1 kg'dan başlar. Toptanda 500 kg – 1 ton. Big bag en ekonomik seçenektir.</p></div></div>
+        <div class="faq-item reveal card-white rounded-xl overflow-hidden"><button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left"><span class="text-sm font-medium pr-4 text-brand-dark">Diyatomit ile boraks aynı mı?</span><i data-lucide="plus" class="w-5 h-5 text-gray-400 flex-shrink-0 faq-icon transition duration-300"></i></button><div class="faq-answer hidden px-5 pb-5"><p class="text-sm text-gray-500">Hayır. Diatomit silis bazlı, boraks boron bazlıdır. Diatomit fiziksel çalışır, toksik değildir.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="iletisim" class="section-gray py-28 relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16">
+        <div>
+          <span class="reveal text-xs font-bold tracking-widest uppercase text-brand-accent mb-4 block">İletişim</span>
+          <h2 class="reveal text-3xl md:text-5xl font-serif mb-6 text-brand-dark">Satın Alın veya <span class="italic gradient-text">Bize Ulaşın</span></h2>
+          <p class="reveal text-gray-600 leading-relaxed mb-10">Siparişleriniz ve teknik sorularınız için formu doldurun.</p>
+          <div class="space-y-6">
+            <div class="reveal flex items-start gap-4"><div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="map-pin" class="w-5 h-5 text-brand-accent"></i></div><div><div class="text-sm font-medium text-brand-dark">Adres</div><div class="text-sm text-gray-500">OSB, 4. Cadde No:12, Eskişehir</div></div></div>
+            <div class="reveal flex items-start gap-4"><div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="phone" class="w-5 h-5 text-blue-500"></i></div><div><div class="text-sm font-medium text-brand-dark">Telefon</div><div class="text-sm text-gray-500">+90 (222) 000 00 00</div></div></div>
+            <div class="reveal flex items-start gap-4"><div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="mail" class="w-5 h-5 text-green-500"></i></div><div><div class="text-sm font-medium text-brand-dark">E-posta</div><div class="text-sm text-gray-500">info@porsukmineral.com.tr</div></div></div>
+          </div>
+          <div class="reveal flex items-center gap-3 mt-10">
+            <a href="#" class="w-11 h-11 bg-gray-100 hover:bg-amber-50 border border-gray-200 rounded-lg flex items-center justify-center transition"><i data-lucide="instagram" class="w-4 h-4 text-gray-500"></i></a>
+            <a href="#" class="w-11 h-11 bg-gray-100 hover:bg-amber-50 border border-gray-200 rounded-lg flex items-center justify-center transition"><i data-lucide="facebook" class="w-4 h-4 text-gray-500"></i></a>
+            <a href="#" class="w-11 h-11 bg-gray-100 hover:bg-amber-50 border border-gray-200 rounded-lg flex items-center justify-center transition"><i data-lucide="linkedin" class="w-4 h-4 text-gray-500"></i></a>
+          </div>
+        </div>
+        <div class="reveal-right bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
+          <form id="contactForm" onsubmit="handleFormSubmit(event)">
+            <div class="grid sm:grid-cols-2 gap-4 mb-4"><div><label class="text-xs text-gray-500 mb-1.5 block">Ad Soyad *</label><input type="text" required placeholder="Adınız" class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50 placeholder-gray-400"></div><div><label class="text-xs text-gray-500 mb-1.5 block">Firma</label><input type="text" placeholder="Firma Adı" class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50 placeholder-gray-400"></div></div>
+            <div class="grid sm:grid-cols-2 gap-4 mb-4"><div><label class="text-xs text-gray-500 mb-1.5 block">Telefon *</label><input type="tel" required placeholder="0(5XX) XXX XX XX" class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50 placeholder-gray-400"></div><div><label class="text-xs text-gray-500 mb-1.5 block">E-posta *</label><input type="email" required placeholder="ornek@email.com" class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50 placeholder-gray-400"></div></div>
+            <div class="mb-4"><label class="text-xs text-gray-500 mb-1.5 block">Ürün</label><select class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50"><option value="">Seçiniz</option><option>Agro Diatom</option><option>Filter-Aid</option><option>Build Lite</option><option>Pet & Farm</option><option>Diğer</option></select></div>
+            <div class="mb-6"><label class="text-xs text-gray-500 mb-1.5 block">Mesaj</label><textarea rows="4" placeholder="Detaylar..." class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50 placeholder-gray-400 resize-none"></textarea></div>
+            <button type="submit" class="magnetic-btn w-full bg-brand-dark hover:bg-gray-800 text-white font-medium py-4 rounded-lg transition flex items-center justify-center gap-2"><i data-lucide="send" class="w-4 h-4"></i>Teklif Talebi Gönder</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA — GÜNCELLENMİŞ RESİM -->
+  <section class="parallax-section relative py-28 overflow-hidden">
+    <div class="parallax-bg" id="ctaBg" style="background-image:url('https://i.pinimg.com/736x/26/52/ea/2652eafb355bd6654100693432611f62.jpg');"></div>
+    <div class="absolute inset-0 bg-white/75 z-[1]"></div>
+    <div class="relative z-[2] max-w-4xl mx-auto px-6 text-center">
+      <h2 class="reveal text-3xl md:text-5xl font-serif mb-4 text-brand-dark">Projeleriniz İçin <span class="italic gradient-text">Uzman Destek</span></h2>
+      <p class="reveal text-gray-700 leading-relaxed max-w-2xl mx-auto mb-8">Ücretsiz numune talebinde bulunun, ihtiyacınıza en uygun ürünü birlikte belirleyelim.</p>
+      <div class="reveal flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#iletisim" class="magnetic-btn bg-brand-accent hover:bg-brand-accent-hover text-white font-medium py-4 px-8 rounded-lg transition inline-flex items-center justify-center gap-2"><i data-lucide="test-tube" class="w-4 h-4"></i>Ücretsiz Numune Talep Et</a>
+        <a href="tel:+902220000000" class="magnetic-btn bg-brand-dark hover:bg-gray-800 text-white font-medium py-4 px-8 rounded-lg transition inline-flex items-center justify-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i>Hemen Arayın</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-brand-dark border-t border-gray-700 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <div>
+          <svg class="logo-svg-footer mb-4" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="22" stroke="white" stroke-width="2" fill="none"/>
+            <text x="25" y="31" text-anchor="middle" font-family="serif" font-size="22" font-weight="600" fill="white" font-style="italic">P</text>
+            <text x="62" y="22" font-family="Inter, sans-serif" font-size="18" font-weight="800" fill="white" letter-spacing="2">POR SUK</text>
+            <text x="62" y="42" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="white" letter-spacing="4">MINERAL</text>
+          </svg>
+          <p class="text-sm text-gray-400 leading-relaxed">Türkiye'nin doğal diatomit yataklarından, sektörlere özel çözümler sunan üretici.</p>
+        </div>
+        <div><h4 class="text-sm font-semibold mb-4 text-white">Ürünler</h4><ul class="space-y-2.5"><li><a href="#urunler" class="text-sm text-gray-400 hover:text-brand-accent transition">Agro Diatom</a></li><li><a href="#urunler" class="text-sm text-gray-400 hover:text-brand-accent transition">Filter-Aid</a></li><li><a href="#urunler" class="text-sm text-gray-400 hover:text-brand-accent transition">Build Lite</a></li><li><a href="#urunler" class="text-sm text-gray-400 hover:text-brand-accent transition">Pet & Farm</a></li></ul></div>
+        <div><h4 class="text-sm font-semibold mb-4 text-white">Kurumsal</h4><ul class="space-y-2.5"><li><a href="#hakkimizda" class="text-sm text-gray-400 hover:text-brand-accent transition">Hakkımızda</a></li><li><a href="#neden" class="text-sm text-gray-400 hover:text-brand-accent transition">Neden Diatomit</a></li><li><a href="#sss" class="text-sm text-gray-400 hover:text-brand-accent transition">S.S.S.</a></li></ul></div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4 text-white">Bülten</h4>
+          <form onsubmit="handleNewsletter(event)" class="flex gap-2 mb-4"><input type="email" required placeholder="E-posta" class="flex-1 bg-white/10 border border-white/10 text-white rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/50 placeholder-gray-500"><button type="submit" class="bg-brand-accent hover:bg-brand-accent-hover text-white px-4 rounded-lg transition"><i data-lucide="arrow-right" class="w-4 h-4"></i></button></form>
+          <div class="p-4 bg-white/5 border border-white/10 rounded-xl"><a href="https://wa.me/902220000000" target="_blank" class="text-sm text-green-400 hover:text-green-300 transition inline-flex items-center gap-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i>WhatsApp</a></div>
+        </div>
+      </div>
+      <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4"><p class="text-xs text-gray-500">© 2025 Porsuk Mineral</p><div class="flex gap-6"><a href="#" class="text-xs text-gray-500 hover:text-gray-300 transition">Gizlilik</a><a href="#" class="text-xs text-gray-500 hover:text-gray-300 transition">KVKK</a></div></div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/902220000000" target="_blank" class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 transition" id="waFloat"><i data-lucide="message-circle" class="w-6 h-6 text-white"></i></a>
+  <button id="backToTop" onclick="gsap.to(window,{duration:1,scrollTo:0,ease:'power3.inOut'})" class="fixed bottom-6 left-6 z-50 w-12 h-12 bg-white border border-gray-200 hover:border-brand-accent/50 rounded-full flex items-center justify-center shadow-md transition opacity-0 pointer-events-none"><i data-lucide="chevron-up" class="w-5 h-5 text-gray-400"></i></button>
+  <div id="toastContainer" class="fixed bottom-24 right-6 z-50 flex flex-col gap-3"></div>
+
+  <script>
+    lucide.createIcons();
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    const heroSection = document.getElementById('hero');
+    const layerBg = document.getElementById('heroLayerBg');
+    const layerText = document.getElementById('heroLayerText');
+    let heroMouseX = 0, heroMouseY = 0, targetMouseX = 0, targetMouseY = 0;
+    heroSection.addEventListener('mousemove', e => { const r = heroSection.getBoundingClientRect(); targetMouseX = ((e.clientX - r.left) / r.width - 0.5) * 2; targetMouseY = ((e.clientY - r.top) / r.height - 0.5) * 2; });
+    heroSection.addEventListener('mouseleave', () => { targetMouseX = 0; targetMouseY = 0; });
+    let scrollY = 0;
+    function updateHeroLayers() {
+      heroMouseX += (targetMouseX - heroMouseX) * 0.06;
+      heroMouseY += (targetMouseY - heroMouseY) * 0.06;
+      layerBg.style.transform = `scale(1.15) translate3d(${heroMouseX*15}px, ${heroMouseY*15 - scrollY*0.2}px, 0)`;
+      layerText.style.transform = `translate3d(${heroMouseX*35}px, ${heroMouseY*30 - scrollY*0.5}px, 0)`;
+      requestAnimationFrame(updateHeroLayers);
+    }
+    updateHeroLayers();
+    gsap.to({}, { onUpdate: () => { scrollY = window.scrollY; } });
+    gsap.to('#heroInnerContent', { opacity: 0, y: -80, filter: 'blur(8px)', ease: 'none', scrollTrigger: { trigger: heroSection, start: 'top top', end: 'bottom top', scrub: true } });
+    gsap.to('#scrollDot', { y: 8, duration: 0.8, repeat: -1, yoyo: true, ease: 'power1.inOut' });
+
+    const follower = document.getElementById('mouseFollower');
+    let fmx=0,fmy=0,ftx=0,fty=0;
+    document.addEventListener('mousemove', e => { ftx=e.clientX; fty=e.clientY; });
+    function uF(){ fmx+=(ftx-fmx)*0.08; fmy+=(fty-fmy)*0.08; follower.style.left=fmx+'px'; follower.style.top=fmy+'px'; requestAnimationFrame(uF); }
+    uF();
+
+    const pc = document.getElementById('heroParticles');
+    for(let i=0;i<35;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.top=Math.random()*100+'%';p.style.opacity=Math.random()*0.4+0.1;p.style.width=p.style.height=(Math.random()*3+1)+'px';pc.appendChild(p);gsap.to(p,{y:-100-Math.random()*200,x:(Math.random()-0.5)*100,opacity:0,duration:4+Math.random()*6,repeat:-1,delay:Math.random()*5,ease:'none'});}
+
+    const heroTl=gsap.timeline({defaults:{ease:'power3.out'}});
+    heroTl.from('#heroBadge',{y:30,opacity:0,duration:0.8,delay:0.3}).from('.hero-word',{y:'100%',rotationX:-40,duration:1,stagger:0.15},'-=0.5').from('#heroDesc',{y:30,opacity:0,duration:0.8},'-=0.5').from('#heroButtons',{y:30,opacity:0,duration:0.8},'-=0.5').from('#heroStats > div',{scale:0.8,opacity:0,duration:0.6,stagger:0.1},'-=0.4');
+
+    gsap.utils.toArray('.reveal').forEach(el=>{gsap.fromTo(el,{y:50,opacity:0},{y:0,opacity:1,duration:0.8,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 85%'}});});
+    gsap.utils.toArray('.reveal-right').forEach(el=>{gsap.fromTo(el,{x:60,opacity:0},{x:0,opacity:1,duration:0.8,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 85%'}});});
+    gsap.utils.toArray('.reveal-scale').forEach((el,i)=>{gsap.fromTo(el,{scale:0.85,opacity:0},{scale:1,opacity:1,duration:0.6,ease:'back.out(1.2)',scrollTrigger:{trigger:el,start:'top 85%'},delay:i%3*0.1});});
+
+    gsap.to('#aboutBg',{yPercent:20,ease:'none',scrollTrigger:{trigger:'#hakkimizda',start:'top bottom',end:'bottom top',scrub:true}});
+    gsap.utils.toArray('.scroll-line').forEach(l=>{gsap.to(l,{scaleX:1,duration:1.5,ease:'power2.inOut',scrollTrigger:{trigger:l.parentElement,start:'top 60%'}});});
+    gsap.utils.toArray('.progress-bar').forEach(b=>{gsap.to(b,{width:b.dataset.width,duration:1.2,ease:'power2.out',scrollTrigger:{trigger:b,start:'top 85%'}});});
+    gsap.utils.toArray('.process-line').forEach(l=>{gsap.to(l,{width:'100%',duration:2,ease:'power2.inOut',scrollTrigger:{trigger:l,start:'top 80%'}});});
+
+    document.querySelectorAll('.counter').forEach(c=>{const t=parseInt(c.dataset.target);ScrollTrigger.create({trigger:c,start:'top 85%',once:true,onEnter:()=>{gsap.to({val:0},{val:t,duration:2,ease:'power2.out',onUpdate:function(){const v=Math.round(this.targets()[0].val);c.textContent=t>=1000?(v>=10000?Math.round(v/1000)+'K+':(v/1000).toFixed(0)+'K+'):v+'+';}});}});});
+
+    document.querySelectorAll('.tilt-card').forEach(card=>{card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();gsap.to(card,{rotateY:((e.clientX-r.left)/r.width-0.5)*8,rotateX:-((e.clientY-r.top)/r.height-0.5)*8,duration:0.3,ease:'power1.out',transformPerspective:800});});card.addEventListener('mouseleave',()=>{gsap.to(card,{rotateY:0,rotateX:0,duration:0.6,ease:'elastic.out(1,0.5)'});});});
+    document.querySelectorAll('.magnetic-btn').forEach(btn=>{btn.addEventListener('mousemove',e=>{const r=btn.getBoundingClientRect();gsap.to(btn,{x:(e.clientX-r.left-r.width/2)*0.15,y:(e.clientY-r.top-r.height/2)*0.15,duration:0.3});});btn.addEventListener('mouseleave',()=>{gsap.to(btn,{x:0,y:0,duration:0.5,ease:'elastic.out(1,0.4)'});});});
+    document.querySelectorAll('.float-element').forEach(el=>{const s=parseFloat(el.dataset.speed)||2;el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();gsap.to(el,{x:(e.clientX-r.left-r.width/2)/s,y:(e.clientY-r.top-r.height/2)/s,duration:0.5});});el.addEventListener('mouseleave',()=>{gsap.to(el,{x:0,y:0,duration:0.8,ease:'elastic.out(1,0.5)'});});});
+
+    const navbar=document.getElementById('navbar'),backToTop=document.getElementById('backToTop');
+    ScrollTrigger.create({start:'top -80',onUpdate:self=>{if(self.scroll()>80)gsap.to(navbar,{background:'rgba(255,255,255,0.95)',backdropFilter:'blur(12px)',borderBottom:'1px solid rgba(209,213,219,0.5)',duration:0.3});if(self.scroll()<=80)gsap.to(navbar,{background:'transparent',backdropFilter:'none',borderBottom:'1px solid transparent',duration:0.3});}});
+    ScrollTrigger.create({start:'top -600',onEnter:()=>gsap.to(backToTop,{opacity:1,pointerEvents:'auto',duration:0.3}),onLeaveBack:()=>gsap.to(backToTop,{opacity:0,pointerEvents:'none',duration:0.3})});
+    document.querySelectorAll('.nav-link').forEach(l=>{l.addEventListener('mouseenter',()=>gsap.to(l.querySelector('.nav-underline'),{width:'100%',duration:0.3}));l.addEventListener('mouseleave',()=>gsap.to(l.querySelector('.nav-underline'),{width:0,duration:0.3}));});
+
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();gsap.to(window,{duration:1,scrollTo:{y:t,offsetY:80},ease:'power3.inOut'});}});});
+    gsap.to('#waFloat',{scale:1.1,duration:1.5,repeat:-1,yoyo:true,ease:'power1.inOut'});
+
+    const mobileToggle=document.getElementById('mobileToggle'),mobileMenu=document.getElementById('mobileMenu');let menuOpen=false;
+    mobileToggle.addEventListener('click',()=>{menuOpen=!menuOpen;if(menuOpen){mobileMenu.classList.remove('hidden');gsap.from(mobileMenu,{y:-20,opacity:0,duration:0.3});}else gsap.to(mobileMenu,{y:-20,opacity:0,duration:0.2,onComplete:()=>mobileMenu.classList.add('hidden')});});
+    document.querySelectorAll('.mobile-link').forEach(l=>l.addEventListener('click',()=>{gsap.to(mobileMenu,{y:-20,opacity:0,duration:0.2,onComplete:()=>mobileMenu.classList.add('hidden')});menuOpen=false;}));
+
+    function filterProducts(cat){document.querySelectorAll('.product-card').forEach((c,i)=>{const show=cat==='all'||c.dataset.category===cat;if(show){c.style.display='block';gsap.fromTo(c,{scale:0.9,opacity:0},{scale:1,opacity:1,duration:0.4,delay:i*0.05});}else gsap.to(c,{scale:0.9,opacity:0,duration:0.3,onComplete:()=>c.style.display='none'});});}
+
+    function toggleFaq(btn){const ans=btn.nextElementSibling,icon=btn.querySelector('.faq-icon'),item=btn.parentElement;const isOpen=!ans.classList.contains('hidden');document.querySelectorAll('.faq-answer').forEach(a=>gsap.to(a,{height:0,opacity:0,duration:0.3,onComplete:()=>a.classList.add('hidden')}));document.querySelectorAll('.faq-icon').forEach(i=>gsap.to(i,{rotation:0,duration:0.3}));document.querySelectorAll('.faq-item').forEach(i=>gsap.to(i,{borderColor:'rgb(229,231,235)',duration:0.3}));if(!isOpen){ans.classList.remove('hidden');gsap.fromTo(ans,{height:0,opacity:0},{height:ans.scrollHeight,opacity:1,duration:0.4});gsap.to(icon,{rotation:45,duration:0.3});gsap.to(item,{borderColor:'rgba(184,134,11,0.4)',duration:0.3});}}
+
+    function showToast(m,t='success'){const c=document.getElementById('toastContainer'),e=document.createElement('div');e.className=`toast ${t==='success'?'bg-green-500/90':'bg-red-500/90'} text-white text-sm px-5 py-3 rounded-lg shadow-lg backdrop-blur flex items-center gap-2`;e.innerHTML=`<i data-lucide="${t==='success'?'check-circle':'alert-circle'}" class="w-4 h-4 flex-shrink-0"></i>${m}`;c.appendChild(e);lucide.createIcons();setTimeout(()=>e.remove(),3000);}
+    function handleFormSubmit(e){e.preventDefault();showToast('Teklif talebiniz gönderildi!');gsap.fromTo(e.target,{scale:0.98},{scale:1,duration:0.3});e.target.reset();}
+    function handleNewsletter(e){e.preventDefault();showToast('Bültene kaydoldunuz!');e.target.reset();}
+
+    let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>ScrollTrigger.refresh(),250);});
+  </script>
+</body>
+</html>
